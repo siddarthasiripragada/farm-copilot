@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ROI Calculator — Canadian Farm Copilot</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+
+    .calc-header-note {
+      background: var(--sage-pale);
+      border: 1px solid rgba(74,122,90,0.2);
+      border-radius: var(--r-sm);
+      padding: 11px 16px;
+      font-size: 12.5px;
+      color: var(--sage);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .range-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 4px;
+    }
+    input[type="range"] {
+      flex: 1;
+      accent-color: var(--forest);
+      cursor: pointer;
+    }
+    .range-val {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 13px;
+      color: var(--forest);
+      font-weight: 600;
+      min-width: 44px;
+      text-align: right;
+    }
+
+    .result-scenario {
+      margin-top: 20px;
+      padding: 16px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .scenario-title {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(244,236,218,0.4);
+      margin-bottom: 8px;
+    }
+    .scenario-indicator {
+      font-size: 13px;
+      color: var(--wheat);
+      line-height: 1.5;
+    }
+
+    .tab-desc {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 20px;
+      line-height: 1.6;
+      padding: 12px 16px;
+      background: var(--cream-dk);
+      border-radius: var(--r-sm);
+      border-left: 3px solid var(--amber);
+    }
+
+    .feed-calc { }
+    .feed-result-bar {
+      background: var(--forest);
+      border-radius: var(--r-lg);
+      padding: 22px 24px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <div id="sidebar-mount"></div>
+
+    <div class="main-content">
+      <div class="page-header">
+        <div class="page-header-row">
+          <div>
+            <div class="page-title">ROI Calculator ◎</div>
+            <div class="page-subtitle">Model the financial impact of technology investments and operational decisions</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="page-body">
+
+        <div class="calc-header-note anim-fade-up">
+          <strong>How to use:</strong> Fill in your farm's numbers to see real payback period, annual savings, and ROI estimates. 
+          Model with and without grants to see how Canadian funding programs change your investment case.
+        </div>
+
+        <!-- Calculator tabs -->
+        <div class="calc-tabs anim-fade-up anim-delay-1">
+          <button class="calc-tab active" id="tab-labour" onclick="switchTab('labour')">⚙ Labour Savings</button>
+          <button class="calc-tab" id="tab-equip" onclick="switchTab('equip')">🚜 Equipment ROI</button>
+          <button class="calc-tab" id="tab-feed" onclick="switchTab('feed')">🌾 Feed / Pasture Cost</button>
+          <button class="calc-tab" id="tab-margin" onclick="switchTab('margin')">📊 Margin Scenario</button>
+        </div>
+
+        <!-- ─── LABOUR SAVINGS ─── -->
+        <div id="panel-labour" class="calc-panel">
+          <div class="tab-desc">
+            Estimate the financial return from automating or reducing labour-intensive roles on your farm.
+            Useful for justifying B.C. On-Farm Technology, CAP, or similar labour-related programs.
+          </div>
+          <div class="calc-grid">
+            <div class="card">
+              <div class="card-header"><span class="card-title">Labour Automation Inputs</span></div>
+              <div class="card-body">
+                <div class="form-group">
+                  <label class="form-label">Number of Workers to Automate</label>
+                  <span class="form-hint">Full-time or seasonal roles partially or fully replaced</span>
+                  <div class="range-row">
+                    <input type="range" id="l-workers" min="1" max="20" value="2" oninput="calcLabour()">
+                    <span class="range-val" id="l-workers-val">2</span>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Average Hourly Wage (CAD)</label>
+                  <span class="form-hint">Include payroll overhead — CPP, EI, WSB (typically add ~18–22%)</span>
+                  <input class="form-input form-mono" type="number" id="l-wage" value="22" min="15" max="80" oninput="calcLabour()">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Hours per Season per Worker</label>
+                  <span class="form-hint">Total seasonal hours for the roles being automated</span>
+                  <input class="form-input form-mono" type="number" id="l-hours" value="1200" min="100" max="4000" oninput="calcLabour()">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Labour Reduction Estimate (%)</label>
+                  <span class="form-hint">Realistic automation coverage — 40–70% is typical</span>
+                  <div class="range-row">
+                    <input type="range" id="l-reduce" min="10" max="100" value="40" oninput="calcLabour()">
+                    <span class="range-val" id="l-reduce-val">40%</span>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Equipment / Technology Cost (CAD)</label>
+                  <span class="form-hint">One-time capital cost of the automation solution</span>
+                  <input class="form-input form-mono" type="number" id="l-cost" value="85000" oninput="calcLabour()">
+                </div>
+                <div class="form-group mb-0">
+                  <label class="form-label">Annual Maintenance Cost (CAD)</label>
+                  <span class="form-hint">Ongoing service, parts, software subscriptions, and support</span>
+                  <input class="form-input form-mono" type="number" id="l-maint" value="3000" oninput="calcLabour()">
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="result-panel">
+                <div class="result-label">Annual Labour Savings</div>
+                <div class="result-main" id="l-res-savings">$—</div>
+                <div class="result-row"><span class="result-row-label">Current annual labour cost</span><span class="result-row-value" id="l-res-labcost">—</span></div>
+                <div class="result-row"><span class="result-row-label">Net annual benefit (after maint.)</span><span class="result-row-value" id="l-res-net">—</span></div>
+                <div class="result-divider"></div>
+                <div class="result-row"><span class="result-row-label">Simple payback period</span><span class="result-row-value" id="l-res-pb">—</span></div>
+                <div class="result-row"><span class="result-row-label">3-year cumulative return</span><span class="result-row-value" id="l-res-3yr">—</span></div>
+                <div class="result-row"><span class="result-row-label">5-year ROI</span><span class="result-row-value" id="l-res-roi">—</span></div>
+                <div class="result-divider"></div>
+                <div class="result-row"><span class="result-row-label">Capital investment</span><span class="result-row-value" id="l-res-cap">—</span></div>
+
+                <div class="result-scenario">
+                  <div class="scenario-title">Verdict</div>
+                  <div class="scenario-indicator" id="l-verdict">Fill in your numbers above</div>
+                </div>
+              </div>
+
+              <div class="card mt-16">
+                <div class="card-header"><span class="card-title">💡 Relevant Funding</span></div>
+                <div class="card-body" style="font-size:13px;color:var(--muted);line-height:1.65;">
+                  Labour-saving technology may qualify under:
+                  <ul style="margin:8px 0 0 16px;display:flex;flex-direction:column;gap:4px;">
+                    <li><strong style="color:var(--forest);">B.C. On-Farm Technology Adoption</strong> — up to $100K</li>
+                    <li><strong style="color:var(--forest);">Canadian Agricultural Partnership (CAP)</strong> — varies by province</li>
+                    <li><strong style="color:var(--forest);">AgriInnovate</strong> — up to $10M for scalable innovations</li>
+                  </ul>
+                  <a href="funding.html" class="btn btn-secondary btn-sm mt-12">Check Eligibility →</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── EQUIPMENT ROI ─── -->
+        <div id="panel-equip" class="calc-panel" style="display:none;">
+          <div class="tab-desc">
+            Calculate the return on a major equipment purchase, modelling with and without grant contributions to see how programs change the investment case.
+          </div>
+          <div class="calc-grid">
+            <div class="card">
+              <div class="card-header"><span class="card-title">Equipment Investment Inputs</span></div>
+              <div class="card-body">
+                <div class="form-group">
+                  <label class="form-label">Equipment Purchase Cost (CAD)</label>
+                  <span class="form-hint">Total purchase price before any grants or subsidies</span>
+                  <input class="form-input form-mono" type="number" id="e-cost" value="120000" oninput="calcEquip()">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Expected Grant / Subsidy (%)</label>
+                  <span class="form-hint">Estimate from available programs — model at 0% first for conservative case</span>
+                  <div class="range-row">
+                    <input type="range" id="e-grant" min="0" max="60" value="25" oninput="calcEquip()">
+                    <span class="range-val" id="e-grant-val">25%</span>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Current Annual Operating Cost (CAD)</label>
+                  <span class="form-hint">The cost this equipment replaces or significantly reduces</span>
+                  <input class="form-input form-mono" type="number" id="e-opcost" value="28000" oninput="calcEquip()">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Expected Cost Reduction (%)</label>
+                  <span class="form-hint">How much of the operating cost does the new equipment save?</span>
+                  <div class="range-row">
+                    <input type="range" id="e-save-pct" min="5" max="100" value="35" oninput="calcEquip()">
+                    <span class="range-val" id="e-save-pct-val">35%</span>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Equipment Useful Life (years)</label>
+                  <span class="form-hint">Expected productive lifespan before major replacement</span>
+                  <input class="form-input form-mono" type="number" id="e-life" value="10" min="1" max="30" oninput="calcEquip()">
+                </div>
+                <div class="form-group mb-0">
+                  <label class="form-label">Annual Equipment Operating Cost (CAD)</label>
+                  <span class="form-hint">Fuel, maintenance, insurance, parts for the new equipment</span>
+                  <input class="form-input form-mono" type="number" id="e-newcost" value="4000" oninput="calcEquip()">
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="result-panel">
+                <div class="result-label">Net Annual Savings</div>
+                <div class="result-main" id="e-res-savings">$—</div>
+                <div class="result-row"><span class="result-row-label">Grant / subsidy amount</span><span class="result-row-value" id="e-res-grant">—</span></div>
+                <div class="result-row"><span class="result-row-label">Net capital cost after grant</span><span class="result-row-value" id="e-res-netcost">—</span></div>
+                <div class="result-divider"></div>
+                <div class="result-row"><span class="result-row-label">Simple payback period</span><span class="result-row-value" id="e-res-pb">—</span></div>
+                <div class="result-row"><span class="result-row-label">Lifetime total return</span><span class="result-row-value" id="e-res-lifetime">—</span></div>
+                <div class="result-row"><span class="result-row-label">Lifetime ROI</span><span class="result-row-value" id="e-res-roi">—</span></div>
+                <div class="result-divider"></div>
+                <div class="result-row"><span class="result-row-label">Without grant — payback</span><span class="result-row-value" id="e-res-nogrant-pb">—</span></div>
+
+                <div class="result-scenario">
+                  <div class="scenario-title">Grant Impact</div>
+                  <div class="scenario-indicator" id="e-verdict">Fill in your numbers above</div>
+                </div>
+              </div>
+
+              <div class="card mt-16">
+                <div class="card-header"><span class="card-title">💡 Grant Strategy Tip</span></div>
+                <div class="card-body" style="font-size:13px;color:var(--muted);line-height:1.65;">
+                  Set grant to 0% for a conservative baseline, then model at 25% and 40%+ to see program impact.
+                  Programs like <strong style="color:var(--forest);">AgriInnovate</strong> and <strong style="color:var(--forest);">CAP</strong> commonly cover 25–50% of eligible capital costs.
+                  <a href="funding.html" class="btn btn-secondary btn-sm mt-12">Find Applicable Programs →</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── FEED / PASTURE ─── -->
+        <div id="panel-feed" class="calc-panel" style="display:none;">
+          <div class="tab-desc">
+            Model your feed and pasture cost exposure. Relevant to AgriStability's 2026 update which added pasture-related feed costs as an allowable expense.
+          </div>
+          <div class="calc-grid">
+            <div class="card">
+              <div class="card-header"><span class="card-title">Feed & Pasture Inputs</span></div>
+              <div class="card-body">
+                <div class="form-group">
+                  <label class="form-label">Herd Size (head)</label>
+                  <input class="form-input form-mono" type="number" id="f-herd" value="80" oninput="calcFeed()">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Feed Cost per Head per Month (CAD)</label>
+                  <span class="form-hint">Include hay, grain, silage, supplements</span>
+                  <input class="form-input form-mono" type="number" id="f-feed-cost" value="95" oninput="calcFeed()">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Pasture Lease / Rental Cost (CAD/month)</label>
+                  <span class="form-hint">Monthly cost for rented pastureland if applicable</span>
+                  <input class="form-input form-mono" type="number" id="f-pasture" value="2200" oninput="calcFeed()">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Feed Months per Year</label>
+                  <span class="form-hint">Number of months feed supplementation is required</span>
+                  <div class="range-row">
+                    <input type="range" id="f-months" min="1" max="12" value="7" oninput="calcFeed()">
+                    <span class="range-val" id="f-months-val">7</span>
+                  </div>
+                </div>
+                <div class="form-group mb-0">
+                  <label class="form-label">Estimated Revenue per Head (CAD/year)</label>
+                  <input class="form-input form-mono" type="number" id="f-revenue" value="1400" oninput="calcFeed()">
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="result-panel">
+                <div class="result-label">Annual Feed & Pasture Cost</div>
+                <div class="result-main" id="f-res-total">$—</div>
+                <div class="result-row"><span class="result-row-label">Feed cost per head / year</span><span class="result-row-value" id="f-res-perhead">—</span></div>
+                <div class="result-row"><span class="result-row-label">Total pasture lease cost</span><span class="result-row-value" id="f-res-pasture">—</span></div>
+                <div class="result-divider"></div>
+                <div class="result-row"><span class="result-row-label">Gross annual revenue</span><span class="result-row-value" id="f-res-revenue">—</span></div>
+                <div class="result-row"><span class="result-row-label">Feed cost as % of revenue</span><span class="result-row-value" id="f-res-pct">—</span></div>
+                <div class="result-row"><span class="result-row-label">Revenue after feed costs</span><span class="result-row-value" id="f-res-net">—</span></div>
+
+                <div class="result-scenario">
+                  <div class="scenario-title">AgriStability Relevance</div>
+                  <div class="scenario-indicator" id="f-verdict">Fill in your numbers above</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── MARGIN SCENARIO ─── -->
+        <div id="panel-margin" class="calc-panel" style="display:none;">
+          <div class="tab-desc">
+            Compare two operational scenarios side-by-side to evaluate the financial impact of a major decision — new technology, production change, or market shift.
+          </div>
+          <div class="calc-grid">
+            <div class="card">
+              <div class="card-header"><span class="card-title">Scenario A — Current / Baseline</span></div>
+              <div class="card-body">
+                <div class="form-group"><label class="form-label">Annual Revenue (CAD)</label><input class="form-input form-mono" type="number" id="a-rev" value="380000" oninput="calcMargin()"></div>
+                <div class="form-group"><label class="form-label">Input Costs (seed, fert, chemicals) (CAD)</label><input class="form-input form-mono" type="number" id="a-input" value="95000" oninput="calcMargin()"></div>
+                <div class="form-group"><label class="form-label">Labour Costs (CAD)</label><input class="form-input form-mono" type="number" id="a-labour" value="72000" oninput="calcMargin()"></div>
+                <div class="form-group"><label class="form-label">Equipment / Overhead (CAD)</label><input class="form-input form-mono" type="number" id="a-equip" value="44000" oninput="calcMargin()"></div>
+                <div class="form-group mb-0"><label class="form-label">Other Costs (CAD)</label><input class="form-input form-mono" type="number" id="a-other" value="18000" oninput="calcMargin()"></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><span class="card-title">Scenario B — Proposed Change</span></div>
+              <div class="card-body">
+                <div class="form-group"><label class="form-label">Annual Revenue (CAD)</label><input class="form-input form-mono" type="number" id="b-rev" value="400000" oninput="calcMargin()"></div>
+                <div class="form-group"><label class="form-label">Input Costs (seed, fert, chemicals) (CAD)</label><input class="form-input form-mono" type="number" id="b-input" value="88000" oninput="calcMargin()"></div>
+                <div class="form-group"><label class="form-label">Labour Costs (CAD)</label><input class="form-input form-mono" type="number" id="b-labour" value="55000" oninput="calcMargin()"></div>
+                <div class="form-group"><label class="form-label">Equipment / Overhead (CAD)</label><input class="form-input form-mono" type="number" id="b-equip" value="54000" oninput="calcMargin()"></div>
+                <div class="form-group mb-0"><label class="form-label">Other Costs (CAD)</label><input class="form-input form-mono" type="number" id="b-other" value="18000" oninput="calcMargin()"></div>
+              </div>
+            </div>
+          </div>
+          <div class="result-panel mt-24" id="margin-result">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;">
+              <div>
+                <div class="result-label">Scenario A Net Margin</div>
+                <div class="result-main" id="m-res-a">$—</div>
+                <div style="font-size:12px;color:rgba(244,236,218,.45);">Margin %: <span id="m-pct-a">—</span></div>
+              </div>
+              <div>
+                <div class="result-label">Scenario B Net Margin</div>
+                <div class="result-main" id="m-res-b">$—</div>
+                <div style="font-size:12px;color:rgba(244,236,218,.45);">Margin %: <span id="m-pct-b">—</span></div>
+              </div>
+              <div>
+                <div class="result-label">Improvement</div>
+                <div class="result-main" id="m-res-diff">$—</div>
+                <div style="font-size:12px;color:rgba(244,236,218,.45);">Per year advantage: <span id="m-pct-diff">—</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script>
+    const profile = Profile.requireOrRedirect();
+    if (profile) {
+      document.getElementById('sidebar-mount').innerHTML = renderSidebar('calculator');
+
+      // Tab switching
+      window.switchTab = function(name) {
+        ['labour','equip','feed','margin'].forEach(t => {
+          document.getElementById(`panel-${t}`).style.display = t === name ? 'block' : 'none';
+          document.getElementById(`tab-${t}`).classList.toggle('active', t === name);
+        });
+      };
+
+      // ─── LABOUR CALC ───
+      window.calcLabour = function() {
+        const workers = +document.getElementById('l-workers').value;
+        const wage    = +document.getElementById('l-wage').value;
+        const hours   = +document.getElementById('l-hours').value;
+        const reduce  = +document.getElementById('l-reduce').value;
+        const cost    = +document.getElementById('l-cost').value;
+        const maint   = +document.getElementById('l-maint').value;
+
+        document.getElementById('l-workers-val').textContent = workers;
+        document.getElementById('l-reduce-val').textContent = reduce + '%';
+
+        const labCost = workers * wage * hours;
+        const labSav  = labCost * (reduce / 100);
+        const netAnn  = labSav - maint;
+        const pb      = netAnn > 0 ? cost / netAnn : Infinity;
+        const roi5    = netAnn > 0 ? ((netAnn * 5 - cost) / cost) * 100 : 0;
+        const ret3    = netAnn * 3 - cost;
+
+        document.getElementById('l-res-savings').textContent = fmtCAD(labSav);
+        document.getElementById('l-res-labcost').textContent = fmtCAD(labCost);
+        document.getElementById('l-res-net').textContent     = fmtCAD(netAnn);
+        document.getElementById('l-res-pb').textContent      = isFinite(pb) ? fmtNum(pb) + ' yrs' : '∞';
+        document.getElementById('l-res-3yr').textContent     = fmtCAD(ret3);
+        document.getElementById('l-res-roi').textContent     = fmtNum(roi5, 0) + '%';
+        document.getElementById('l-res-cap').textContent     = fmtCAD(cost);
+
+        let verdict = '';
+        if (!isFinite(pb)) verdict = 'Not financially viable at current reduction rate';
+        else if (pb < 2) verdict = '✓ Excellent — payback under 2 years. Strong investment case.';
+        else if (pb < 4) verdict = '✓ Good — payback in ' + fmtNum(pb) + ' years. Solid return.';
+        else if (pb < 7) verdict = '◌ Moderate — ' + fmtNum(pb) + ' year payback. Check for grants to improve.';
+        else verdict = '△ Long payback (' + fmtNum(pb) + ' yrs). Seek grant support to de-risk.';
+        document.getElementById('l-verdict').textContent = verdict;
+      };
+      calcLabour();
+
+      // ─── EQUIP CALC ───
+      window.calcEquip = function() {
+        const cost    = +document.getElementById('e-cost').value;
+        const grant   = +document.getElementById('e-grant').value;
+        const opCost  = +document.getElementById('e-opcost').value;
+        const savePct = +document.getElementById('e-save-pct').value;
+        const life    = +document.getElementById('e-life').value;
+        const newCost = +document.getElementById('e-newcost').value;
+
+        document.getElementById('e-grant-val').textContent    = grant + '%';
+        document.getElementById('e-save-pct-val').textContent = savePct + '%';
+
+        const grantAmt   = cost * (grant / 100);
+        const netCost    = cost - grantAmt;
+        const annSav     = opCost * (savePct / 100) - newCost;
+        const pb         = annSav > 0 ? netCost / annSav : Infinity;
+        const pbNoGrant  = annSav > 0 ? cost / annSav : Infinity;
+        const lifetime   = annSav * life - netCost;
+        const roi        = netCost > 0 ? (lifetime / netCost) * 100 : 0;
+
+        document.getElementById('e-res-savings').textContent   = fmtCAD(annSav);
+        document.getElementById('e-res-grant').textContent     = fmtCAD(grantAmt);
+        document.getElementById('e-res-netcost').textContent   = fmtCAD(netCost);
+        document.getElementById('e-res-pb').textContent        = isFinite(pb) ? fmtNum(pb) + ' yrs' : '∞';
+        document.getElementById('e-res-lifetime').textContent  = fmtCAD(lifetime);
+        document.getElementById('e-res-roi').textContent       = fmtNum(roi, 0) + '%';
+        document.getElementById('e-res-nogrant-pb').textContent = isFinite(pbNoGrant) ? fmtNum(pbNoGrant) + ' yrs' : '∞';
+
+        const diff = isFinite(pb) && isFinite(pbNoGrant) ? (pbNoGrant - pb) : 0;
+        document.getElementById('e-verdict').textContent =
+          diff > 0.5
+            ? `Grant saves ${fmtNum(diff)} years off payback (${fmtNum(pbNoGrant)} → ${fmtNum(pb)} yrs)`
+            : grant === 0 ? 'Add a grant % to see how funding impacts your payback period'
+            : 'Minimal grant impact at this level — seek higher-value program';
+      };
+      calcEquip();
+
+      // ─── FEED CALC ───
+      window.calcFeed = function() {
+        const herd     = +document.getElementById('f-herd').value;
+        const feedCost = +document.getElementById('f-feed-cost').value;
+        const pasture  = +document.getElementById('f-pasture').value;
+        const months   = +document.getElementById('f-months').value;
+        const revenue  = +document.getElementById('f-revenue').value;
+
+        document.getElementById('f-months-val').textContent = months;
+
+        const annFeed    = herd * feedCost * months;
+        const annPasture = pasture * 12;
+        const total      = annFeed + annPasture;
+        const annRev     = herd * revenue;
+        const pct        = annRev > 0 ? (total / annRev) * 100 : 0;
+        const net        = annRev - total;
+
+        document.getElementById('f-res-total').textContent   = fmtCAD(total);
+        document.getElementById('f-res-perhead').textContent = fmtCAD(feedCost * months);
+        document.getElementById('f-res-pasture').textContent = fmtCAD(annPasture);
+        document.getElementById('f-res-revenue').textContent = fmtCAD(annRev);
+        document.getElementById('f-res-pct').textContent     = fmtNum(pct, 1) + '%';
+        document.getElementById('f-res-net').textContent     = fmtCAD(net);
+
+        let verdict = '';
+        if (pct > 50) verdict = '⚠ Feed costs exceed 50% of revenue — highly exposed. Document carefully for AgriStability.';
+        else if (pct > 35) verdict = '△ Feed costs are a significant margin risk. Consider AgriStability enrollment.';
+        else if (pct > 20) verdict = '◌ Moderate feed cost exposure. Enroll in AgriStability as a risk buffer.';
+        else verdict = '✓ Feed costs are manageable relative to revenue. Standard risk management applies.';
+        document.getElementById('f-verdict').textContent = verdict;
+      };
+      calcFeed();
+
+      // ─── MARGIN CALC ───
+      window.calcMargin = function() {
+        const aRev = +document.getElementById('a-rev').value;
+        const aCost = +document.getElementById('a-input').value + +document.getElementById('a-labour').value + +document.getElementById('a-equip').value + +document.getElementById('a-other').value;
+        const bRev = +document.getElementById('b-rev').value;
+        const bCost = +document.getElementById('b-input').value + +document.getElementById('b-labour').value + +document.getElementById('b-equip').value + +document.getElementById('b-other').value;
+
+        const aNet = aRev - aCost;
+        const bNet = bRev - bCost;
+        const aPct = aRev > 0 ? (aNet / aRev * 100) : 0;
+        const bPct = bRev > 0 ? (bNet / bRev * 100) : 0;
+        const diff = bNet - aNet;
+        const diffPct = bPct - aPct;
+
+        document.getElementById('m-res-a').textContent   = fmtCAD(aNet);
+        document.getElementById('m-pct-a').textContent   = fmtNum(aPct, 1) + '%';
+        document.getElementById('m-res-b').textContent   = fmtCAD(bNet);
+        document.getElementById('m-pct-b').textContent   = fmtNum(bPct, 1) + '%';
+        document.getElementById('m-res-diff').textContent  = (diff >= 0 ? '+' : '') + fmtCAD(diff);
+        document.getElementById('m-pct-diff').textContent  = (diffPct >= 0 ? '+' : '') + fmtNum(diffPct, 1) + ' ppts';
+        document.getElementById('m-res-diff').style.color = diff >= 0 ? 'var(--amber-lt)' : '#e88';
+      };
+      calcMargin();
+    }
+  </script>
+</body>
+</html>

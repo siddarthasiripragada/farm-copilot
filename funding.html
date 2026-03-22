@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Funding Navigator — Canadian Farm Copilot</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+    .empty-state-icon {
+      font-size: 36px;
+      margin-bottom: 12px;
+    }
+    .empty-state h3 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 18px;
+      color: var(--forest);
+      margin-bottom: 7px;
+    }
+    .checklist-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(28,56,41,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 500;
+      backdrop-filter: blur(3px);
+      padding: 20px;
+    }
+    .checklist-modal-inner {
+      background: var(--cream);
+      border-radius: var(--r-lg);
+      max-width: 500px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+      animation: fadeUp 0.2s ease;
+    }
+    .modal-header {
+      padding: 18px 22px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 22px;
+      color: var(--muted);
+      cursor: pointer;
+      line-height: 1;
+    }
+    .modal-body { padding: 18px 22px; }
+    .modal-checklist-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 4px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .modal-checklist-item:last-child { border-bottom: none; }
+    .mc-check {
+      width: 16px; height: 16px;
+      border-radius: 3px;
+      border: 1.5px solid var(--border-md);
+      flex-shrink: 0;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; color: white;
+      transition: all 0.13s;
+    }
+    .mc-check.on { background: var(--sage); border-color: var(--sage); }
+
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <div id="sidebar-mount"></div>
+
+    <div class="main-content">
+      <div class="page-header">
+        <div class="page-header-row">
+          <div>
+            <div class="page-title">Funding Navigator ◈</div>
+            <div class="page-subtitle" id="funding-sub">Loading programs…</div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-ghost btn-sm" onclick="toggleSavedOnly()">
+              <span id="save-toggle-label">☆ Show saved only</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="page-body">
+
+        <!-- Stats -->
+        <div class="stats-bar anim-fade-up">
+          <div class="stat-card">
+            <div class="stat-label">Programs Available</div>
+            <div class="stat-value" id="stat-total">8</div>
+            <div class="stat-change">Federal + Provincial</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">High Match (85%+)</div>
+            <div class="stat-value" id="stat-high">3</div>
+            <div class="stat-change">Strongly recommended</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Urgent Deadlines</div>
+            <div class="stat-value" id="stat-urgent">2</div>
+            <div class="stat-change neg">Action required soon</div>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="funding-filters anim-fade-up anim-delay-1">
+          <input class="filter-search" id="search-input" placeholder="Search programs, keywords, eligibility tags…" oninput="applyFilters()">
+          <select class="filter-select" id="cat-filter" onchange="applyFilters()">
+            <option value="">All Categories</option>
+          </select>
+          <select class="filter-select" id="prov-filter" onchange="applyFilters()">
+            <option value="">All Provinces</option>
+          </select>
+          <select class="filter-select" id="match-filter" onchange="applyFilters()">
+            <option value="">All Match Scores</option>
+            <option value="high">High (85%+)</option>
+            <option value="med">Medium (65–84%)</option>
+            <option value="low">Low (below 65%)</option>
+          </select>
+        </div>
+
+        <!-- Program list -->
+        <div id="program-list" class="anim-fade-up anim-delay-2"></div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Apply checklist modal -->
+  <div class="checklist-modal" id="modal" style="display:none;">
+    <div class="checklist-modal-inner">
+      <div class="modal-header">
+        <div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:3px;">APPLICATION CHECKLIST</div>
+          <div style="font-family:'DM Serif Display',serif;font-size:17px;color:var(--forest);" id="modal-title">Program Name</div>
+        </div>
+        <button class="modal-close" onclick="closeModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.55;">
+          Work through this application readiness checklist before submitting. Check off each item as you complete it.
+        </p>
+        <div id="modal-checklist"></div>
+        <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--border);text-align:right;">
+          <a id="modal-apply-link" href="#" target="_blank" class="btn btn-amber btn-sm">Go to Program Website →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script>
+    const profile = Profile.requireOrRedirect();
+    if (!profile) throw new Error('no profile');
+
+    document.getElementById('sidebar-mount').innerHTML = renderSidebar('funding');
+
+    const APPLICATION_CHECKLIST = [
+      'Confirm you meet the basic eligibility criteria for this program',
+      'Gather your most recent tax return and financial statements',
+      'Document your farm operation type, size, and commodities',
+      'Collect evidence of production (acreage, herd counts, yield data)',
+      'Identify relevant expenses or investments related to the program',
+      'Prepare a brief description of your project or need',
+      'Compile any required permits, registrations, or certifications',
+      'Review the program application guide on the official website',
+      'Note the application deadline and set a calendar reminder',
+      'Contact your local AAFC service centre if you have questions',
+    ];
+
+    let saved = JSON.parse(localStorage.getItem('savedPrograms') || '[]');
+    let showSavedOnly = false;
+
+    // Populate filters
+    const cats = ['', ...new Set(PROGRAMS.map(p => p.category))];
+    const catSel = document.getElementById('cat-filter');
+    cats.filter(Boolean).forEach(c => {
+      const o = document.createElement('option'); o.value = c; o.textContent = c; catSel.appendChild(o);
+    });
+
+    const provSel = document.getElementById('prov-filter');
+    PROVINCES.forEach(p => {
+      const o = document.createElement('option'); o.value = p; o.textContent = p; provSel.appendChild(o);
+    });
+
+    function applyFilters() {
+      const search = document.getElementById('search-input').value.toLowerCase();
+      const cat = document.getElementById('cat-filter').value;
+      const prov = document.getElementById('prov-filter').value;
+      const match = document.getElementById('match-filter').value;
+
+      let filtered = PROGRAMS.filter(p => {
+        if (showSavedOnly && !saved.includes(p.id)) return false;
+        const ms = !search ||
+          p.name.toLowerCase().includes(search) ||
+          p.desc.toLowerCase().includes(search) ||
+          p.tags.some(t => t.toLowerCase().includes(search)) ||
+          p.category.toLowerCase().includes(search);
+        const mc = !cat || p.category === cat;
+        const mp = !prov || p.provinces === 'All' || p.provinces === prov;
+        const mm = !match ||
+          (match === 'high' && p.match >= 85) ||
+          (match === 'med' && p.match >= 65 && p.match < 85) ||
+          (match === 'low' && p.match < 65);
+        return ms && mc && mp && mm;
+      }).sort((a, b) => b.match - a.match);
+
+      renderPrograms(filtered);
+      document.getElementById('funding-sub').textContent =
+        `${filtered.length} program${filtered.length !== 1 ? 's' : ''} · Sorted by eligibility score for your ${profile.farmType} in ${profile.province}`;
+    }
+
+    function renderPrograms(list) {
+      const el = document.getElementById('program-list');
+      if (!list.length) {
+        el.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">◈</div>
+            <h3>No programs found</h3>
+            <p style="font-size:13px;">Try adjusting your filters or clearing the search.</p>
+          </div>`;
+        return;
+      }
+      el.innerHTML = list.map(p => {
+        const days = getDaysUntil(p.deadlineDate);
+        const daysStr = days !== null
+          ? (days <= 0 ? `<span style="color:var(--red);font-weight:600;">Passed</span>` :
+             days <= 30 ? `<span style="color:var(--red);">⚡ ${days} days left</span>` :
+             days <= 60 ? `<span style="color:var(--amber);">⏱ ${days} days left</span>` :
+             `${p.deadline}`)
+          : p.deadline;
+        const isSaved = saved.includes(p.id);
+        const matchClass = p.match >= 85 ? 'high' : p.match >= 65 ? 'med' : 'low';
+        return `
+          <div class="program-card match-${matchClass}">
+            <div class="program-card-header">
+              <div>
+                <div class="program-name">${p.name}</div>
+                <div style="display:flex;gap:7px;margin-top:5px;flex-wrap:wrap;">
+                  <span class="badge badge-blue">${p.category}</span>
+                  ${p.urgent ? '<span class="badge badge-red">⚡ Urgent</span>' : ''}
+                </div>
+              </div>
+              <span class="match-score ${matchClass}">${p.match}% match</span>
+            </div>
+
+            <p class="program-desc">${p.desc}</p>
+
+            <div class="program-meta">
+              <div class="program-meta-item">💰 <strong>${p.amount}</strong></div>
+              <div class="program-meta-item">📅 <strong>${daysStr}</strong></div>
+              <div class="program-meta-item">🏛 <strong>${p.type}</strong></div>
+              <div class="program-meta-item">📍 <strong>${p.provinces}</strong></div>
+            </div>
+
+            <div class="program-tags">
+              ${p.tags.map(t => `<span class="badge badge-sage">${t}</span>`).join('')}
+            </div>
+
+            <div class="program-card-footer">
+              <div style="font-size:12px;color:var(--muted);font-family:'IBM Plex Mono',monospace;">
+                Program ID: ${String(p.id).padStart(3,'0')} · ${p.type}
+              </div>
+              <div style="display:flex;gap:8px;">
+                <button class="save-btn ${isSaved ? 'saved' : ''}" id="save-${p.id}" onclick="toggleSave(${p.id})">
+                  ${isSaved ? '★ Saved' : '☆ Save'}
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="openChecklist(${p.id})">
+                  Checklist
+                </button>
+                <a href="${p.applyUrl}" target="_blank" class="btn btn-primary btn-sm">
+                  Apply →
+                </a>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleSave(id) {
+      if (saved.includes(id)) saved = saved.filter(x => x !== id);
+      else saved.push(id);
+      localStorage.setItem('savedPrograms', JSON.stringify(saved));
+      // Update button
+      const btn = document.getElementById(`save-${id}`);
+      if (btn) {
+        btn.classList.toggle('saved', saved.includes(id));
+        btn.textContent = saved.includes(id) ? '★ Saved' : '☆ Save';
+      }
+    }
+
+    function toggleSavedOnly() {
+      showSavedOnly = !showSavedOnly;
+      document.getElementById('save-toggle-label').textContent =
+        showSavedOnly ? '★ Show all programs' : '☆ Show saved only';
+      applyFilters();
+    }
+
+    // Checklist modal
+    let modalChecks = {};
+    function openChecklist(id) {
+      const p = PROGRAMS.find(x => x.id === id);
+      if (!p) return;
+      document.getElementById('modal-title').textContent = p.name;
+      document.getElementById('modal-apply-link').href = p.applyUrl;
+      modalChecks = JSON.parse(localStorage.getItem(`cl-${id}`) || '{}');
+      renderModalChecklist(id);
+      document.getElementById('modal').style.display = 'flex';
+    }
+    function renderModalChecklist(id) {
+      document.getElementById('modal-checklist').innerHTML = APPLICATION_CHECKLIST.map((item, i) => `
+        <div class="modal-checklist-item">
+          <div class="mc-check ${modalChecks[i] ? 'on' : ''}" onclick="toggleModalCheck(${id},${i})">${modalChecks[i]?'✓':''}</div>
+          <span style="color:${modalChecks[i]?'var(--faint)':'var(--text)'};text-decoration:${modalChecks[i]?'line-through':'none'}">${item}</span>
+        </div>
+      `).join('');
+    }
+    window.toggleModalCheck = function(id, i) {
+      modalChecks[i] = !modalChecks[i];
+      localStorage.setItem(`cl-${id}`, JSON.stringify(modalChecks));
+      renderModalChecklist(id);
+    };
+    function closeModal() { document.getElementById('modal').style.display = 'none'; }
+    document.getElementById('modal').addEventListener('click', e => { if (e.target === document.getElementById('modal')) closeModal(); });
+
+    // Init
+    document.getElementById('stat-high').textContent = PROGRAMS.filter(p => p.match >= 85).length;
+    document.getElementById('stat-urgent').textContent = PROGRAMS.filter(p => p.urgent).length;
+    applyFilters();
+  </script>
+</body>
+</html>

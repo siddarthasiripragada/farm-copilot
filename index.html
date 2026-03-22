@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Canadian Farm Copilot — Setup</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ── Additional landing-page styles ── */
+    .ob-split {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    /* Left panel — hero */
+    .ob-hero {
+      background: var(--forest);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 50px 56px;
+      position: relative;
+      overflow: hidden;
+      background-image:
+        radial-gradient(ellipse at 0% 100%, rgba(74,122,90,0.35) 0%, transparent 55%),
+        radial-gradient(ellipse at 100% 0%, rgba(184,114,14,0.15) 0%, transparent 50%),
+        repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.013) 39px, rgba(255,255,255,0.013) 40px),
+        repeating-linear-gradient(90deg, transparent, transparent 79px, rgba(255,255,255,0.008) 79px, rgba(255,255,255,0.008) 80px);
+    }
+
+    .hero-logo {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--amber-lt);
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .hero-logo-dot {
+      width: 7px; height: 7px;
+      background: var(--amber-lt);
+      border-radius: 50%;
+      animation: pulse 2.4s ease-in-out infinite;
+    }
+
+    .hero-main {}
+
+    .hero-eyebrow {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--sage-lt);
+      margin-bottom: 18px;
+    }
+
+    .hero-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 44px;
+      color: var(--wheat);
+      line-height: 1.15;
+      letter-spacing: -0.8px;
+      margin-bottom: 20px;
+    }
+
+    .hero-title em {
+      font-style: italic;
+      color: var(--amber-lt);
+    }
+
+    .hero-desc {
+      font-size: 14.5px;
+      color: rgba(244,236,218,0.65);
+      line-height: 1.7;
+      margin-bottom: 36px;
+      max-width: 380px;
+    }
+
+    .hero-features {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .hero-feat {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      font-size: 13px;
+      color: rgba(244,236,218,0.7);
+    }
+
+    .hero-feat-icon {
+      width: 26px; height: 26px;
+      background: rgba(255,255,255,0.07);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    .hero-foot {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      color: rgba(244,236,218,0.25);
+      letter-spacing: 1px;
+    }
+
+    /* Right panel — form */
+    .ob-form-panel {
+      background: var(--wheat);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 60px;
+      overflow-y: auto;
+    }
+
+    .ob-form-inner {
+      width: 100%;
+      max-width: 440px;
+    }
+
+    .ob-form-top {
+      margin-bottom: 36px;
+    }
+
+    .ob-form-eyebrow {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--sage);
+      margin-bottom: 8px;
+    }
+
+    .ob-form-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 26px;
+      color: var(--forest);
+      letter-spacing: -0.4px;
+      line-height: 1.2;
+    }
+
+    .step-panel { display: none; }
+    .step-panel.active { display: block; animation: fadeUp 0.25s ease; }
+
+    .step-header {
+      margin-bottom: 22px;
+    }
+
+    .step-num {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      color: var(--faint);
+      margin-bottom: 5px;
+    }
+
+    .step-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 20px;
+      color: var(--forest);
+      margin-bottom: 5px;
+    }
+
+    .step-hint {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+  </style>
+</head>
+<body>
+  <div class="ob-split">
+
+    <!-- Left: Hero -->
+    <div class="ob-hero">
+      <div class="hero-logo">
+        <div class="hero-logo-dot"></div>
+        Canadian Farm Copilot
+      </div>
+
+      <div class="hero-main">
+        <div class="hero-eyebrow">AI Decision Support for Canadian Agriculture</div>
+        <h1 class="hero-title">
+          Smarter decisions<br>for the <em>Canadian</em><br>farm.
+        </h1>
+        <p class="hero-desc">
+          Find funding programs, model ROI on technology investments, 
+          plan operations, and get grounded answers — all in one place, 
+          built specifically for Canadian producers.
+        </p>
+        <div class="hero-features">
+          <div class="hero-feat"><div class="hero-feat-icon">◈</div>Federal & provincial funding navigator</div>
+          <div class="hero-feat"><div class="hero-feat-icon">✦</div>AI copilot trained on Canadian ag programs</div>
+          <div class="hero-feat"><div class="hero-feat-icon">◎</div>ROI & payback calculators for farm tech</div>
+          <div class="hero-feat"><div class="hero-feat-icon">▦</div>Seasonal operations planner & checklists</div>
+        </div>
+      </div>
+
+      <div class="hero-foot">
+        Covering programs active in 2025–2026 · Canada-focused · Free to use
+      </div>
+    </div>
+
+    <!-- Right: Onboarding form -->
+    <div class="ob-form-panel">
+      <div class="ob-form-inner">
+        <div class="ob-form-top">
+          <div class="ob-form-eyebrow">Setup — 4 quick steps</div>
+          <h2 class="ob-form-title">Tell us about your farm</h2>
+        </div>
+
+        <!-- Progress -->
+        <div class="ob-progress mb-24" id="progress">
+          <div class="ob-pip active" id="pip-0"></div>
+          <div class="ob-pip"       id="pip-1"></div>
+          <div class="ob-pip"       id="pip-2"></div>
+          <div class="ob-pip"       id="pip-3"></div>
+        </div>
+
+        <!-- Step 0: Province -->
+        <div class="step-panel active" id="step-0">
+          <div class="step-header">
+            <div class="step-num">STEP 1 OF 4</div>
+            <div class="step-title">Where is your farm located?</div>
+            <div class="step-hint">We personalize program matches and recommendations by province.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Province or Territory</label>
+            <select class="form-select" id="sel-province">
+              <option value="">Select your province…</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Step 1: Farm Type -->
+        <div class="step-panel" id="step-1">
+          <div class="step-header">
+            <div class="step-num">STEP 2 OF 4</div>
+            <div class="step-title">What type of farm do you operate?</div>
+            <div class="step-hint">Helps us tailor funding programs, calculators, and planning templates.</div>
+          </div>
+          <div class="ob-grid" id="farm-type-grid"></div>
+        </div>
+
+        <!-- Step 2: Pain Points -->
+        <div class="step-panel" id="step-2">
+          <div class="step-header">
+            <div class="step-num">STEP 3 OF 4</div>
+            <div class="step-title">What are your biggest challenges?</div>
+            <div class="step-hint">Select all that apply — we'll prioritize these in your dashboard.</div>
+          </div>
+          <div class="ob-grid" id="pain-grid"></div>
+        </div>
+
+        <!-- Step 3: Size -->
+        <div class="step-panel" id="step-3">
+          <div class="step-header">
+            <div class="step-num">STEP 4 OF 4</div>
+            <div class="step-title">What is your operation size?</div>
+            <div class="step-hint">Approximate is fine — used for funding eligibility and benchmarking.</div>
+          </div>
+          <div class="ob-grid-1" id="size-grid"></div>
+        </div>
+
+        <!-- Navigation -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+          <button class="ob-back" id="btn-back" style="display:none;" onclick="stepBack()">← Back</button>
+          <span></span>
+          <button class="btn btn-primary btn-lg" id="btn-next" disabled onclick="stepNext()">
+            Continue →
+          </button>
+        </div>
+
+        <p style="font-size:11px; color:var(--faint); margin-top:18px; line-height:1.5; font-family:'IBM Plex Mono',monospace; letter-spacing:0.3px;">
+          Your data stays in your browser. No account required for the demo.
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="js/data.js"></script>
+  <script>
+    // Redirect if already profiled
+    if (Profile.load()) window.location.href = 'dashboard.html';
+
+    let step = 0;
+    const profile = { province: '', farmType: '', painPoints: [], size: '' };
+
+    // Populate selects & grids
+    const provSel = document.getElementById('sel-province');
+    PROVINCES.forEach(p => {
+      const o = document.createElement('option');
+      o.value = p; o.textContent = p;
+      provSel.appendChild(o);
+    });
+
+    const farmGrid = document.getElementById('farm-type-grid');
+    FARM_TYPES.forEach(t => {
+      const btn = document.createElement('button');
+      btn.className = 'ob-option';
+      btn.textContent = t;
+      btn.onclick = () => {
+        farmGrid.querySelectorAll('.ob-option').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        profile.farmType = t;
+        validateStep();
+      };
+      farmGrid.appendChild(btn);
+    });
+
+    const painGrid = document.getElementById('pain-grid');
+    PAIN_POINTS.forEach(p => {
+      const btn = document.createElement('button');
+      btn.className = 'ob-option';
+      btn.textContent = p;
+      btn.onclick = () => {
+        btn.classList.toggle('selected');
+        if (btn.classList.contains('selected')) profile.painPoints.push(p);
+        else profile.painPoints = profile.painPoints.filter(x => x !== p);
+        validateStep();
+      };
+      painGrid.appendChild(btn);
+    });
+
+    const sizeGrid = document.getElementById('size-grid');
+    SIZES.forEach(s => {
+      const btn = document.createElement('button');
+      btn.className = 'ob-option';
+      btn.textContent = s;
+      btn.onclick = () => {
+        sizeGrid.querySelectorAll('.ob-option').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        profile.size = s;
+        validateStep();
+      };
+      sizeGrid.appendChild(btn);
+    });
+
+    provSel.addEventListener('change', () => {
+      profile.province = provSel.value;
+      validateStep();
+    });
+
+    function validateStep() {
+      const btn = document.getElementById('btn-next');
+      if (step === 0) btn.disabled = !profile.province;
+      else if (step === 1) btn.disabled = !profile.farmType;
+      else if (step === 2) btn.disabled = false; // pain points optional
+      else if (step === 3) btn.disabled = !profile.size;
+    }
+
+    function updateProgress() {
+      for (let i = 0; i < 4; i++) {
+        const pip = document.getElementById(`pip-${i}`);
+        pip.className = 'ob-pip' + (i < step ? ' done' : i === step ? ' active' : '');
+      }
+      document.getElementById('btn-back').style.display = step > 0 ? 'block' : 'none';
+      document.getElementById('btn-next').textContent = step < 3 ? 'Continue →' : 'Launch Dashboard →';
+    }
+
+    function stepNext() {
+      if (step === 3) {
+        // Complete
+        Profile.save(profile);
+        window.location.href = 'dashboard.html';
+        return;
+      }
+      document.getElementById(`step-${step}`).classList.remove('active');
+      step++;
+      document.getElementById(`step-${step}`).classList.add('active');
+      updateProgress();
+      validateStep();
+    }
+
+    function stepBack() {
+      document.getElementById(`step-${step}`).classList.remove('active');
+      step--;
+      document.getElementById(`step-${step}`).classList.add('active');
+      updateProgress();
+      validateStep();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Canadian Farm Copilot</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .welcome-bar {
+      background: linear-gradient(135deg, var(--forest) 0%, var(--forest-lite) 100%);
+      border-radius: var(--r-lg);
+      padding: 22px 26px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .welcome-text h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 20px;
+      color: var(--wheat);
+      margin-bottom: 4px;
+    }
+    .welcome-text p {
+      font-size: 13px;
+      color: rgba(244,236,218,0.6);
+    }
+    .welcome-actions { display: flex; gap: 10px; }
+    .welcome-btn {
+      padding: 9px 16px;
+      border-radius: var(--r-sm);
+      font-family: 'Sora', sans-serif;
+      font-size: 13px;
+      cursor: pointer;
+      border: none;
+      transition: all 0.14s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .wb-primary { background: var(--amber); color: white; }
+    .wb-primary:hover { background: var(--amber-lt); }
+    .wb-secondary { background: rgba(255,255,255,0.1); color: var(--wheat); border: 1px solid rgba(255,255,255,0.15); }
+    .wb-secondary:hover { background: rgba(255,255,255,0.18); }
+
+    .insight-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .insight-card {
+      background: var(--cream);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 14px 18px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      gap: 13px;
+      align-items: center;
+    }
+
+    .insight-icon {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .ii-green { background: var(--green-pale); }
+    .ii-amber { background: var(--amber-pale); }
+    .ii-blue  { background: var(--blue-pale); }
+    .ii-red   { background: var(--red-pale); }
+
+    .insight-text {}
+    .insight-val {
+      font-family: 'DM Serif Display', serif;
+      font-size: 22px;
+      color: var(--forest);
+      line-height: 1;
+    }
+    .insight-lbl {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1px;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <div id="sidebar-mount"></div>
+
+    <div class="main-content">
+      <div class="page-header">
+        <div class="page-header-row">
+          <div>
+            <div class="page-title" id="page-title">Dashboard</div>
+            <div class="page-subtitle" id="page-subtitle">Loading your farm profile…</div>
+          </div>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <span id="date-badge" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);background:var(--wheat-dk);padding:5px 12px;border-radius:20px;"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="page-body">
+
+        <!-- Welcome strip -->
+        <div class="welcome-bar anim-fade-up">
+          <div class="welcome-text">
+            <h2 id="welcome-h">Welcome back 🌾</h2>
+            <p id="welcome-sub">Your personalized agricultural intelligence dashboard</p>
+          </div>
+          <div class="welcome-actions">
+            <a href="copilot.html" class="welcome-btn wb-primary">✦ Ask AI Copilot</a>
+            <a href="funding.html" class="welcome-btn wb-secondary">◈ Browse Funding</a>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stat-grid anim-fade-up anim-delay-1">
+          <div class="stat-card">
+            <div class="stat-label">Programs Matched</div>
+            <div class="stat-value">8</div>
+            <div class="stat-change">↑ 2 new this month</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Est. Funding Available</div>
+            <div class="stat-value" style="font-size:22px;">$31M+</div>
+            <div class="stat-change neutral">Combined pool</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Urgent Deadlines</div>
+            <div class="stat-value">2</div>
+            <div class="stat-change neg">Within 60 days</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Profile Match Score</div>
+            <div class="stat-value">84%</div>
+            <div class="stat-change">Based on your profile</div>
+          </div>
+        </div>
+
+        <!-- Row 1 -->
+        <div class="grid-2 mb-24 anim-fade-up anim-delay-2">
+
+          <!-- Alerts -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Priority Alerts</span>
+              <span class="badge badge-red">3 Active</span>
+            </div>
+            <div class="card-body">
+              <div class="alert alert-urgent">
+                <div class="alert-title">⏱ AgriStability — Deadline April 30, 2026</div>
+                <div class="alert-desc">Enrollment closes in ~40 days. Gather production margin documentation and pasture-related feed costs now. Expanded 2026 rules may increase your eligible support.</div>
+              </div>
+              <div class="alert alert-warn">
+                <div class="alert-title">◈ New AgriMarketing Diversification Stream Open</div>
+                <div class="alert-desc">Announced February 2026. Supports ag exporters accessing new international markets. Up to $500K available — rolling deadline, apply before pool is exhausted.</div>
+              </div>
+              <div class="alert alert-info">
+                <div class="alert-title">✦ AI Copilot Ready for Your Questions</div>
+                <div class="alert-desc">Ask anything about funding eligibility, ROI calculations, market intelligence, or operational planning. Responses are grounded in Canadian agricultural context.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recommended actions -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Recommended Actions</span>
+              <span class="badge badge-amber">4 pending</span>
+            </div>
+            <div class="card-body" style="padding: 6px 20px;">
+              <div id="actions-list"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 2 -->
+        <div class="grid-2 anim-fade-up anim-delay-3">
+
+          <!-- Spring checklist -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Spring Season Checklist</span>
+              <span class="badge badge-sage" id="checklist-count">0 / 12 done</span>
+            </div>
+            <div class="card-body" style="padding:8px 20px; max-height:350px; overflow-y:auto;">
+              <div id="checklist"></div>
+            </div>
+            <div class="card-footer" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);">
+              Click items to mark complete · Progress saved in browser
+            </div>
+          </div>
+
+          <!-- Top programs -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Top Matched Programs</span>
+              <a href="funding.html" class="micro-link">View All →</a>
+            </div>
+            <div class="card-body" style="padding:4px 20px;">
+              <div id="top-programs"></div>
+            </div>
+            <div class="card-footer" style="text-align:center;">
+              <a href="funding.html" class="btn btn-secondary btn-sm">Browse All 8 Programs →</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script>
+    const profile = Profile.requireOrRedirect();
+    if (profile) {
+      // Sidebar
+      document.getElementById('sidebar-mount').innerHTML = renderSidebar('dashboard');
+
+      // Header
+      const today = new Date().toLocaleDateString('en-CA', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+      document.getElementById('page-subtitle').textContent = `${today} · ${profile.province}`;
+      document.getElementById('date-badge').textContent = new Date().toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+      document.getElementById('welcome-h').textContent = `Welcome, ${profile.farmType} 🌾`;
+      document.getElementById('welcome-sub').textContent = `Showing personalized insights for your ${profile.province} operation`;
+
+      // Actions
+      const actions = [
+        { text:'Review AgriStability enrollment documents', pri:'HIGH',  priClass:'pri-high',  href:'funding.html' },
+        { text:'Run ROI estimate on labour-saving tech',    pri:'MED',   priClass:'pri-medium', href:'calculator.html' },
+        { text:'Complete spring operations checklist',      pri:'MED',   priClass:'pri-medium', href:'planner.html' },
+        { text:'Explore market diversification programs',   pri:'LOW',   priClass:'pri-low',    href:'funding.html' },
+      ];
+      document.getElementById('actions-list').innerHTML = actions.map(a => `
+        <div class="action-row">
+          <span class="priority-tag ${a.priClass}">${a.pri}</span>
+          <span style="font-size:13px;flex:1;">${a.text}</span>
+          <a href="${a.href}" class="action-go">GO →</a>
+        </div>
+      `).join('');
+
+      // Checklist
+      const saved = JSON.parse(localStorage.getItem('checklist') || '[]');
+      const cl = document.getElementById('checklist');
+      function renderChecklist() {
+        const ck = JSON.parse(localStorage.getItem('checklist') || '[]');
+        cl.innerHTML = SPRING_CHECKLIST.map((item, i) => `
+          <div class="check-item" onclick="toggleCheck(${i})">
+            <div class="check-box ${ck.includes(i) ? 'checked' : ''}">${ck.includes(i) ? '✓' : ''}</div>
+            <span class="check-text ${ck.includes(i) ? 'done' : ''}">${item}</span>
+          </div>
+        `).join('');
+        document.getElementById('checklist-count').textContent = `${ck.length} / ${SPRING_CHECKLIST.length} done`;
+      }
+      window.toggleCheck = function(i) {
+        let ck = JSON.parse(localStorage.getItem('checklist') || '[]');
+        if (ck.includes(i)) ck = ck.filter(x => x !== i); else ck.push(i);
+        localStorage.setItem('checklist', JSON.stringify(ck));
+        renderChecklist();
+      };
+      renderChecklist();
+
+      // Top programs
+      const sorted = [...PROGRAMS].sort((a,b) => b.match - a.match).slice(0,7);
+      document.getElementById('top-programs').innerHTML = sorted.map(p => `
+        <div class="program-mini">
+          <div style="flex:1;">
+            <div class="program-mini-name">${p.name}</div>
+            <div class="program-mini-meta">${p.category} · Deadline: ${p.deadline}</div>
+          </div>
+          <span class="match-score ${p.match>=85?'high':p.match>=65?'med':'low'}">${p.match}%</span>
+        </div>
+      `).join('');
+    }
+  </script>
+</body>
+</html>

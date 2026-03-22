@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Operations Planner — Canadian Farm Copilot</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .planner-layout {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .progress-bar-wrap {
+      height: 6px;
+      background: var(--wheat-dk);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--sage), var(--sage-lt));
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+
+    .category-section {
+      margin-bottom: 6px;
+    }
+
+    .category-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 10px 16px 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .template-btn {
+      padding: 8px 14px;
+      border-radius: 6px;
+      border: 1.5px solid var(--border-md);
+      background: white;
+      font-family: 'Sora', sans-serif;
+      font-size: 12px;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.13s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .template-btn:hover {
+      border-color: var(--sage);
+      color: var(--forest);
+      background: var(--sage-pale);
+    }
+
+    .side-panel {}
+
+    .deadline-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .deadline-item:last-child { border-bottom: none; }
+    .deadline-name { color: var(--text); font-weight: 500; font-size: 12.5px; }
+    .deadline-days {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10.5px;
+      padding: 3px 9px;
+      border-radius: 12px;
+    }
+    .deadline-urgent { background: var(--red-pale); color: var(--red); }
+    .deadline-warn   { background: var(--amber-pale); color: var(--amber); }
+    .deadline-ok     { background: var(--green-pale); color: var(--green); }
+
+    .note-textarea {
+      width: 100%;
+      padding: 10px 13px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-sm);
+      font-family: 'Sora', sans-serif;
+      font-size: 13px;
+      color: var(--text);
+      background: white;
+      resize: vertical;
+      min-height: 100px;
+      outline: none;
+      transition: border-color 0.15s;
+      line-height: 1.6;
+    }
+    .note-textarea:focus { border-color: var(--sage); }
+
+    .filter-row {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .sort-select {
+      padding: 6px 10px;
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      font-family: 'Sora', sans-serif;
+      font-size: 12px;
+      background: white;
+      color: var(--muted);
+      cursor: pointer;
+      outline: none;
+      margin-left: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <div id="sidebar-mount"></div>
+
+    <div class="main-content">
+      <div class="page-header">
+        <div class="page-header-row">
+          <div>
+            <div class="page-title">Operations Planner ▦</div>
+            <div class="page-subtitle" id="planner-sub">Your farm task list and seasonal planning hub</div>
+          </div>
+          <div style="display:flex;gap:9px;">
+            <button class="template-btn" onclick="loadTemplate('spring')">🌱 Load Spring Template</button>
+            <button class="template-btn" onclick="loadTemplate('fall')">🍂 Load Fall Template</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="page-body">
+
+        <!-- Stats -->
+        <div class="planner-stats anim-fade-up">
+          <div class="stat-card">
+            <div class="stat-label">Total Tasks</div>
+            <div class="stat-value" id="stat-total">0</div>
+            <div style="margin-top:8px;">
+              <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-bar" style="width:0%"></div></div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Pending</div>
+            <div class="stat-value" id="stat-pending">0</div>
+            <div class="stat-change neg">Needs attention</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Completed</div>
+            <div class="stat-value" id="stat-done">0</div>
+            <div class="stat-change">Good progress</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Completion Rate</div>
+            <div class="stat-value" id="stat-rate">0%</div>
+            <div class="stat-change neutral">This session</div>
+          </div>
+        </div>
+
+        <div class="planner-layout anim-fade-up anim-delay-1">
+
+          <!-- Main task panel -->
+          <div>
+            <div class="card">
+              <div class="filter-row">
+                <div style="font-family:'DM Serif Display',serif;font-size:15px;color:var(--forest);">Task List</div>
+                <div style="display:flex;gap:6px;margin-left:auto;">
+                  <button class="task-filter-btn active" id="filter-all" onclick="setFilter('all')">All</button>
+                  <button class="task-filter-btn" id="filter-pending" onclick="setFilter('pending')">Pending</button>
+                  <button class="task-filter-btn" id="filter-done" onclick="setFilter('done')">Completed</button>
+                  <button class="task-filter-btn" id="filter-high" onclick="setFilter('high')">High Priority</button>
+                  <select class="sort-select" id="sort-select" onchange="renderTasks()">
+                    <option value="priority">Sort: Priority</option>
+                    <option value="alpha">Sort: A–Z</option>
+                    <option value="status">Sort: Status</option>
+                  </select>
+                </div>
+              </div>
+
+              <div id="task-list" class="task-list"></div>
+
+              <div class="add-task-bar">
+                <input class="add-task-input" id="new-task-input" placeholder="Add a new task…" onkeydown="handleAddKey(event)">
+                <select class="pri-select" id="new-task-pri">
+                  <option value="high">High</option>
+                  <option value="medium" selected>Medium</option>
+                  <option value="low">Low</option>
+                </select>
+                <input class="add-task-input" id="new-task-date" type="date" style="max-width:150px;">
+                <button class="btn btn-primary btn-sm" onclick="addTask()">Add Task</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Side panel -->
+          <div class="side-panel">
+            <!-- Funding deadlines -->
+            <div class="card mb-16">
+              <div class="card-header"><span class="card-title">Program Deadlines</span></div>
+              <div class="card-body" style="padding:6px 18px;" id="deadline-list"></div>
+              <div class="card-footer">
+                <a href="funding.html" class="micro-link">View All Programs →</a>
+              </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="card mb-16">
+              <div class="card-header">
+                <span class="card-title">Season Notes</span>
+                <button class="btn btn-ghost btn-sm" onclick="saveNote()">Save</button>
+              </div>
+              <div class="card-body">
+                <textarea class="note-textarea" id="season-note" placeholder="Record seasonal observations, plans, equipment issues, weather notes…"></textarea>
+              </div>
+            </div>
+
+            <!-- Quick links -->
+            <div class="card">
+              <div class="card-header"><span class="card-title">Quick Actions</span></div>
+              <div class="card-body" style="display:flex;flex-direction:column;gap:8px;padding:14px 18px;">
+                <a href="copilot.html" class="btn btn-primary btn-sm">✦ Ask AI for Checklist</a>
+                <a href="funding.html" class="btn btn-secondary btn-sm">◈ Check Funding Deadlines</a>
+                <a href="calculator.html" class="btn btn-secondary btn-sm">◎ Run ROI Calculator</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script>
+    const profile = Profile.requireOrRedirect();
+    if (!profile) throw new Error('no profile');
+
+    document.getElementById('sidebar-mount').innerHTML = renderSidebar('planner');
+    document.getElementById('planner-sub').textContent =
+      `Seasonal planning and task management for your ${profile.farmType} in ${profile.province}`;
+
+    // Load/save note
+    document.getElementById('season-note').value = localStorage.getItem('seasonNote') || '';
+    window.saveNote = function() {
+      localStorage.setItem('seasonNote', document.getElementById('season-note').value);
+      const btn = document.querySelector('.card-body + .card-body .btn-ghost');
+    };
+    document.getElementById('season-note').addEventListener('input', () => {
+      localStorage.setItem('seasonNote', document.getElementById('season-note').value);
+    });
+
+    // Default tasks
+    const DEFAULT_TASKS = [
+      { id:1, text:'Submit AgriStability enrollment — deadline April 30, 2026', pri:'high',   done:false, date:'2026-04-20' },
+      { id:2, text:'Service and calibrate seeding equipment for spring',         pri:'high',   done:false, date:'2026-04-10' },
+      { id:3, text:'Review crop rotation plan for 2026 season',                  pri:'medium', done:false, date:'' },
+      { id:4, text:'Confirm seed orders and delivery with supplier',              pri:'medium', done:true,  date:'' },
+      { id:5, text:'Conduct spring soil moisture and nutrient assessment',        pri:'medium', done:false, date:'' },
+      { id:6, text:'Review seasonal labour contracts and staffing plan',          pri:'medium', done:false, date:'2026-04-15' },
+      { id:7, text:'Update farm insurance and review coverage limits',            pri:'low',    done:false, date:'' },
+      { id:8, text:'Register for Ontario Federation of Agriculture spring webinar',pri:'low',  done:true,  date:'' },
+    ];
+
+    let tasks = JSON.parse(localStorage.getItem('plannerTasks') || 'null') || DEFAULT_TASKS;
+    let activeFilter = 'all';
+
+    function saveTasks() { localStorage.setItem('plannerTasks', JSON.stringify(tasks)); }
+
+    function setFilter(f) {
+      activeFilter = f;
+      ['all','pending','done','high'].forEach(x => {
+        document.getElementById(`filter-${x}`)?.classList.toggle('active', x === f);
+      });
+      renderTasks();
+    }
+
+    function renderTasks() {
+      const sort = document.getElementById('sort-select').value;
+      let list = tasks.filter(t => {
+        if (activeFilter === 'all')    return true;
+        if (activeFilter === 'pending') return !t.done;
+        if (activeFilter === 'done')   return t.done;
+        if (activeFilter === 'high')   return t.pri === 'high' && !t.done;
+        return true;
+      });
+
+      if (sort === 'priority') {
+        const rank = { high:0, medium:1, low:2 };
+        list.sort((a,b) => (a.done - b.done) || (rank[a.pri] - rank[b.pri]));
+      } else if (sort === 'alpha') {
+        list.sort((a,b) => a.text.localeCompare(b.text));
+      } else if (sort === 'status') {
+        list.sort((a,b) => a.done - b.done);
+      }
+
+      const el = document.getElementById('task-list');
+      if (!list.length) {
+        el.innerHTML = `<div style="text-align:center;padding:36px;color:var(--muted);font-size:13px;">No tasks in this view. Add one below or load a seasonal template.</div>`;
+      } else {
+        el.innerHTML = list.map(t => `
+          <div class="task-item" id="task-${t.id}">
+            <div class="task-check ${t.done ? 'checked' : ''}" onclick="toggleTask(${t.id})">${t.done ? '✓' : ''}</div>
+            <span class="task-text ${t.done ? 'done' : ''}">${t.text}</span>
+            ${t.date ? `<span class="task-date">${formatDate(t.date)}</span>` : ''}
+            <span class="priority-tag pri-${t.pri}">${t.pri.toUpperCase()}</span>
+            <button class="task-delete" onclick="deleteTask(${t.id})">×</button>
+          </div>
+        `).join('');
+      }
+
+      // Update stats
+      const total   = tasks.length;
+      const pending = tasks.filter(t => !t.done).length;
+      const done    = tasks.filter(t => t.done).length;
+      const rate    = total ? Math.round((done / total) * 100) : 0;
+      document.getElementById('stat-total').textContent   = total;
+      document.getElementById('stat-pending').textContent = pending;
+      document.getElementById('stat-done').textContent    = done;
+      document.getElementById('stat-rate').textContent    = rate + '%';
+      document.getElementById('progress-bar').style.width = rate + '%';
+    }
+
+    function formatDate(d) {
+      if (!d) return '';
+      const dt = new Date(d + 'T00:00:00');
+      return dt.toLocaleDateString('en-CA', { month:'short', day:'numeric' });
+    }
+
+    window.toggleTask = function(id) {
+      tasks = tasks.map(t => t.id === id ? { ...t, done: !t.done } : t);
+      saveTasks(); renderTasks();
+    };
+
+    window.deleteTask = function(id) {
+      tasks = tasks.filter(t => t.id !== id);
+      saveTasks(); renderTasks();
+    };
+
+    window.addTask = function() {
+      const text = document.getElementById('new-task-input').value.trim();
+      if (!text) return;
+      const newTask = {
+        id:   Date.now(),
+        text: text,
+        pri:  document.getElementById('new-task-pri').value,
+        done: false,
+        date: document.getElementById('new-task-date').value || '',
+      };
+      tasks.push(newTask);
+      saveTasks(); renderTasks();
+      document.getElementById('new-task-input').value = '';
+      document.getElementById('new-task-date').value = '';
+    };
+
+    window.handleAddKey = function(e) {
+      if (e.key === 'Enter') addTask();
+    };
+
+    // Templates
+    const FALL_CHECKLIST = [
+      'Complete harvest equipment servicing and storage',
+      'Submit crop production and sales records',
+      'Review and pay crop insurance premiums',
+      'Plan cover crop seeding before ground freezes',
+      'Conduct livestock facility pre-winter inspection',
+      'Order winter feed and hay supply',
+      'Drain and winterize irrigation systems',
+      'File end-of-season income and expense summary',
+      'Review next-year seed and input requirements',
+      'Attend provincial agricultural fall conference',
+    ];
+
+    window.loadTemplate = function(season) {
+      const items = season === 'spring' ? SPRING_CHECKLIST : FALL_CHECKLIST;
+      const newTasks = items.map((text, i) => ({
+        id:   Date.now() + i,
+        text: text,
+        pri:  i === 0 ? 'high' : i < 3 ? 'medium' : 'low',
+        done: false,
+        date: '',
+      }));
+      tasks = [...tasks, ...newTasks];
+      saveTasks(); renderTasks();
+    };
+
+    // Funding deadlines in side panel
+    const upcoming = PROGRAMS
+      .filter(p => p.deadlineDate)
+      .map(p => ({ ...p, days: getDaysUntil(p.deadlineDate) }))
+      .sort((a,b) => a.days - b.days);
+
+    document.getElementById('deadline-list').innerHTML = upcoming.map(p => {
+      const cls = p.days <= 30 ? 'deadline-urgent' : p.days <= 60 ? 'deadline-warn' : 'deadline-ok';
+      return `
+        <div class="deadline-item">
+          <div>
+            <div class="deadline-name">${p.name}</div>
+            <div style="font-size:11px;color:var(--faint);margin-top:2px;font-family:'IBM Plex Mono',monospace;">${p.deadline}</div>
+          </div>
+          <span class="deadline-days ${cls}">${p.days > 0 ? p.days + 'd' : 'Past'}</span>
+        </div>
+      `;
+    }).join('');
+
+    renderTasks();
+  </script>
+</body>
+</html>

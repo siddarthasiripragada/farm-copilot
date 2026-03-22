@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Copilot — Canadian Farm Copilot</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .main-content {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .copilot-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <div id="sidebar-mount"></div>
+
+    <div class="main-content">
+      <div class="page-header" style="flex-shrink:0;">
+        <div class="page-header-row">
+          <div>
+            <div class="page-title">AI Farm Copilot ✦</div>
+            <div class="page-subtitle" id="copilot-sub">Ask anything about Canadian agriculture, funding programs, operations, or farm decisions</div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-ghost btn-sm" onclick="clearChat()">Clear chat</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="copilot-wrap">
+        <!-- Messages -->
+        <div class="chat-area" id="chat-area">
+          <div class="chat-welcome" id="chat-welcome">
+            <div class="chat-welcome-icon">🌿</div>
+            <h2>Your Canadian Farm Copilot</h2>
+            <p>
+              I'm grounded in Canadian agricultural programs, farm operations, and business decisions. 
+              I know the 2026 funding landscape — AgriStability, AgriMarketing, CAP, and more — 
+              and I can help you plan, calculate, and decide with confidence.
+            </p>
+            <div class="suggestions" id="suggestions"></div>
+          </div>
+        </div>
+
+        <!-- Input bar -->
+        <div class="chat-input-bar">
+          <div class="chat-input-row">
+            <textarea
+              class="chat-textarea"
+              id="chat-input"
+              rows="1"
+              placeholder="Ask about funding, operations, ROI, markets, planning…"
+            ></textarea>
+            <button class="chat-send" id="send-btn" onclick="sendMessage()" disabled>↑</button>
+          </div>
+          <div class="chat-input-hint">
+            Enter to send · Shift+Enter for new line · Powered by Claude
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script>
+    const profile = Profile.requireOrRedirect();
+    if (!profile) throw new Error('no profile');
+
+    document.getElementById('sidebar-mount').innerHTML = renderSidebar('copilot');
+    document.getElementById('copilot-sub').textContent =
+      `Farm type: ${profile.farmType} · ${profile.province} · Ask anything`;
+
+    // Suggestions
+    const sugWrap = document.getElementById('suggestions');
+    SUGGESTED_QUESTIONS.forEach(q => {
+      const chip = document.createElement('div');
+      chip.className = 'suggestion-chip';
+      chip.textContent = q;
+      chip.onclick = () => sendMessage(q);
+      sugWrap.appendChild(chip);
+    });
+
+    // Chat state
+    let messages = [];
+    let isLoading = false;
+
+    const chatArea = document.getElementById('chat-area');
+    const chatInput = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('send-btn');
+
+    chatInput.addEventListener('input', () => {
+      sendBtn.disabled = !chatInput.value.trim() || isLoading;
+      // Auto resize
+      chatInput.style.height = 'auto';
+      chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
+    });
+
+    chatInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        if (!sendBtn.disabled) sendMessage();
+      }
+    });
+
+    async function sendMessage(overrideText) {
+      const text = overrideText || chatInput.value.trim();
+      if (!text || isLoading) return;
+
+      // Hide welcome
+      const welcome = document.getElementById('chat-welcome');
+      if (welcome) welcome.style.display = 'none';
+
+      chatInput.value = '';
+      chatInput.style.height = '';
+      sendBtn.disabled = true;
+      isLoading = true;
+
+      // Add user message
+      messages.push({ role: 'user', content: text });
+      appendMessage('user', text);
+
+      // Typing indicator
+      const typingId = appendTyping();
+
+      try {
+        const systemPrompt = `You are the Canadian Farm Copilot — a practical AI assistant specialized in helping Canadian farmers, producers, and agribusinesses make better decisions.
+
+The user's farm profile:
+- Province: ${profile.province}
+- Farm type: ${profile.farmType}
+- Operation size: ${profile.size}
+- Current pain points: ${profile.painPoints?.join(', ') || 'not specified'}
+
+Your areas of expertise:
+- Canadian federal and provincial agricultural funding programs (AgriStability, AgriMarketing Market Diversification, Canadian Agricultural Partnership, AgriInnovate, NRC-IRAP, Resilient Agricultural Landscape Program, Local Food Infrastructure Fund, and provincial programs specific to each province)
+- Current 2025–2026 Canadian agriculture policy context: market diversification support launched Feb 2026, pasture feed costs added to AgriStability in 2026, $30M Local Food Infrastructure Fund, $14.6M Resilient Agricultural Landscape Program (Ontario), B.C. On-Farm Technology Adoption program
+- Farm operations planning, seasonal workflows, crop and livestock management best practices
+- ROI and payback analysis for farm technology investments (automation, equipment, irrigation, storage)
+- Market access, trade diversification, and agri-business strategy for Canadian producers
+- Labour planning, input cost management, and risk management
+- Feed and pasture economics for livestock producers
+
+Communication style:
+- Be practical, specific, and action-oriented — not generic
+- Reference real Canadian programs by name with approximate amounts and deadlines
+- Keep responses clear and well-structured; use bullet points for lists
+- End substantive answers with a "Next step:" or concrete recommendation
+- If uncertain about current program specifics, acknowledge it and recommend canada.ca or the relevant provincial agriculture ministry
+- Speak to a Canadian farmer directly, not about them`;
+
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 1000,
+            system: systemPrompt,
+            messages: messages
+          })
+        });
+
+        const data = await response.json();
+        removeTyping(typingId);
+
+        const reply = data.content?.map(b => b.text || '').join('') ||
+          'Sorry, I could not get a response. Please try again.';
+        messages.push({ role: 'assistant', content: reply });
+        appendMessage('ai', reply);
+
+      } catch (err) {
+        removeTyping(typingId);
+        const errMsg = 'Sorry — there was a connection error. Please try again in a moment.';
+        messages.push({ role: 'assistant', content: errMsg });
+        appendMessage('ai', errMsg);
+      }
+
+      isLoading = false;
+      sendBtn.disabled = !chatInput.value.trim();
+    }
+
+    function appendMessage(role, text) {
+      const row = document.createElement('div');
+      row.className = `msg-row ${role === 'user' ? 'user' : ''}`;
+
+      const av = document.createElement('div');
+      av.className = `msg-avatar ${role === 'user' ? 'user' : 'ai'}`;
+      av.textContent = role === 'user' ? '👤' : 'FC';
+
+      const bub = document.createElement('div');
+      bub.className = `msg-bubble ${role === 'user' ? 'user' : 'ai'}`;
+      bub.textContent = text;
+
+      row.appendChild(av);
+      row.appendChild(bub);
+      chatArea.appendChild(row);
+      chatArea.scrollTop = chatArea.scrollHeight;
+    }
+
+    function appendTyping() {
+      const id = 'typing-' + Date.now();
+      const row = document.createElement('div');
+      row.className = 'msg-row';
+      row.id = id;
+      row.innerHTML = `
+        <div class="msg-avatar ai">FC</div>
+        <div class="msg-bubble ai">
+          <div class="typing-dots">
+            <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+          </div>
+        </div>
+      `;
+      chatArea.appendChild(row);
+      chatArea.scrollTop = chatArea.scrollHeight;
+      return id;
+    }
+
+    function removeTyping(id) {
+      const el = document.getElementById(id);
+      if (el) el.remove();
+    }
+
+    function clearChat() {
+      messages = [];
+      chatArea.innerHTML = '';
+      // Re-add welcome
+      const wlc = document.createElement('div');
+      wlc.className = 'chat-welcome';
+      wlc.id = 'chat-welcome';
+      wlc.innerHTML = `
+        <div class="chat-welcome-icon">🌿</div>
+        <h2>Your Canadian Farm Copilot</h2>
+        <p>I'm grounded in Canadian agricultural programs, farm operations, and business decisions. Ask me anything.</p>
+        <div class="suggestions" id="suggestions"></div>
+      `;
+      chatArea.appendChild(wlc);
+      // Re-add suggestions
+      const sg = document.getElementById('suggestions');
+      SUGGESTED_QUESTIONS.forEach(q => {
+        const chip = document.createElement('div');
+        chip.className = 'suggestion-chip';
+        chip.textContent = q;
+        chip.onclick = () => sendMessage(q);
+        sg.appendChild(chip);
+      });
+    }
+  </script>
+</body>
+</html>
