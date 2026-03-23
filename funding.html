@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Funding Navigator — Canadian Farm Copilot</title>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="manifest" href="manifest.json">
   <style>
     .empty-state {
       text-align: center;
@@ -98,7 +99,8 @@
             <div class="page-title">Funding Navigator ◈</div>
             <div class="page-subtitle" id="funding-sub">Loading programs…</div>
           </div>
-          <div style="display:flex;gap:8px;">
+          <div style="display:flex;gap:8px;align-items:center;">
+            <a href="index.html" class="btn btn-ghost btn-sm" style="display:inline-flex;align-items:center;gap:5px;text-decoration:none;">🏠 Home</a>
             <button class="btn btn-ghost btn-sm" onclick="toggleSavedOnly()">
               <span id="save-toggle-label">☆ Show saved only</span>
             </button>

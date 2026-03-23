@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Operations Planner — Canadian Farm Copilot</title>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="manifest" href="manifest.json">
   <style>
     .planner-layout {
       display: grid;
@@ -136,7 +137,8 @@
             <div class="page-title">Operations Planner ▦</div>
             <div class="page-subtitle" id="planner-sub">Your farm task list and seasonal planning hub</div>
           </div>
-          <div style="display:flex;gap:9px;">
+          <div style="display:flex;gap:9px;align-items:center;">
+            <a href="index.html" class="btn btn-ghost btn-sm" style="display:inline-flex;align-items:center;gap:5px;text-decoration:none;">🏠 Home</a>
             <button class="template-btn" onclick="loadTemplate('spring')">🌱 Load Spring Template</button>
             <button class="template-btn" onclick="loadTemplate('fall')">🍂 Load Fall Template</button>
           </div>

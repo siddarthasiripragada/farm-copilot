@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard — Canadian Farm Copilot</title>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="manifest" href="manifest.json">
   <style>
     .welcome-bar {
       background: linear-gradient(135deg, var(--forest) 0%, var(--forest-lite) 100%);
@@ -16,80 +17,18 @@
       justify-content: space-between;
       gap: 20px;
     }
-    .welcome-text h2 {
-      font-family: 'DM Serif Display', serif;
-      font-size: 20px;
-      color: var(--wheat);
-      margin-bottom: 4px;
-    }
-    .welcome-text p {
-      font-size: 13px;
-      color: rgba(244,236,218,0.6);
-    }
-    .welcome-actions { display: flex; gap: 10px; }
-    .welcome-btn {
-      padding: 9px 16px;
-      border-radius: var(--r-sm);
-      font-family: 'Sora', sans-serif;
-      font-size: 13px;
-      cursor: pointer;
-      border: none;
-      transition: all 0.14s;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .wb-primary { background: var(--amber); color: white; }
-    .wb-primary:hover { background: var(--amber-lt); }
-    .wb-secondary { background: rgba(255,255,255,0.1); color: var(--wheat); border: 1px solid rgba(255,255,255,0.15); }
-    .wb-secondary:hover { background: rgba(255,255,255,0.18); }
-
-    .insight-strip {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-
-    .insight-card {
-      background: var(--cream);
-      border: 1px solid var(--border);
-      border-radius: var(--r);
-      padding: 14px 18px;
-      box-shadow: var(--shadow-sm);
-      display: flex;
-      gap: 13px;
-      align-items: center;
-    }
-
-    .insight-icon {
-      width: 36px; height: 36px;
-      border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 16px;
-      flex-shrink: 0;
-    }
-    .ii-green { background: var(--green-pale); }
-    .ii-amber { background: var(--amber-pale); }
-    .ii-blue  { background: var(--blue-pale); }
-    .ii-red   { background: var(--red-pale); }
-
-    .insight-text {}
-    .insight-val {
-      font-family: 'DM Serif Display', serif;
-      font-size: 22px;
-      color: var(--forest);
-      line-height: 1;
-    }
-    .insight-lbl {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 10px;
-      letter-spacing: 1px;
-      color: var(--muted);
-      text-transform: uppercase;
-      margin-top: 2px;
-    }
+    .welcome-text h2 { font-family:'DM Serif Display',serif; font-size:20px; color:var(--wheat); margin-bottom:4px; }
+    .welcome-text p  { font-size:13px; color:rgba(244,236,218,0.6); }
+    .welcome-actions { display:flex; gap:10px; flex-wrap:wrap; }
+    .welcome-btn { padding:9px 16px; border-radius:var(--r-sm); font-family:'Sora',sans-serif; font-size:13px; cursor:pointer; border:none; transition:all .14s; text-decoration:none; display:inline-flex; align-items:center; gap:6px; }
+    .wb-primary   { background:var(--amber);color:white; }
+    .wb-primary:hover { background:var(--amber-lt); }
+    .wb-secondary { background:rgba(255,255,255,0.1);color:var(--wheat);border:1px solid rgba(255,255,255,0.15); }
+    .wb-secondary:hover { background:rgba(255,255,255,0.18); }
+    .wb-demo { background:rgba(255,213,0,0.15);color:#FFD580;border:1px solid rgba(255,213,0,0.25); }
+    .wb-demo:hover { background:rgba(255,213,0,0.25); }
+    .card-hover-lift { box-shadow:var(--shadow-sm); }
+    .card-hover-lift:hover { box-shadow:var(--shadow); transform:translateY(-2px); }
   </style>
 </head>
 <body>
@@ -97,19 +36,40 @@
     <div id="sidebar-mount"></div>
 
     <div class="main-content">
+      <div class="demo-banner" id="demo-banner" style="display:none;">
+        <span>🎭 <strong>Demo Mode</strong> — Viewing a sample Ontario vegetable farm. Your real profile is preserved.</span>
+        <button class="demo-exit-btn" onclick="exitDemoMode()">Exit Demo</button>
+      </div>
+
       <div class="page-header">
         <div class="page-header-row">
           <div>
             <div class="page-title" id="page-title">Dashboard</div>
             <div class="page-subtitle" id="page-subtitle">Loading your farm profile…</div>
           </div>
-          <div style="display:flex; gap:8px; align-items:center;">
+          <div style="display:flex;gap:8px;align-items:center;position:relative;">
+            <a href="index.html" class="btn btn-ghost btn-sm" title="Go Home" style="display:inline-flex;align-items:center;gap:5px;text-decoration:none;">🏠 Home</a>
             <span id="date-badge" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);background:var(--wheat-dk);padding:5px 12px;border-radius:20px;"></span>
+            <div class="notif-bell" id="notif-bell" onclick="toggleNotif()">🔔<div class="notif-dot" id="notif-dot" style="display:none;"></div></div>
+            <div class="notif-dropdown" id="notif-dropdown">
+              <div class="notif-header"><span>Alerts</span><span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);" id="notif-count-lbl"></span></div>
+              <div id="notif-list"></div>
+            </div>
           </div>
         </div>
       </div>
 
       <div class="page-body">
+
+        <!-- Profile completeness -->
+        <div class="profile-complete-card anim-fade-up" id="pc-card" style="display:none;">
+          <div class="pc-header">
+            <span class="pc-title">Complete Your Farm Profile</span>
+            <span class="pc-score" id="pc-score-lbl">0%</span>
+          </div>
+          <div class="pc-bar-wrap"><div class="pc-bar-fill" id="pc-bar" style="width:0%"></div></div>
+          <div class="pc-items" id="pc-items"></div>
+        </div>
 
         <!-- Welcome strip -->
         <div class="welcome-bar anim-fade-up">
@@ -118,8 +78,11 @@
             <p id="welcome-sub">Your personalized agricultural intelligence dashboard</p>
           </div>
           <div class="welcome-actions">
-            <a href="copilot.html" class="welcome-btn wb-primary">✦ Ask AI Copilot</a>
-            <a href="funding.html" class="welcome-btn wb-secondary">◈ Browse Funding</a>
+            <a href="copilot.html"  class="welcome-btn wb-primary">✦ AI Copilot</a>
+            <a href="funding.html"  class="welcome-btn wb-secondary">◈ Funding</a>
+            <a href="weather.html"  class="welcome-btn wb-secondary">🌤 Weather</a>
+            <a href="support.html"  class="welcome-btn wb-secondary">💬 Support</a>
+            <button class="welcome-btn wb-demo" onclick="activateDemoMode()">🎭 Demo</button>
           </div>
         </div>
 
@@ -147,9 +110,47 @@
           </div>
         </div>
 
+        <!-- Weather + Quick tools -->
+        <div class="grid-2 mb-24 anim-fade-up anim-delay-1">
+          <a href="weather.html" class="dash-weather" id="dash-weather">
+            <div class="dw-icon" id="dw-icon">🌤</div>
+            <div class="dw-text">
+              <div class="dw-title" id="dw-province">Current Conditions</div>
+              <div class="dw-temp" id="dw-temp">—</div>
+              <div class="dw-cond" id="dw-cond"></div>
+              <div class="dw-crops" id="dw-crops"></div>
+            </div>
+          </a>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <a href="support.html" class="card card-hover-lift" style="padding:16px 18px;text-decoration:none;display:flex;flex-direction:column;gap:5px;">
+              <div style="font-size:22px;">💬</div>
+              <div style="font-family:'DM Serif Display',serif;font-size:14px;color:var(--forest);">Live Support</div>
+              <div style="font-size:11.5px;color:var(--muted);line-height:1.4;">AI advisor available now</div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--sage);margin-top:auto;letter-spacing:.5px;">CHAT NOW →</div>
+            </a>
+            <div class="card" style="padding:16px 18px;display:flex;flex-direction:column;gap:5px;">
+              <div style="font-size:22px;">📅</div>
+              <div style="font-family:'DM Serif Display',serif;font-size:14px;color:var(--forest);">Book a Call</div>
+              <div style="font-size:11.5px;color:var(--muted);line-height:1.4;">1-on-1 ag advisor</div>
+              <a href="support.html" style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--amber);margin-top:auto;letter-spacing:.5px;text-decoration:none;">SCHEDULE →</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Commodity Prices -->
+        <div class="card mb-24 anim-fade-up anim-delay-2">
+          <div class="card-header">
+            <span class="card-title">📈 Canadian Commodity Prices</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);">Reference prices · Mar 2026</span>
+          </div>
+          <div class="card-body" style="padding:10px 20px;">
+            <div id="commodity-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;"></div>
+          </div>
+          <div class="card-footer" style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--faint);">Reference prices based on recent Canadian market data · Verify with your elevator or board for trading decisions</div>
+        </div>
+
         <!-- Row 1 -->
         <div class="grid-2 mb-24 anim-fade-up anim-delay-2">
-
           <!-- Alerts -->
           <div class="card">
             <div class="card-header">
@@ -178,7 +179,7 @@
               <span class="card-title">Recommended Actions</span>
               <span class="badge badge-amber">4 pending</span>
             </div>
-            <div class="card-body" style="padding: 6px 20px;">
+            <div class="card-body" style="padding:6px 20px;">
               <div id="actions-list"></div>
             </div>
           </div>
@@ -186,14 +187,13 @@
 
         <!-- Row 2 -->
         <div class="grid-2 anim-fade-up anim-delay-3">
-
           <!-- Spring checklist -->
           <div class="card">
             <div class="card-header">
               <span class="card-title">Spring Season Checklist</span>
               <span class="badge badge-sage" id="checklist-count">0 / 12 done</span>
             </div>
-            <div class="card-body" style="padding:8px 20px; max-height:350px; overflow-y:auto;">
+            <div class="card-body" style="padding:8px 20px;max-height:350px;overflow-y:auto;">
               <div id="checklist"></div>
             </div>
             <div class="card-footer" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);">
@@ -220,67 +220,174 @@
     </div>
   </div>
 
+  <!-- Feedback FAB -->
+  <button class="feedback-fab" onclick="openFeedback()">💬 Feedback</button>
+  <div id="feedback-bg" style="display:none;" class="feedback-modal-bg" onclick="if(event.target===this)closeFeedback()">
+    <div class="feedback-modal" style="position:relative;">
+      <button class="feedback-close" onclick="closeFeedback()">×</button>
+      <h3>How are we doing?</h3>
+      <p>Your feedback helps us improve Canadian Farm Copilot for all producers.</p>
+      <div class="feedback-stars" id="feedback-stars">
+        <span class="feedback-star" onclick="setRating(1)">⭐</span>
+        <span class="feedback-star" onclick="setRating(2)">⭐</span>
+        <span class="feedback-star" onclick="setRating(3)">⭐</span>
+        <span class="feedback-star" onclick="setRating(4)">⭐</span>
+        <span class="feedback-star" onclick="setRating(5)">⭐</span>
+      </div>
+      <textarea class="feedback-ta" id="feedback-text" placeholder="What's working? What could be better?"></textarea>
+      <button class="feedback-submit" onclick="submitFeedback()">Submit Feedback →</button>
+    </div>
+  </div>
+
   <script src="js/data.js"></script>
   <script>
     const profile = Profile.requireOrRedirect();
     if (profile) {
-      // Sidebar
       document.getElementById('sidebar-mount').innerHTML = renderSidebar('dashboard');
+      if (localStorage.getItem('preDemo')) document.getElementById('demo-banner').style.display = 'flex';
 
-      // Header
-      const today = new Date().toLocaleDateString('en-CA', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+      const today = new Date().toLocaleDateString('en-CA',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
       document.getElementById('page-subtitle').textContent = `${today} · ${profile.province}`;
       document.getElementById('date-badge').textContent = new Date().toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
       document.getElementById('welcome-h').textContent = `Welcome, ${profile.farmType} 🌾`;
-      document.getElementById('welcome-sub').textContent = `Showing personalized insights for your ${profile.province} operation`;
+      document.getElementById('welcome-sub').textContent = `Personalized insights for your ${profile.province} operation`;
 
-      // Actions
-      const actions = [
-        { text:'Review AgriStability enrollment documents', pri:'HIGH',  priClass:'pri-high',  href:'funding.html' },
-        { text:'Run ROI estimate on labour-saving tech',    pri:'MED',   priClass:'pri-medium', href:'calculator.html' },
-        { text:'Complete spring operations checklist',      pri:'MED',   priClass:'pri-medium', href:'planner.html' },
-        { text:'Explore market diversification programs',   pri:'LOW',   priClass:'pri-low',    href:'funding.html' },
+      // Profile completeness
+      const checks = [
+        { label:'Province set',    done:!!profile.province },
+        { label:'Farm type set',   done:!!profile.farmType },
+        { label:'Challenges set',  done:!!(profile.painPoints && profile.painPoints.length) },
+        { label:'Farm size set',   done:!!profile.size },
       ];
+      const score = checks.filter(c=>c.done).length * 25;
+      if (score < 100) {
+        document.getElementById('pc-card').style.display = 'block';
+        document.getElementById('pc-score-lbl').textContent = score + '%';
+        document.getElementById('pc-bar').style.width = score + '%';
+        document.getElementById('pc-items').innerHTML = checks.map(c => `
+          <div class="pc-item ${c.done?'done':''}"><span class="pc-check">${c.done?'✓':'○'}</span>${c.label}</div>
+        `).join('');
+      }
+
+      // Notifications
+      const urgent = PROGRAMS.filter(p => { const d=getDaysUntil(p.deadlineDate); return d!==null&&d>=0&&d<=60; });
+      if (urgent.length) {
+        document.getElementById('notif-dot').style.display = 'block';
+        document.getElementById('notif-count-lbl').textContent = urgent.length + ' alert' + (urgent.length>1?'s':'');
+        document.getElementById('notif-list').innerHTML = urgent.map(p => {
+          const d = getDaysUntil(p.deadlineDate);
+          return `<a href="funding.html" class="notif-item"><div class="notif-item-title">${p.name}</div><div class="notif-item-sub">⏱ ${d} day${d!==1?'s':''} left · ${p.deadline}</div></a>`;
+        }).join('') + `<a href="funding.html" class="notif-item" style="text-align:center;color:var(--sage);font-size:12px;font-family:'IBM Plex Mono',monospace;">View all →</a>`;
+      }
+      window.toggleNotif = function() { document.getElementById('notif-dropdown').classList.toggle('open'); };
+      document.addEventListener('click', e => { if (!document.getElementById('notif-bell').contains(e.target)) document.getElementById('notif-dropdown').classList.remove('open'); });
+
+      // Weather widget
+      const wxM = getCurrentMonthWeather(profile.province);
+      const wxS = getCurrentSeasonCrops(profile.province);
+      if (wxM) {
+        document.getElementById('dw-icon').textContent = wxM.icon;
+        document.getElementById('dw-province').textContent = profile.province + ' · ' + wxM.m;
+        document.getElementById('dw-temp').textContent = wxM.high + '°C / ' + wxM.low + '°C';
+        document.getElementById('dw-cond').textContent = wxM.cond;
+        document.getElementById('dw-crops').textContent = '🌱 ' + wxS.season + ': ' + wxS.crops.slice(0,3).join(', ');
+      }
+
+      // Commodity prices widget
+      const COMMODITIES = [
+        { name:'SRW Wheat', unit:'$/t', price:302, change:+4.5, dir:'up' },
+        { name:'Canola',    unit:'$/t', price:641, change:-2.1, dir:'dn' },
+        { name:'Corn',      unit:'$/t', price:238, change:+1.8, dir:'up' },
+        { name:'Soybeans',  unit:'$/t', price:498, change:-5.0, dir:'dn' },
+        { name:'Barley',    unit:'$/t', price:241, change:+0.5, dir:'up' },
+      ];
+      document.getElementById('commodity-grid').innerHTML = COMMODITIES.map(c => `
+        <div style="background:var(--cream);border:1px solid var(--border);border-radius:8px;padding:10px 12px;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.5px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;">${c.name}</div>
+          <div style="font-family:'DM Serif Display',serif;font-size:18px;color:var(--forest);letter-spacing:-.3px;">${c.price}</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:${c.dir==='up'?'var(--green)':'var(--red)'};margin-top:2px;">${c.dir==='up'?'▲':'▼'} ${Math.abs(c.change).toFixed(1)} &nbsp;${c.unit}</div>
+        </div>`).join('');
+
+      // Dynamic recommended actions based on profile
+      const actionsByType = {
+        'Grain & Oilseeds': [
+          {text:'Review AgriStability enrollment — deadline April 30',pri:'HIGH',priClass:'pri-high',href:'funding.html'},
+          {text:'Check canola & wheat basis levels at local elevator',pri:'HIGH',priClass:'pri-high',href:'calculator.html'},
+          {text:'Plan spring seeding schedule with crop calendar',pri:'MED',priClass:'pri-medium',href:'weather.html'},
+          {text:'Explore AgriMarketing diversification stream',pri:'LOW',priClass:'pri-low',href:'funding.html'},
+        ],
+        'Dairy': [
+          {text:'Review AgriStability enrollment — deadline April 30',pri:'HIGH',priClass:'pri-high',href:'funding.html'},
+          {text:'Calculate ROI on automated milking equipment',pri:'MED',priClass:'pri-medium',href:'calculator.html'},
+          {text:'Check feed cost inputs vs AgriStability 2026 changes',pri:'HIGH',priClass:'pri-high',href:'copilot.html'},
+          {text:'Explore labour-saving technology funding programs',pri:'MED',priClass:'pri-medium',href:'funding.html'},
+        ],
+        'Livestock': [
+          {text:'Review AgriStability pasture feed cost expansion',pri:'HIGH',priClass:'pri-high',href:'copilot.html'},
+          {text:'Model ROI on corral/handling equipment upgrades',pri:'MED',priClass:'pri-medium',href:'calculator.html'},
+          {text:'Check Resilient Agricultural Landscape Program',pri:'MED',priClass:'pri-medium',href:'funding.html'},
+          {text:'Plan spring/summer operations with planner',pri:'LOW',priClass:'pri-low',href:'planner.html'},
+        ],
+        'Produce / Vegetables': [
+          {text:'Review AgriStability enrollment — deadline April 30',pri:'HIGH',priClass:'pri-high',href:'funding.html'},
+          {text:'Run ROI estimate on labour-saving packing tech',pri:'MED',priClass:'pri-medium',href:'calculator.html'},
+          {text:'Check spring planting calendar for your province',pri:'MED',priClass:'pri-medium',href:'weather.html'},
+          {text:'Explore Local Food Infrastructure Fund ($30M)',pri:'MED',priClass:'pri-medium',href:'funding.html'},
+        ],
+        'default': [
+          {text:'Review AgriStability enrollment — deadline April 30',pri:'HIGH',priClass:'pri-high',href:'funding.html'},
+          {text:'Run ROI estimate on labour-saving technology',pri:'MED',priClass:'pri-medium',href:'calculator.html'},
+          {text:'Complete spring operations checklist',pri:'MED',priClass:'pri-medium',href:'planner.html'},
+          {text:'Explore market diversification programs',pri:'LOW',priClass:'pri-low',href:'funding.html'},
+        ]
+      };
+      const actions = actionsByType[profile.farmType] || actionsByType['default'];
       document.getElementById('actions-list').innerHTML = actions.map(a => `
         <div class="action-row">
           <span class="priority-tag ${a.priClass}">${a.pri}</span>
           <span style="font-size:13px;flex:1;">${a.text}</span>
           <a href="${a.href}" class="action-go">GO →</a>
-        </div>
-      `).join('');
+        </div>`).join('');
 
       // Checklist
-      const saved = JSON.parse(localStorage.getItem('checklist') || '[]');
       const cl = document.getElementById('checklist');
       function renderChecklist() {
-        const ck = JSON.parse(localStorage.getItem('checklist') || '[]');
-        cl.innerHTML = SPRING_CHECKLIST.map((item, i) => `
+        const ck = JSON.parse(localStorage.getItem('checklist')||'[]');
+        cl.innerHTML = SPRING_CHECKLIST.map((item,i) => `
           <div class="check-item" onclick="toggleCheck(${i})">
-            <div class="check-box ${ck.includes(i) ? 'checked' : ''}">${ck.includes(i) ? '✓' : ''}</div>
-            <span class="check-text ${ck.includes(i) ? 'done' : ''}">${item}</span>
-          </div>
-        `).join('');
+            <div class="check-box ${ck.includes(i)?'checked':''}">${ck.includes(i)?'✓':''}</div>
+            <span class="check-text ${ck.includes(i)?'done':''}">${item}</span>
+          </div>`).join('');
         document.getElementById('checklist-count').textContent = `${ck.length} / ${SPRING_CHECKLIST.length} done`;
       }
       window.toggleCheck = function(i) {
-        let ck = JSON.parse(localStorage.getItem('checklist') || '[]');
-        if (ck.includes(i)) ck = ck.filter(x => x !== i); else ck.push(i);
-        localStorage.setItem('checklist', JSON.stringify(ck));
-        renderChecklist();
+        let ck = JSON.parse(localStorage.getItem('checklist')||'[]');
+        if (ck.includes(i)) ck=ck.filter(x=>x!==i); else ck.push(i);
+        localStorage.setItem('checklist',JSON.stringify(ck)); renderChecklist();
       };
       renderChecklist();
 
       // Top programs
-      const sorted = [...PROGRAMS].sort((a,b) => b.match - a.match).slice(0,7);
-      document.getElementById('top-programs').innerHTML = sorted.map(p => `
+      document.getElementById('top-programs').innerHTML = [...PROGRAMS].sort((a,b)=>b.match-a.match).slice(0,7).map(p => `
         <div class="program-mini">
           <div style="flex:1;">
             <div class="program-mini-name">${p.name}</div>
             <div class="program-mini-meta">${p.category} · Deadline: ${p.deadline}</div>
           </div>
           <span class="match-score ${p.match>=85?'high':p.match>=65?'med':'low'}">${p.match}%</span>
-        </div>
-      `).join('');
+        </div>`).join('');
+
+      // Feedback
+      let feedbackRating = 0;
+      window.openFeedback  = () => { document.getElementById('feedback-bg').style.display='flex'; };
+      window.closeFeedback = () => { document.getElementById('feedback-bg').style.display='none'; };
+      window.setRating = n => { feedbackRating=n; document.querySelectorAll('.feedback-star').forEach((s,i)=>s.classList.toggle('active',i<n)); };
+      window.submitFeedback = () => {
+        const all = JSON.parse(localStorage.getItem('feedback')||'[]');
+        all.push({rating:feedbackRating,text:document.getElementById('feedback-text').value,date:new Date().toISOString()});
+        localStorage.setItem('feedback',JSON.stringify(all));
+        closeFeedback(); alert('Thank you for your feedback! 🌾');
+      };
     }
   </script>
 </body>

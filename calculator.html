@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ROI Calculator — Canadian Farm Copilot</title>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="manifest" href="manifest.json">
   <style>
     .calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
 
@@ -89,6 +90,10 @@
           <div>
             <div class="page-title">ROI Calculator ◎</div>
             <div class="page-subtitle">Model the financial impact of technology investments and operational decisions</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <button class="btn btn-ghost btn-sm" onclick="exportPDF()" style="display:inline-flex;align-items:center;gap:5px;">📄 Export PDF</button>
+            <a href="index.html" class="btn btn-ghost btn-sm" style="display:inline-flex;align-items:center;gap:5px;text-decoration:none;">🏠 Home</a>
           </div>
         </div>
       </div>
@@ -526,6 +531,40 @@
       };
       calcMargin();
     }
+
+    /* ── PDF / Print Export ─────────────────────────────── */
+    window.exportPDF = function() {
+      const profile = Profile.load();
+      const activeTab = document.querySelector('.calc-tab.active')?.textContent || 'Calculator';
+      const printWin = window.open('', '_blank');
+      const content = document.querySelector('.page-body').innerHTML;
+      printWin.document.write(`<!DOCTYPE html>
+<html><head>
+<title>Farm Copilot ROI Report — ${new Date().toLocaleDateString('en-CA')}</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=IBM+Plex+Mono&family=Sora:wght@400;500;600&display=swap');
+  body { font-family:'Sora',sans-serif; background:white; color:#1a2e22; padding:32px; max-width:900px; margin:0 auto; font-size:13px; }
+  h1   { font-family:'DM Serif Display',serif; font-size:28px; color:#1B3528; margin-bottom:4px; }
+  .meta { font-family:'IBM Plex Mono',monospace; font-size:10px; color:#888; letter-spacing:1px; margin-bottom:28px; }
+  .calc-tab-group { display:none; }
+  .calc-panel { border:1px solid #e0d9cc; border-radius:10px; padding:20px; margin-bottom:24px; }
+  .calc-panel:not(.active) { display:none; }
+  label { font-size:12px; color:#666; display:block; margin-bottom:3px; }
+  input { border:1px solid #ccc; border-radius:5px; padding:7px 10px; font-size:13px; width:100%; box-sizing:border-box; }
+  .result-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:16px; }
+  .result-card { background:#f5edda; border-radius:8px; padding:14px; text-align:center; }
+  .result-val  { font-family:'DM Serif Display',serif; font-size:22px; color:#1B3528; }
+  .result-lbl  { font-size:11px; color:#888; margin-top:3px; }
+  @media print { button { display:none; } }
+</style>
+</head><body>
+<h1>Canadian Farm Copilot — ROI Report</h1>
+<div class="meta">FARM: ${profile?.farmType || '—'} · PROVINCE: ${profile?.province || '—'} · GENERATED: ${new Date().toLocaleDateString('en-CA', {weekday:'long',year:'numeric',month:'long',day:'numeric'})}</div>
+${content}
+</body></html>`);
+      printWin.document.close();
+      setTimeout(() => { printWin.focus(); printWin.print(); }, 600);
+    };
   </script>
 </body>
 </html>

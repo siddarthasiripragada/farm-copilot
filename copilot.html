@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI Copilot — Canadian Farm Copilot</title>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="manifest" href="manifest.json">
   <style>
     .main-content {
       display: flex;
@@ -30,7 +31,8 @@
             <div class="page-title">AI Farm Copilot ✦</div>
             <div class="page-subtitle" id="copilot-sub">Ask anything about Canadian agriculture, funding programs, operations, or farm decisions</div>
           </div>
-          <div style="display:flex;gap:8px;">
+          <div style="display:flex;gap:8px;align-items:center;">
+            <a href="index.html" class="btn btn-ghost btn-sm" style="display:inline-flex;align-items:center;gap:5px;text-decoration:none;">🏠 Home</a>
             <button class="btn btn-ghost btn-sm" onclick="clearChat()">Clear chat</button>
           </div>
         </div>
@@ -187,6 +189,20 @@ Communication style:
       sendBtn.disabled = !chatInput.value.trim();
     }
 
+    function renderMarkdown(text) {
+      return text
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g,'<em>$1</em>')
+        .replace(/`(.+?)`/g,'<code style="background:rgba(0,0,0,.08);padding:1px 5px;border-radius:3px;font-family:monospace;font-size:12px;">$1</code>')
+        .replace(/^### (.+)$/gm,'<div style="font-family:\'DM Serif Display\',serif;font-size:15px;font-weight:600;margin:10px 0 4px;">$1</div>')
+        .replace(/^## (.+)$/gm,'<div style="font-family:\'DM Serif Display\',serif;font-size:16px;font-weight:700;margin:12px 0 5px;">$1</div>')
+        .replace(/^- (.+)$/gm,'<div style="padding:2px 0 2px 14px;position:relative;"><span style="position:absolute;left:0;color:#888;">•</span>$1</div>')
+        .replace(/^\d+\. (.+)$/gm,'<div style="padding:2px 0;">$1</div>')
+        .replace(/\n\n/g,'<br><br>')
+        .replace(/\n/g,'<br>');
+    }
+
     function appendMessage(role, text) {
       const row = document.createElement('div');
       row.className = `msg-row ${role === 'user' ? 'user' : ''}`;
@@ -197,10 +213,22 @@ Communication style:
 
       const bub = document.createElement('div');
       bub.className = `msg-bubble ${role === 'user' ? 'user' : 'ai'}`;
-      bub.textContent = text;
+      if (role === 'user') {
+        bub.textContent = text;
+      } else {
+        bub.innerHTML = renderMarkdown(text);
+      }
+
+      const time = document.createElement('div');
+      time.style.cssText = 'font-family:\'IBM Plex Mono\',monospace;font-size:9.5px;color:var(--faint);margin-top:4px;';
+      time.textContent = new Date().toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit'});
+
+      const wrap = document.createElement('div');
+      wrap.appendChild(bub);
+      wrap.appendChild(time);
 
       row.appendChild(av);
-      row.appendChild(bub);
+      row.appendChild(wrap);
       chatArea.appendChild(row);
       chatArea.scrollTop = chatArea.scrollHeight;
     }

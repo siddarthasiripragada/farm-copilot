@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Canadian Farm Copilot — Setup</title>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="manifest" href="manifest.json">
   <style>
     /* ── Additional landing-page styles ── */
     .ob-split {
@@ -291,18 +292,23 @@
   <script src="js/data.js"></script>
   <script>
     // Redirect if already profiled
-    if (Profile.load()) window.location.href = 'dashboard.html';
+const savedProfile = Profile.load();
+const isEditMode = new URLSearchParams(window.location.search).get('edit') === '1';
+
+if (savedProfile && !isEditMode) {
+  window.location.href = 'dashboard.html';
+}
 
     let step = 0;
-    const profile = { province: '', farmType: '', painPoints: [], size: '' };
+const profile = savedProfile || { province: '', farmType: '', painPoints: [], size: '' };
 
-    // Populate selects & grids
     const provSel = document.getElementById('sel-province');
-    PROVINCES.forEach(p => {
-      const o = document.createElement('option');
-      o.value = p; o.textContent = p;
-      provSel.appendChild(o);
-    });
+PROVINCES.forEach(p => {
+  const o = document.createElement('option');
+  o.value = p; o.textContent = p;
+  provSel.appendChild(o);
+});
+provSel.value = profile.province || '';
 
     const farmGrid = document.getElementById('farm-type-grid');
     FARM_TYPES.forEach(t => {
