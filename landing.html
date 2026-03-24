@@ -7,8 +7,51 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="manifest" href="manifest.json">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--forest); font-family: 'Sora', sans-serif; overflow-x: hidden; }
+ * { box-sizing: border-box; margin: 0; padding: 0; }
+
+html,
+body {
+  background: #1B3528;
+  min-height: 100%;
+}
+
+body {
+  background: var(--forest);
+  font-family: 'Sora', sans-serif;
+  overflow-x: hidden;
+  color: var(--wheat);
+}
+
+.ln-nav,
+.ln-hero,
+.ln-section-dark,
+.ln-footer {
+  background-color: #1B3528;
+}
+
+.ln-section {
+  position: relative;
+  z-index: 1;
+}
+
+.ln-nav {
+  background: rgba(27,53,40,.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.ln-section-dark {
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.16) 0%, rgba(0,0,0,.10) 100%);
+}
+
+.ln-preview-card,
+.feat-card,
+.testi-card,
+.price-card,
+.waitlist-wrap {
+  box-shadow: 0 18px 48px rgba(0,0,0,.22);
+}
 
     /* ── NAV ──────────────────────────────────────────────── */
     .ln-nav {
@@ -505,21 +548,81 @@
 
 <script src="js/data.js"></script>
 <script>
-  /* Show dashboard link if already profiled */
-  if (Profile.load()) document.getElementById('nav-dashboard').style.display = 'inline';
+  if (Profile.load()) {
+    document.getElementById('nav-dashboard').style.display = 'inline';
+  }
 
-  /* Programs strip */
   const strip = document.getElementById('prog-strip');
   PROGRAMS.forEach(p => {
     strip.innerHTML += `<div class="prog-pill">${p.name} <span class="prog-pill-score">${p.match}%</span></div>`;
   });
 
-  /* Preview card weather */
-  const wx = getCurrentMonthWeather('Ontario');
-  if (wx) {
-    document.getElementById('lpc-temp').textContent = `${wx.high}°C / ${wx.low}°C`;
-    document.getElementById('lpc-cond').textContent = `Ontario · ${wx.m} · ${wx.cond}`;
+  async function renderLandingWeather() {
+    const tempEl = document.getElementById('lpc-temp');
+    const condEl = document.getElementById('lpc-cond');
+
+    try {
+      const profile = Profile.load();
+      const province = profile?.province || 'Ontario';
+
+      tempEl.textContent = 'Loading…';
+      condEl.textContent = `${province} · live weather`;
+
+      const live = await loadProvinceWeather(province);
+
+      tempEl.textContent = `${Math.round(live.current.temperature)}°C`;
+      condEl.textContent = `${live.city} · ${live.current.label} · Updated ${live.updatedLabel}`;
+    } catch (err) {
+      console.error('Landing weather failed', err);
+
+      const fallback = getCurrentMonthWeather('Ontario');
+      tempEl.textContent = `${fallback.high}°C / ${fallback.low}°C`;
+      condEl.textContent = `Ontario · ${fallback.m} · ${fallback.cond}`;
+    }
   }
+
+  renderLandingWeather();
+
+  window.joinWaitlist = function() {
+    const email = document.getElementById('wl-email').value.trim();
+    if (!email || !email.includes('@')) {
+      alert('Please enter a valid email address.');
+      return;
+    }
+
+    const list = JSON.parse(localStorage.getItem('waitlist') || '[]');
+    list.push({ email, date: new Date().toISOString() });
+    localStorage.setItem('waitlist', JSON.stringify(list));
+
+    document.getElementById('wl-success').style.display = 'block';
+    document.getElementById('wl-email').value = '';
+  };
+
+  window.activateDemoModeFromLanding = function() {
+    const r = Profile.load();
+    if (r) localStorage.setItem('preDemo', JSON.stringify(r));
+
+    Profile.save({
+      province: 'Ontario',
+      farmType: 'Produce / Vegetables',
+      painPoints: ['Labour Shortage', 'Funding Discovery'],
+      size: 'Small (< 100 acres / < 50 head)'
+    });
+
+    localStorage.setItem('demoMode', '1');
+    window.location.href = 'dashboard.html';
+  };
+
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const t = document.querySelector(a.getAttribute('href'));
+      if (t) {
+        e.preventDefault();
+        t.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  });
+</script>
 
   /* Waitlist */
   window.joinWaitlist = function() {
