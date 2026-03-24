@@ -12,6 +12,7 @@
       min-height: 100vh;
       display: grid;
       grid-template-columns: 1fr 1fr;
+	  align-items: stretch;
     }
 
     /* Left panel — hero */
@@ -176,6 +177,297 @@
       color: var(--muted);
       line-height: 1.55;
     }
+	/* ── Mobile / tablet responsiveness ── */
+.ob-hero,
+.ob-form-panel,
+.ob-form-inner,
+.hero-main,
+.hero-features,
+.step-panel,
+.form-group,
+.ob-grid,
+.ob-grid-1 {
+  min-width: 0;
+}
+
+@media (max-width: 1200px) {
+  .ob-hero {
+    padding: 40px 40px;
+  }
+
+  .ob-form-panel {
+    padding: 32px 36px;
+  }
+
+  .hero-title {
+    font-size: 38px;
+  }
+
+  .hero-desc {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 920px) {
+  .ob-split {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .ob-hero {
+    min-height: auto;
+    padding: 28px 24px 26px;
+    gap: 24px;
+  }
+
+  .hero-main {
+    margin: 8px 0;
+  }
+
+  .hero-title {
+    font-size: 34px;
+    line-height: 1.12;
+    margin-bottom: 14px;
+  }
+
+  .hero-desc {
+    font-size: 14px;
+    line-height: 1.65;
+    max-width: 100%;
+    margin-bottom: 22px;
+  }
+
+  .hero-features {
+    gap: 8px;
+  }
+
+  .hero-feat {
+    font-size: 12.5px;
+    line-height: 1.45;
+    align-items: flex-start;
+  }
+
+  .hero-feat-icon {
+    width: 24px;
+    height: 24px;
+    font-size: 11px;
+    margin-top: 1px;
+  }
+
+  .hero-foot {
+    font-size: 9px;
+    line-height: 1.5;
+  }
+
+  .ob-form-panel {
+    display: block;
+    padding: 24px 18px 28px;
+    overflow: visible;
+  }
+
+  .ob-form-inner {
+    max-width: 100%;
+  }
+
+  .ob-form-top {
+    margin-bottom: 24px;
+  }
+
+  .ob-form-title {
+    font-size: 24px;
+    line-height: 1.2;
+  }
+
+  .step-title {
+    font-size: 19px;
+    line-height: 1.25;
+  }
+
+  .step-hint {
+    font-size: 12.5px;
+  }
+
+  .ob-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .ob-grid-1 {
+    gap: 10px;
+  }
+
+  .ob-option {
+    min-height: 52px;
+    padding: 12px 12px;
+    font-size: 13px;
+    line-height: 1.35;
+  }
+
+  .btn.btn-lg,
+  .btn-lg {
+    min-height: 48px;
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+
+  .ob-back {
+    min-height: 44px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 640px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  .ob-hero {
+    padding: 22px 16px 20px;
+  }
+
+  .hero-logo {
+    font-size: 9px;
+    letter-spacing: 2px;
+    gap: 7px;
+    flex-wrap: wrap;
+  }
+
+  .hero-eyebrow {
+    font-size: 9px;
+    letter-spacing: 1.8px;
+    margin-bottom: 12px;
+  }
+
+  .hero-title {
+    font-size: 28px;
+    letter-spacing: -0.4px;
+    line-height: 1.08;
+  }
+
+  .hero-desc {
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 18px;
+  }
+
+  .hero-feat {
+    font-size: 12px;
+    gap: 9px;
+  }
+
+  .hero-foot {
+    font-size: 8.5px;
+    letter-spacing: 0.6px;
+  }
+
+  .ob-form-panel {
+    padding: 18px 14px 24px;
+  }
+
+  .ob-form-eyebrow {
+    font-size: 9px;
+    letter-spacing: 1.6px;
+  }
+
+  .ob-form-title {
+    font-size: 22px;
+  }
+
+  .ob-progress {
+    margin-bottom: 18px !important;
+  }
+
+  .step-header {
+    margin-bottom: 18px;
+  }
+
+  .step-num {
+    font-size: 9px;
+  }
+
+  .step-title {
+    font-size: 18px;
+  }
+
+  .step-hint {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .form-label {
+    font-size: 12px;
+  }
+
+  .form-select {
+    min-height: 48px;
+    font-size: 14px;
+  }
+
+  .ob-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .ob-grid-1 {
+    gap: 8px;
+  }
+
+  .ob-option {
+    width: 100%;
+    min-height: 50px;
+    font-size: 13px;
+    padding: 12px 12px;
+    border-radius: 10px;
+  }
+
+  .ob-progress {
+    gap: 8px;
+  }
+
+  .ob-pip {
+    width: 100%;
+    max-width: 64px;
+    height: 6px;
+    border-radius: 999px;
+  }
+
+  .btn.btn-primary,
+  .btn.btn-lg,
+  .btn-lg {
+    width: auto;
+    min-width: 152px;
+  }
+
+  .ob-back {
+    font-size: 12px;
+  }
+
+  p[style*="font-size:11px"] {
+    font-size: 10px !important;
+    line-height: 1.45 !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .hero-title {
+    font-size: 24px;
+  }
+
+  .ob-form-title {
+    font-size: 20px;
+  }
+
+  .step-title {
+    font-size: 17px;
+  }
+
+  .btn.btn-primary,
+  .btn.btn-lg,
+  .btn-lg {
+    min-width: 138px;
+    font-size: 13px;
+  }
+}
   </style>
 </head>
 <body>
