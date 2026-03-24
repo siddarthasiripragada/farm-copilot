@@ -2,6 +2,10 @@
 
 AI-powered decision support platform for Canadian farmers, producers, and agribusinesses.
 
+## Live Demo
+
+Website: https://siddarthasiripragada.github.io/siddarthasiripragada.github.io-farm-copilot/
+
 ## Project Structure
 
 ```
