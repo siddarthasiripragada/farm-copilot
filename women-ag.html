@@ -36,6 +36,12 @@
     .ma-name{font-size:13.5px;font-weight:600;color:var(--text);}
     .ma-sub{font-size:11.5px;color:var(--muted);margin-top:2px;}
     .ma-match{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10px;padding:3px 9px;border-radius:8px;background:rgba(142,68,173,.1);color:#7d3c98;white-space:nowrap;}
+
+    .report-nav{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 18px;}
+    .report-chip{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid var(--border);border-radius:999px;background:#fff;color:var(--text);text-decoration:none;font-size:12px;font-weight:600;transition:all .15s;}
+    .report-chip:hover{border-color:var(--sage);color:var(--forest);transform:translateY(-1px);}
+    .report-chip.is-active{background:var(--forest);border-color:var(--forest);color:var(--wheat);}
+    .report-chip.is-active:hover{color:var(--wheat);}
   </style>
 </head>
 <body>
@@ -46,12 +52,21 @@
       <div class="page-header-row">
         <div><div class="page-title">👩‍🌾 Women in Agriculture Hub</div><div class="page-subtitle" id="wa-sub">Leadership programs, mentorship, grants, and community for women in Canadian farming</div></div>
         <div style="display:flex;gap:8px;align-items:center;">
-          <a href="dashboard.html" class="btn btn-ghost btn-sm" style="text-decoration:none;">← Dashboard</a>
-          <a href="training.html" class="btn btn-secondary btn-sm">Training Academy →</a>
+          <a href="dashboard.html" data-report-link="dashboard" class="btn btn-ghost btn-sm" style="text-decoration:none;">← Dashboard</a>
+          <a href="training.html" data-report-link="training" class="btn btn-secondary btn-sm">Training Academy →</a>
         </div>
       </div>
     </div>
     <div class="page-body">
+
+      <div class="report-nav anim-fade-up" id="report-nav">
+        <a href="dashboard.html" data-report-link="dashboard" class="report-chip">🏠 Dashboard</a>
+        <a href="training.html" data-report-link="training" class="report-chip">🎓 Training</a>
+        <a href="funding.html" data-report-link="funding" class="report-chip">💰 Funding</a>
+        <a href="copilot.html" data-report-link="copilot" class="report-chip">🤖 AI Copilot</a>
+        <a href="women-ag.html" data-report-link="women-ag" class="report-chip">👩‍🌾 Women Ag</a>
+      </div>
+
 
       <!-- Hero -->
       <div class="wa-hero anim-fade-up">
@@ -140,7 +155,7 @@
           <div class="card">
             <div class="card-header"><span class="card-title">🤝 Mentor Matches — Women in Agriculture</span></div>
             <div class="card-body" style="padding:8px 16px;" id="mentor-list2"></div>
-            <div class="card-footer"><a href="copilot.html" class="btn btn-secondary btn-sm">Ask AI Copilot to connect me →</a></div>
+            <div class="card-footer"><a href="copilot.html" data-report-link="copilot" class="btn btn-secondary btn-sm">Ask AI Copilot to connect me →</a></div>
           </div>
           <div class="card">
             <div class="card-header"><span class="card-title">📋 How Mentorship Works</span></div>
@@ -160,8 +175,8 @@
           <div class="card-header"><span class="card-title">💰 Grants &amp; Funding for Women Farmers — 2026</span></div>
           <div class="card-body" id="grants-list" style="padding:8px 20px;"></div>
           <div class="card-footer">
-            <a href="funding.html" class="btn btn-secondary btn-sm">Full Funding Navigator →</a>
-            <a href="copilot.html" class="btn btn-ghost btn-sm" style="margin-left:8px;">Ask AI about eligibility →</a>
+            <a href="funding.html" data-report-link="funding" class="btn btn-secondary btn-sm">Full Funding Navigator →</a>
+            <a href="copilot.html" data-report-link="copilot" class="btn btn-ghost btn-sm" style="margin-left:8px;">Ask AI about eligibility →</a>
           </div>
         </div>
       </div>
@@ -200,41 +215,199 @@
 <script src="js/data.js"></script>
 <script src="js/nav-patch.js"></script>
 <script>
-  const profile = Profile.requireOrRedirect();
-  if (!profile) throw new Error('no profile');
-  document.getElementById('sidebar-mount').innerHTML = renderSidebar('women-ag');
-  document.getElementById('wa-sub').textContent = `Women in agriculture resources · ${profile.province}`;
+  const REPORT_ROUTES = {
+    dashboard: 'dashboard.html',
+    training: 'training.html',
+    funding: 'funding.html',
+    copilot: 'copilot.html',
+    'women-ag': 'women-ag.html'
+  };
 
-  function showWaTab(t){['programs','mentor','grants','stories','community'].forEach(id=>{document.getElementById('waview-'+id).style.display=id===t?'':'none';document.getElementById('watab-'+id).classList.toggle('active',id===t);});if(t==='mentor')renderMentors();if(t==='grants')renderGrants();if(t==='stories')renderStories();}
+  function getStoredProfile(){
+    try{
+      return JSON.parse(localStorage.getItem('farmCopilotProfile') || sessionStorage.getItem('farmCopilotProfile') || 'null');
+    }catch(_error){
+      return null;
+    }
+  }
 
-  const MENTORS2=[
+  const profile = window.Profile && typeof Profile.requireOrRedirect === 'function'
+    ? Profile.requireOrRedirect()
+    : getStoredProfile();
+
+  if (profile && typeof renderSidebar === 'function') {
+    document.getElementById('sidebar-mount').innerHTML = renderSidebar('women-ag');
+  }
+
+  document.getElementById('wa-sub').textContent = profile?.province
+    ? `Women in agriculture resources · ${profile.province}`
+    : 'Leadership programs, mentorship, grants, and community for women in Canadian farming';
+
+  function currentPageName(){
+    const path = window.location.pathname.split('/').pop() || 'women-ag.html';
+    return path.toLowerCase();
+  }
+
+  function currentPageKey(){
+    const page = currentPageName();
+    const entry = Object.entries(REPORT_ROUTES).find(([, value]) => value.toLowerCase() === page);
+    return entry ? entry[0] : 'women-ag';
+  }
+
+  function buildReportUrl(reportKey, extraParams = {}){
+    const target = REPORT_ROUTES[reportKey] || reportKey;
+    const nextUrl = new URL(target, window.location.href);
+    const currentUrl = new URL(window.location.href);
+
+    currentUrl.searchParams.forEach((value, key) => {
+      if (!nextUrl.searchParams.has(key) && key !== 'tab') {
+        nextUrl.searchParams.set(key, value);
+      }
+    });
+
+    Object.entries(extraParams).forEach(([key, value]) => {
+      if (value === null || value === undefined || value === '') {
+        nextUrl.searchParams.delete(key);
+      } else {
+        nextUrl.searchParams.set(key, value);
+      }
+    });
+
+    return `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`;
+  }
+
+  function syncReportLinks(){
+    document.querySelectorAll('a[data-report-link]').forEach((anchor) => {
+      const reportKey = anchor.dataset.reportLink;
+      anchor.href = buildReportUrl(reportKey);
+    });
+  }
+
+  function markActiveReportLinks(){
+    const activeKey = currentPageKey();
+    document.querySelectorAll('[data-report-link]').forEach((node) => {
+      node.classList.toggle('is-active', node.dataset.reportLink === activeKey);
+      if (node.dataset.reportLink === activeKey) {
+        node.setAttribute('aria-current', 'page');
+      } else {
+        node.removeAttribute('aria-current');
+      }
+    });
+  }
+
+  function upgradeExternalLinks(){
+    document.querySelectorAll('a[href^="http"]').forEach((anchor) => {
+      anchor.setAttribute('target', '_blank');
+      anchor.setAttribute('rel', 'noopener noreferrer');
+    });
+  }
+
+  function setTabState(tabName, replaceHistory = false){
+    ['programs','mentor','grants','stories','community'].forEach((id) => {
+      const view = document.getElementById(`waview-${id}`);
+      const tab = document.getElementById(`watab-${id}`);
+      if (view) {
+        view.style.display = id === tabName ? '' : 'none';
+      }
+      if (tab) {
+        tab.classList.toggle('active', id === tabName);
+      }
+    });
+
+    if (tabName === 'mentor') renderMentors();
+    if (tabName === 'grants') renderGrants();
+    if (tabName === 'stories') renderStories();
+
+    try {
+      sessionStorage.setItem('womenAgActiveTab', tabName);
+    } catch (_error) {}
+
+    const nextUrl = new URL(window.location.href);
+    nextUrl.searchParams.set('tab', tabName);
+
+    if (replaceHistory) {
+      window.history.replaceState({}, '', `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`);
+    } else {
+      window.history.replaceState({}, '', `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`);
+    }
+  }
+
+  function showWaTab(tabName){
+    setTabState(tabName, false);
+  }
+
+  const MENTORS2 = [
     {icon:'👩‍🌾',name:'Sarah K., Ontario',sub:'30-yr grain & oilseeds · Business succession specialist',match:'96% match'},
     {icon:'👩‍🌾',name:'Marie G., Quebec',sub:'Dairy farmer & CAHRC Women in Ag facilitator',match:'89% match'},
     {icon:'👩‍🌾',name:'Priya S., BC',sub:'Greenhouse vegetables · New farmer land access expert',match:'84% match'},
   ];
-  function renderMentors(){document.getElementById('mentor-list2').innerHTML=MENTORS2.map(m=>`
-    <div class="mentor-card2"><div class="ma-avatar">${m.icon}</div><div><div class="ma-name">${m.name}</div><div class="ma-sub">${m.sub}</div></div><div class="ma-match">${m.match}</div><button class="btn btn-ghost btn-sm" style="margin-left:8px;flex-shrink:0;" onclick="alert('Mentorship connection coming soon. Use AI Copilot to reach out.')">Connect →</button></div>`).join('');}
 
-  const GRANTS2=[
+  function renderMentors(){
+    document.getElementById('mentor-list2').innerHTML = MENTORS2.map((mentor) => `
+      <div class="mentor-card2">
+        <div class="ma-avatar">${mentor.icon}</div>
+        <div>
+          <div class="ma-name">${mentor.name}</div>
+          <div class="ma-sub">${mentor.sub}</div>
+        </div>
+        <div class="ma-match">${mentor.match}</div>
+        <button class="btn btn-ghost btn-sm" style="margin-left:8px;flex-shrink:0;" onclick="alert('Mentorship connection coming soon. Use AI Copilot to reach out.')">Connect →</button>
+      </div>
+    `).join('');
+  }
+
+  const GRANTS2 = [
     {title:'FCC AgriSpirit Fund',amt:'Up to $15,000',desc:'Farm Credit Canada\'s community grant supporting projects led by or benefiting women in Canadian agricultural communities.'},
     {title:'CAHRC Women in Ag Training Grant',amt:'Full tuition coverage',desc:'Covers tuition for CAHRC\'s Women in Agriculture Leadership program for qualifying applicants.'},
     {title:'Canadian Agricultural Partnership — Women\'s Business Stream',amt:'Up to $75K cost-share',desc:'Provincial CAP streams with specific women-in-agriculture criteria. Contact your provincial ag ministry.'},
     {title:'BDC Women Entrepreneur Loan',amt:'Up to $100K',desc:'Business Development Bank of Canada offers preferred terms for women-owned farm businesses including lower down payment requirements.'},
     {title:'CWF — Canadian Women\'s Foundation Grant',amt:'Varies',desc:'Community-level grants supporting women\'s economic development including agriculture and food sector projects.'},
   ];
-  function renderGrants(){document.getElementById('grants-list').innerHTML=GRANTS2.map(g=>`<div class="grant-card"><div class="gc-title">${g.title}</div><div class="gc-amt">${g.amt}</div><div class="gc-desc">${g.desc}</div><a href="copilot.html" style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--amber);margin-top:6px;display:inline-block;">Ask AI about eligibility →</a></div>`).join('');}
 
-  const STORIES=[
+  function renderGrants(){
+    document.getElementById('grants-list').innerHTML = GRANTS2.map((grant) => `
+      <div class="grant-card">
+        <div class="gc-title">${grant.title}</div>
+        <div class="gc-amt">${grant.amt}</div>
+        <div class="gc-desc">${grant.desc}</div>
+        <a href="copilot.html" data-report-link="copilot" style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--amber);margin-top:6px;display:inline-block;">Ask AI about eligibility →</a>
+      </div>
+    `).join('');
+    syncReportLinks();
+    markActiveReportLinks();
+  }
+
+  const STORIES = [
     {icon:'👩‍🌾',name:'Danielle Brossard',farm:'Brossard Dairy — Quebec',quote:'"Taking the CAHRC leadership program changed how I approach decisions on our farm. I had the instincts — the program gave me the language and confidence to act on them."',tags:['Dairy','Quebec','CAHRC Graduate','Succession']},
     {icon:'👩‍🌾',name:'Amara Singh',farm:'Prairie Pulse Growers — Saskatchewan',quote:'"As a first-generation farmer and newcomer, I didn\'t know where to start. The Women Ag Hub connected me with a mentor who had done the exact same thing 15 years ago. She\'s still my first call."',tags:['Grain','Saskatchewan','Newcomer','Mentorship']},
     {icon:'👩‍🌾',name:'Rebecca Townsend',farm:'Townsend Orchards — BC',quote:'"I was managing everything — orchard, family, books — and burning out. The FCC women\'s entrepreneurship program helped me separate my role as owner vs. operator. Hired a farm manager. Best decision I ever made."',tags:['Horticulture','British Columbia','FCC Program','Leadership']},
   ];
-  function renderStories(){document.getElementById('stories-list').innerHTML=STORIES.map(s=>`
-    <div class="story-card">
-      <div class="sc-header"><div class="sc-avatar">${s.icon}</div><div><div class="sc-name">${s.name}</div><div class="sc-sub">${s.farm}</div></div></div>
-      <div class="sc-quote">${s.quote}</div>
-      <div class="sc-tags">${s.tags.map(t=>`<span class="sc-tag">${t}</span>`).join('')}</div>
-    </div>`).join('');}
+
+  function renderStories(){
+    document.getElementById('stories-list').innerHTML = STORIES.map((story) => `
+      <div class="story-card">
+        <div class="sc-header">
+          <div class="sc-avatar">${story.icon}</div>
+          <div>
+            <div class="sc-name">${story.name}</div>
+            <div class="sc-sub">${story.farm}</div>
+          </div>
+        </div>
+        <div class="sc-quote">${story.quote}</div>
+        <div class="sc-tags">${story.tags.map((tag) => `<span class="sc-tag">${tag}</span>`).join('')}</div>
+      </div>
+    `).join('');
+  }
+
+  syncReportLinks();
+  markActiveReportLinks();
+  upgradeExternalLinks();
+
+  const initialTab = new URL(window.location.href).searchParams.get('tab')
+    || sessionStorage.getItem('womenAgActiveTab')
+    || 'programs';
+
+  setTabState(initialTab, true);
 </script>
 </body>
 </html>

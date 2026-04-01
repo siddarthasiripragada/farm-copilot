@@ -1,368 +1,665 @@
 /**
- * nav-patch.js  v2 — Canadian Farm Copilot
- * ─────────────────────────────────────────
- * Loaded AFTER js/data.js on every page.
- * Does three things without touching data.js:
- *
- *  1. Extends every sidebar with "Community & Tools" nav items
- *  2. Injects a subtle auth widget (Sign In / user avatar) into every page
- *  3. Exposes window.CP_PROVINCE_COORDS so the weather page can do real live fetches
+ * nav-patch.js — Canadian Farm Copilot
+ * Renders: desktop sidebar (collapsible groups) + mobile bottom nav + More drawer
+ * Drop-in replacement — keep loading after data.js
  */
 (function () {
-  'use strict';
-
-  /* ═══════════════════════════════════════════════════════════
-     1.  PROVINCE COORDINATES
-         Accurate city-centre lat/lon + IANA timezone for all
-         10 Canadian provinces. Used by the weather page.
-  ═══════════════════════════════════════════════════════════ */
-  window.CP_PROVINCE_COORDS = {
-    'Alberta':                    { lat: 51.0447, lon: -114.0719, city: 'Calgary',       tz: 'America/Edmonton' },
-    'British Columbia':           { lat: 49.2827, lon: -123.1207, city: 'Vancouver',     tz: 'America/Vancouver' },
-    'Manitoba':                   { lat: 49.8951, lon: -97.1384,  city: 'Winnipeg',      tz: 'America/Winnipeg' },
-    'New Brunswick':              { lat: 46.4928, lon: -66.1516,  city: 'Fredericton',   tz: 'America/Moncton' },
-    'Newfoundland & Labrador':    { lat: 47.5615, lon: -52.7126,  city: 'St. John\'s',  tz: 'America/St_Johns' },
-    'Nova Scotia':                { lat: 44.6488, lon: -63.5752,  city: 'Halifax',       tz: 'America/Halifax' },
-    'Ontario':                    { lat: 43.7001, lon: -79.4163,  city: 'Toronto',       tz: 'America/Toronto' },
-    'Prince Edward Island':       { lat: 46.2382, lon: -63.1311,  city: 'Charlottetown', tz: 'America/Halifax' },
-    'Quebec':                     { lat: 45.5017, lon: -73.5673,  city: 'Montreal',      tz: 'America/Toronto' },
-    'Saskatchewan':               { lat: 50.4452, lon: -104.6189, city: 'Regina',        tz: 'America/Regina' },
+  /* ═══════════════════════════════════════════════════════
+     1. TOOL CATALOGUE  (all 18 tools + support pages)
+  ═══════════════════════════════════════════════════════ */
+  const TOOLS = {
+    dashboard:      { label: 'Dashboard',       icon: '🏠', href: 'dashboard.html' },
+    copilot:        { label: 'AI Copilot',       icon: '✦',  href: 'copilot.html'  },
+    weather:        { label: 'Weather',          icon: '🌤', href: 'weather.html'  },
+    funding:        { label: 'Funding',          icon: '💰', href: 'funding.html'  },
+    // Intelligence
+    'risk-monitor': { label: 'Risk Monitor',    icon: '🛡', href: 'risk-monitor.html'  },
+    'policy-feed':  { label: 'Policy Feed',     icon: '📰', href: 'policy-feed.html'   },
+    events:         { label: 'Events',           icon: '📅', href: 'events.html'        },
+    'peer-benchmark':{ label: 'Benchmarks',     icon: '📊', href: 'peer-benchmark.html'},
+    'grain-tracker':{ label: 'Grain Tracker',   icon: '📈', href: 'grain-tracker.html' },
+    // Farm Tools
+    calculator:     { label: 'ROI Calculator',  icon: '🧮', href: 'calculator.html'    },
+    planner:        { label: 'Season Planner',  icon: '📋', href: 'planner.html'       },
+    'soil-health':  { label: 'Soil Health',     icon: '🌱', href: 'soil-health.html'   },
+    'equipment-share':{ label: 'Equipment',     icon: '🚜', href: 'equipment-share.html'},
+    'farm-safety':  { label: 'Farm Safety',     icon: '⛑', href: 'farm-safety.html'   },
+    // Business
+    'crop-insurance':{ label: 'Crop Insurance', icon: '🛡', href: 'crop-insurance.html'},
+    compliance:     { label: 'Compliance',      icon: '✅', href: 'compliance.html'    },
+    'gov-portal':   { label: 'Gov Portal',      icon: '🏛', href: 'gov-portal.html'   },
+    'local-markets':{ label: 'Local Markets',   icon: '🏪', href: 'local-markets.html' },
+    'land-matcher': { label: 'Land Matcher',    icon: '🗺', href: 'land-matcher.html'  },
+    labour:         { label: 'Labour',           icon: '👷', href: 'labour.html'        },
+    climate:        { label: 'Climate',          icon: '🌿', href: 'climate.html'       },
+    agritech:       { label: 'AgriTech',         icon: '⚙️', href: 'agritech.html'      },
+    // Community
+    'women-ag':     { label: 'Women in Ag',     icon: '👩‍🌾', href: 'women-ag.html'   },
+    training:       { label: 'Training',         icon: '🎓', href: 'training.html'      },
+    newcomers:      { label: 'Newcomers',        icon: '🌍', href: 'newcomers.html'     },
+    wellness:       { label: 'Wellness',         icon: '💚', href: 'wellness.html'      },
+    support:        { label: 'Support',          icon: '🆘', href: 'support.html'       },
   };
 
-  /* ═══════════════════════════════════════════════════════════
-     2.  AUTH STATE HELPERS
-  ═══════════════════════════════════════════════════════════ */
-  function getAuthUser () {
-    try { return JSON.parse(localStorage.getItem('authUser') || 'null'); } catch (e) { return null; }
-  }
-  function signOut () {
-    localStorage.removeItem('authUser');
-    // Redirect to landing if currently on an auth-protected page
-    const cur = window.location.pathname.split('/').pop();
-    const publicPages = ['landing.html', 'index.html', 'pricing.html', 'auth.html', ''];
-    if (!publicPages.includes(cur)) window.location.href = 'landing.html';
-    else renderAuthWidget();
-  }
-
-  /* ═══════════════════════════════════════════════════════════
-     3.  AUTH WIDGET
-         A slim, non-intrusive pill that appears in:
-           a) The top-right of ln-nav (landing / pricing / auth)
-           b) The bottom of the app sidebar (dashboard pages)
-           c) Any page that has neither (fallback floating pill)
-  ═══════════════════════════════════════════════════════════ */
-  const AUTH_CSS = `
-    /* ── Auth pill — universal ── */
-    .cp-auth-pill {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 7px 14px; border-radius: 20px; cursor: pointer;
-      font-family: 'Sora', sans-serif; font-size: 12.5px;
-      text-decoration: none; transition: all .15s; white-space: nowrap;
-      border: 1.5px solid transparent;
-    }
-    /* On dark nav (landing / pricing nav) */
-    .cp-auth-pill.dark {
-      background: rgba(255,255,255,.09);
-      border-color: rgba(255,255,255,.14);
-      color: rgba(244,236,218,.85);
-    }
-    .cp-auth-pill.dark:hover {
-      background: rgba(255,255,255,.16);
-      border-color: rgba(255,255,255,.26);
-      color: #fff;
-    }
-    /* Signed-in state on dark nav */
-    .cp-auth-pill.dark.signed-in {
-      background: rgba(212,154,58,.18);
-      border-color: rgba(212,154,58,.35);
-      color: #D49A3A;
-    }
-    /* On light bg (index onboarding) */
-    .cp-auth-pill.light {
-      background: rgba(27,53,40,.07);
-      border-color: rgba(27,53,40,.14);
-      color: #1B3528;
-    }
-    .cp-auth-pill.light:hover {
-      background: rgba(27,53,40,.14);
-    }
-    .cp-auth-pill.light.signed-in {
-      background: rgba(27,53,40,.1);
-      border-color: #1B3528;
-      color: #1B3528;
-    }
-    .cp-auth-avatar {
-      width: 22px; height: 22px; border-radius: 50%;
-      background: #1B3528; color: #F4ECDA;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 11px; font-weight: 700; flex-shrink: 0;
-    }
-    /* Sidebar auth block */
-    .cp-sidebar-auth {
-      padding: 10px 12px 14px;
-      border-top: 1px solid rgba(255,255,255,.07);
-      margin-top: 4px;
-    }
-    .cp-sidebar-auth-inner {
-      display: flex; align-items: center; gap: 10px;
-      padding: 9px 10px; border-radius: 9px;
-      background: rgba(255,255,255,.05);
-      cursor: pointer; transition: background .14s;
-      text-decoration: none;
-    }
-    .cp-sidebar-auth-inner:hover { background: rgba(255,255,255,.09); }
-    .cp-sidebar-auth-avatar {
-      width: 30px; height: 30px; border-radius: 50%;
-      background: rgba(212,154,58,.22); color: #D49A3A;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 13px; font-weight: 700; flex-shrink: 0;
-    }
-    .cp-sidebar-auth-name  { font-family:'Sora',sans-serif; font-size:12.5px; color:rgba(244,236,218,.85); }
-    .cp-sidebar-auth-sub   { font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:rgba(244,236,218,.35); margin-top:2px; }
-    .cp-sidebar-auth-btn   {
-      margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:9px;
-      letter-spacing:.5px; padding:3px 8px; border-radius:5px;
-      background:rgba(192,57,43,.18); color:#ff9999; cursor:pointer;
-      border:none; transition:background .14s; flex-shrink:0;
-    }
-    .cp-sidebar-auth-btn:hover { background:rgba(192,57,43,.32); }
-    .cp-sidebar-auth-signin {
-      display:flex; align-items:center; justify-content:center;
-      gap:7px; padding:9px; border-radius:9px;
-      background:rgba(212,154,58,.15); border:1.5px solid rgba(212,154,58,.28);
-      color:#D49A3A; text-decoration:none; font-family:'Sora',sans-serif;
-      font-size:12.5px; font-weight:600; transition:background .14s;
-    }
-    .cp-sidebar-auth-signin:hover { background:rgba(212,154,58,.25); }
-
-    /* ── Floating pill (fallback for pages without nav/sidebar) ── */
-    .cp-auth-float {
-      position: fixed; top: 14px; right: 16px; z-index: 9999;
-    }
-  `;
-
-  function injectAuthStyles () {
-    if (document.getElementById('cp-auth-styles')) return;
-    const s = document.createElement('style');
-    s.id = 'cp-auth-styles';
-    s.textContent = AUTH_CSS;
-    document.head.appendChild(s);
-  }
-
-  function initials (user) {
-    if (!user) return '?';
-    if (user.firstName) return (user.firstName[0] + (user.lastName ? user.lastName[0] : '')).toUpperCase();
-    return user.email ? user.email[0].toUpperCase() : '?';
-  }
-  function displayName (user) {
-    if (!user) return '';
-    if (user.firstName) return user.firstName + (user.lastName ? ' ' + user.lastName : '');
-    return user.email || 'My Account';
-  }
-
-  /* ── a) Patch ln-nav (landing / pricing / auth pages) ── */
-  function patchLnNav () {
-    const nav = document.querySelector('.ln-nav-links');
-    if (!nav || nav.querySelector('.cp-auth-pill')) return;
-
-    const user    = getAuthUser();
-    const pill    = document.createElement('span');
-    pill.className = 'cp-auth-pill dark' + (user ? ' signed-in' : '');
-
-    if (user) {
-      pill.innerHTML = `<span class="cp-auth-avatar">${initials(user)}</span>${displayName(user).split(' ')[0]}`;
-      pill.title     = 'Signed in as ' + displayName(user);
-      // clicking opens a small dropdown-like confirm
-      pill.onclick   = () => { if (confirm('Sign out of Farm Copilot?')) signOut(); };
-    } else {
-      pill.innerHTML = `🌾 Sign In`;
-      pill.onclick   = () => { window.location.href = 'auth.html'; };
-    }
-    nav.appendChild(pill);
-  }
-
-  /* ── b) Patch app sidebar (dashboard + all inner pages) ── */
-  function buildSidebarAuth () {
-    const user = getAuthUser();
-    if (user) {
-      return `<div class="cp-sidebar-auth">
-        <div class="cp-sidebar-auth-inner">
-          <div class="cp-sidebar-auth-avatar">${initials(user)}</div>
-          <div>
-            <div class="cp-sidebar-auth-name">${displayName(user)}</div>
-            <div class="cp-sidebar-auth-sub">${user.province || 'My Farm'}</div>
-          </div>
-          <button class="cp-sidebar-auth-btn" onclick="if(confirm('Sign out?')){localStorage.removeItem('authUser');window.location.reload();}">Out</button>
-        </div>
-      </div>`;
-    }
-    return `<div class="cp-sidebar-auth">
-      <a href="auth.html" class="cp-sidebar-auth-signin">🌾 Sign In / Sign Up</a>
-    </div>`;
-  }
-
-  /* ── c) Fallback floating pill for index/onboarding (light bg) ── */
-  function injectFloatingPill () {
-    if (document.querySelector('.cp-auth-float')) return;
-    const user  = getAuthUser();
-    const wrap  = document.createElement('div');
-    wrap.className = 'cp-auth-float';
-    const pill  = document.createElement('span');
-    pill.className = 'cp-auth-pill light' + (user ? ' signed-in' : '');
-    if (user) {
-      pill.innerHTML = `<span class="cp-auth-avatar" style="background:#1B3528;color:#F4ECDA;">${initials(user)}</span>${displayName(user).split(' ')[0]}`;
-      pill.onclick   = () => { if (confirm('Sign out of Farm Copilot?')) signOut(); };
-    } else {
-      pill.innerHTML = '🌾 Sign In';
-      pill.onclick   = () => { window.location.href = 'auth.html'; };
-    }
-    wrap.appendChild(pill);
-    document.body.appendChild(wrap);
-  }
-
-  function renderAuthWidget () {
-    injectAuthStyles();
-    const page = window.location.pathname.split('/').pop().replace('.html','');
-
-    // Landing-style pages — patch the .ln-nav-links
-    if (document.querySelector('.ln-nav-links')) {
-      patchLnNav();
-      return;
-    }
-    // App-shell pages — auth goes in sidebar (handled via buildSection below)
-    if (document.getElementById('sidebar-mount')) return; // sidebar patch handles it
-    // index.html / anything else
-    injectFloatingPill();
-  }
-
-  /* ═══════════════════════════════════════════════════════════
-     4.  COMMUNITY SIDEBAR NAV
-  ═══════════════════════════════════════════════════════════ */
-  const COMMUNITY_ITEMS = [
-    /* ── Original 8 ── */
-    { key: 'wellness',        href: 'wellness.html',        icon: '🧠', label: 'Wellness' },
-    { key: 'labour',          href: 'labour.html',          icon: '👷', label: 'Labour Exchange' },
-    { key: 'land-matcher',    href: 'land-matcher.html',    icon: '🤝', label: 'Land Matcher' },
-    { key: 'grain-tracker',   href: 'grain-tracker.html',   icon: '📈', label: 'Grain Basis' },
-    { key: 'crop-insurance',  href: 'crop-insurance.html',  icon: '🛡', label: 'Crop Insurance' },
-    { key: 'equipment-share', href: 'equipment-share.html', icon: '🚜', label: 'Equipment Share' },
-    { key: 'peer-benchmark',  href: 'peer-benchmark.html',  icon: '📊', label: 'Peer Benchmark' },
-    { key: 'compliance',      href: 'compliance.html',      icon: '📋', label: 'Compliance' },
-    /* ── Batch 2 — Training & Gov ── */
-    { key: 'training',        href: 'training.html',        icon: '🎓', label: 'Training Academy' },
-    { key: 'gov-portal',      href: 'gov-portal.html',      icon: '🏛️', label: 'Gov Portals' },
-    { key: 'farm-safety',     href: 'farm-safety.html',     icon: '🛡', label: 'Farm Safety' },
-    { key: 'agritech',        href: 'agritech.html',        icon: '🤖', label: 'Agritech Guide' },
-    { key: 'policy-feed',     href: 'policy-feed.html',     icon: '📡', label: 'Policy Feed' },
-    /* ── Batch 3 — Community & Markets ── */
-    { key: 'local-markets',   href: 'local-markets.html',   icon: '🛒', label: 'Local Markets' },
-    { key: 'newcomers',       href: 'newcomers.html',       icon: '🌍', label: 'Newcomer Hub' },
-    { key: 'soil-health',     href: 'soil-health.html',     icon: '🌱', label: 'Soil Health' },
-    { key: 'events',          href: 'events.html',          icon: '📅', label: 'Event Calendar' },
-    { key: 'climate',         href: 'climate.html',         icon: '🌡', label: 'Climate Planner' },
-    { key: 'women-ag',        href: 'women-ag.html',        icon: '👩‍🌾', label: 'Women in Ag' },
+  const SIDEBAR_GROUPS = [
+    {
+      id: 'core', label: 'Core', icon: '◈',
+      keys: ['dashboard', 'copilot', 'weather', 'funding'],
+    },
+    {
+      id: 'intel', label: 'Intelligence', icon: '📡',
+      keys: ['risk-monitor', 'policy-feed', 'events', 'peer-benchmark', 'grain-tracker'],
+    },
+    {
+      id: 'tools', label: 'Farm Tools', icon: '🚜',
+      keys: ['calculator', 'planner', 'soil-health', 'equipment-share', 'farm-safety'],
+    },
+    {
+      id: 'biz', label: 'Business', icon: '💼',
+      keys: ['crop-insurance', 'compliance', 'gov-portal', 'local-markets', 'land-matcher', 'labour', 'climate', 'agritech'],
+    },
+    {
+      id: 'community', label: 'Community', icon: '🌱',
+      keys: ['women-ag', 'training', 'newcomers', 'wellness', 'support'],
+    },
   ];
 
-  const NAV_CSS = `
-    .cp-sidebar-section { padding: 10px 12px 4px; border-top: 1px solid rgba(255,255,255,.07); }
-    .cp-sidebar-section-label {
-      font-family: 'IBM Plex Mono', monospace; font-size: 8.5px;
-      letter-spacing: 1.8px; text-transform: uppercase;
-      color: rgba(244,236,218,.28); padding: 4px 4px 8px; display: block;
+  /* ═══════════════════════════════════════════════════════
+     2. INJECT STYLES (sidebar + mobile nav)
+  ═══════════════════════════════════════════════════════ */
+  const STYLE = `
+    /* ── App Shell ──────────────────────────────────── */
+    .app-shell {
+      display: flex;
+      min-height: 100vh;
+      background: var(--cream, #FAF8F2);
     }
-    .cp-nav-item {
-      display: flex; align-items: center; gap: 8px; padding: 8px 10px;
-      border-radius: 7px; text-decoration: none;
-      font-family: 'Sora', sans-serif; font-size: 12.5px;
-      color: rgba(244,236,218,.6); transition: background .13s, color .13s;
-      margin-bottom: 2px; line-height: 1;
+
+    /* ── DESKTOP SIDEBAR ────────────────────────────── */
+    .sidebar {
+      width: 230px;
+      flex-shrink: 0;
+      background: var(--forest, #1B3528);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255,255,255,.1) transparent;
+      z-index: 100;
     }
-    .cp-nav-item:hover  { background: rgba(255,255,255,.08); color: rgba(244,236,218,.92); }
-    .cp-nav-item.active { background: rgba(212,154,58,.18); color: #D49A3A; font-weight: 600; }
-    .cp-nav-icon   { font-size: 14px; width: 18px; text-align: center; flex-shrink: 0; }
-    .cp-new-badge  {
-      margin-left: auto; font-family: 'IBM Plex Mono', monospace;
-      font-size: 7.5px; letter-spacing: .5px; padding: 1px 5px;
-      border-radius: 4px; background: rgba(74,200,120,.18); color: #4ac878;
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 2px; }
+
+    .sb-head {
+      padding: 20px 18px 14px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      flex-shrink: 0;
+    }
+    .sb-logo {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9.5px; letter-spacing: 2.5px; text-transform: uppercase;
+      color: var(--amber-lt, #E8B84B);
+      display: flex; align-items: center; gap: 7px;
+      text-decoration: none; margin-bottom: 14px;
+    }
+    .sb-logo-dot {
+      width: 6px; height: 6px;
+      background: var(--amber-lt, #E8B84B);
+      border-radius: 50%; flex-shrink: 0;
+      animation: sbpulse 2.4s ease-in-out infinite;
+    }
+    @keyframes sbpulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    .sb-profile {
+      display: flex; align-items: center; gap: 9px;
+    }
+    .sb-avatar {
+      width: 32px; height: 32px;
+      background: rgba(255,255,255,.1);
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; flex-shrink: 0;
+    }
+    .sb-profile-info { min-width: 0; }
+    .sb-profile-name {
+      font-family: 'Sora', sans-serif;
+      font-size: 12px; font-weight: 600;
+      color: var(--wheat, #F4ECDA);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .sb-profile-sub {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px; letter-spacing: .5px;
+      color: rgba(244,236,218,.35);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    .sb-search-wrap {
+      padding: 10px 12px 6px;
+    }
+    .sb-search {
+      width: 100%;
+      padding: 7px 10px 7px 30px;
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 7px;
+      font-family: 'Sora', sans-serif;
+      font-size: 12px; color: var(--wheat, #F4ECDA);
+      outline: none; transition: border-color .15s;
+      position: relative;
+    }
+    .sb-search::placeholder { color: rgba(244,236,218,.3); }
+    .sb-search:focus { border-color: rgba(255,255,255,.25); }
+    .sb-search-icon {
+      position: absolute;
+      left: 22px;
+      font-size: 11px;
+      color: rgba(244,236,218,.3);
+      pointer-events: none;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .sb-search-container {
+      position: relative;
+    }
+
+    .sb-nav {
+      flex: 1;
+      padding: 6px 8px;
+      overflow-y: auto;
+    }
+
+    /* Group header */
+    .sb-group { margin-bottom: 2px; }
+    .sb-group-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 7px 10px 5px;
+      cursor: pointer;
+      border-radius: 7px;
+      user-select: none;
+      transition: background .13s;
+    }
+    .sb-group-header:hover { background: rgba(255,255,255,.05); }
+    .sb-group-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 8.5px; letter-spacing: 1.5px; text-transform: uppercase;
+      color: rgba(244,236,218,.3);
+      display: flex; align-items: center; gap: 5px;
+    }
+    .sb-group-chevron {
+      font-size: 8px; color: rgba(244,236,218,.2);
+      transition: transform .2s; flex-shrink: 0;
+    }
+    .sb-group.collapsed .sb-group-chevron { transform: rotate(-90deg); }
+    .sb-group-items { overflow: hidden; }
+    .sb-group.collapsed .sb-group-items { display: none; }
+
+    /* Nav item */
+    .sb-item {
+      display: flex; align-items: center; gap: 9px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      text-decoration: none;
+      color: rgba(244,236,218,.62);
+      font-family: 'Sora', sans-serif;
+      font-size: 12.5px;
+      transition: all .13s;
+      margin-bottom: 1px;
+      white-space: nowrap;
+    }
+    .sb-item:hover { background: rgba(255,255,255,.07); color: var(--wheat, #F4ECDA); }
+    .sb-item.active {
+      background: rgba(255,255,255,.1);
+      color: var(--wheat, #F4ECDA);
+      font-weight: 600;
+    }
+    .sb-item-icon {
+      width: 22px; height: 22px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; flex-shrink: 0;
+      border-radius: 5px;
+    }
+    .sb-item.active .sb-item-icon {
+      background: rgba(232,184,75,.15);
+    }
+    .sb-item-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+
+    /* Sidebar footer */
+    .sb-foot {
+      padding: 10px 8px 14px;
+      border-top: 1px solid rgba(255,255,255,.06);
+      flex-shrink: 0;
+    }
+    .sb-foot-item {
+      display: flex; align-items: center; gap: 9px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      color: rgba(244,236,218,.45);
+      font-family: 'Sora', sans-serif;
+      font-size: 12px;
+      transition: all .13s;
+      text-decoration: none;
+      border: none; background: none; width: 100%;
+    }
+    .sb-foot-item:hover { background: rgba(255,255,255,.07); color: rgba(244,236,218,.8); }
+    .sb-foot-item.danger:hover { background: rgba(192,57,43,.15); color: #ff9999; }
+    .sb-foot-icon { font-size: 14px; width: 22px; text-align: center; }
+
+    /* Main content area */
+    .main-content {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── MOBILE BOTTOM NAV ──────────────────────────── */
+    .mob-nav {
+      display: none;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 62px;
+      background: var(--forest, #1B3528);
+      border-top: 1px solid rgba(255,255,255,.09);
+      z-index: 300;
+      padding: 0 6px;
+      padding-bottom: env(safe-area-inset-bottom, 0);
+      align-items: stretch;
+      justify-content: space-around;
+    }
+    .mob-nav-btn {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 3px;
+      flex: 1; max-width: 72px;
+      padding: 0 4px;
+      background: none; border: none;
+      cursor: pointer; text-decoration: none;
+      color: rgba(244,236,218,.45);
+      transition: color .13s;
+      border-radius: 10px;
+      position: relative;
+    }
+    .mob-nav-btn.active { color: var(--amber-lt, #E8B84B); }
+    .mob-nav-btn:hover:not(.active) { color: rgba(244,236,218,.75); }
+    .mob-nav-icon { font-size: 19px; line-height: 1; }
+    .mob-nav-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px; letter-spacing: .5px;
+      white-space: nowrap;
+    }
+    .mob-nav-dot {
+      position: absolute; top: 8px; right: 14px;
+      width: 6px; height: 6px;
+      background: #c0392b; border-radius: 50%;
+      border: 1.5px solid var(--forest, #1B3528);
+    }
+    /* Push page content above mobile nav */
+    .main-content { padding-bottom: 0; }
+
+    /* ── MORE DRAWER ────────────────────────────────── */
+    .more-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(10,24,16,.6);
+      z-index: 290;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+    .more-overlay.open { display: block; animation: moFadeIn .18s ease; }
+    @keyframes moFadeIn { from{opacity:0} to{opacity:1} }
+
+    .more-drawer {
+      position: fixed;
+      bottom: 62px; left: 0; right: 0;
+      max-height: 75vh;
+      background: #162C1F;
+      border-top: 1px solid rgba(255,255,255,.1);
+      border-radius: 18px 18px 0 0;
+      overflow-y: auto;
+      z-index: 295;
+      transform: translateY(100%);
+      transition: transform .25s cubic-bezier(.32,.72,0,1);
+      padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+    .more-drawer.open { transform: translateY(0); }
+
+    .more-drawer-handle {
+      width: 36px; height: 4px;
+      background: rgba(255,255,255,.15);
+      border-radius: 2px;
+      margin: 12px auto 14px;
+    }
+    .more-drawer-section { padding: 0 16px 14px; }
+    .more-drawer-section-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase;
+      color: rgba(244,236,218,.3);
+      padding: 6px 0 8px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      margin-bottom: 10px;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .more-tools-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .more-tool-tile {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 5px;
+      padding: 10px 6px 9px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 10px;
+      text-decoration: none;
+      transition: all .14s;
+      cursor: pointer;
+    }
+    .more-tool-tile:hover { background: rgba(232,184,75,.1); border-color: rgba(232,184,75,.3); }
+    .more-tool-tile.active { background: rgba(232,184,75,.14); border-color: rgba(232,184,75,.4); }
+    .more-tool-icon { font-size: 20px; line-height: 1; }
+    .more-tool-label {
+      font-family: 'Sora', sans-serif;
+      font-size: 10px; text-align: center;
+      color: rgba(244,236,218,.7);
+      line-height: 1.25;
+      letter-spacing: -.1px;
+    }
+    .more-tool-tile.active .more-tool-label { color: var(--amber-lt, #E8B84B); }
+
+    /* ── RESPONSIVE SWITCH ─────────────────────────── */
+    @media (max-width: 768px) {
+      .sidebar { display: none !important; }
+      .mob-nav { display: flex !important; }
+      .main-content { padding-bottom: 66px; }
+      /* Tighten page headers on mobile */
+      .page-header { padding: 14px 16px 12px !important; }
+      .page-header-row { flex-wrap: wrap; gap: 8px; }
+      .page-title { font-size: 18px !important; }
+      .page-body { padding: 14px 14px 20px !important; }
+      .planner-stats,
+      .stats-bar { grid-template-columns: repeat(2,1fr) !important; }
+    }
+    @media (min-width: 769px) {
+      .mob-nav, .more-overlay, .more-drawer { display: none !important; }
     }
   `;
 
-  function injectNavStyles () {
-    if (document.getElementById('cp-nav-styles')) return;
-    const s = document.createElement('style'); s.id = 'cp-nav-styles';
-    s.textContent = NAV_CSS; document.head.appendChild(s);
+  function injectStyles() {
+    if (document.getElementById('fc-nav-styles')) return;
+    const tag = document.createElement('style');
+    tag.id = 'fc-nav-styles';
+    tag.textContent = STYLE;
+    document.head.appendChild(tag);
   }
 
-  function activeKey () {
-    return window.location.pathname.split('/').pop().replace('.html','') || 'dashboard';
-  }
+  /* ═══════════════════════════════════════════════════════
+     3. RENDER SIDEBAR (desktop)
+  ═══════════════════════════════════════════════════════ */
+  window.renderSidebar = function (active) {
+    const profile = (() => {
+      try { return JSON.parse(localStorage.getItem('farmProfile')); } catch { return null; }
+    })();
 
-  function buildCommunitySection (currentKey) {
-    const items = COMMUNITY_ITEMS.map(item => {
-      const active = item.key === currentKey;
-      return `<a href="${item.href}" class="cp-nav-item${active?' active':''}">
-        <span class="cp-nav-icon">${item.icon}</span>${item.label}
-        <span class="cp-new-badge">NEW</span>
+    const name  = profile ? (profile.farmType || 'My Farm')    : 'Farm Copilot';
+    const sub   = profile ? (profile.province  || 'Canada')     : 'Setup required';
+    const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+
+    const groupsHTML = SIDEBAR_GROUPS.map(g => {
+      // Auto-expand the group that contains the active page
+      const hasActive = g.keys.includes(active);
+      return `
+        <div class="sb-group ${hasActive ? '' : 'collapsed'}" data-group="${g.id}">
+          <div class="sb-group-header" onclick="sbToggleGroup('${g.id}')">
+            <span class="sb-group-label">${g.icon}&ensp;${g.label}</span>
+            <span class="sb-group-chevron">▼</span>
+          </div>
+          <div class="sb-group-items">
+            ${g.keys.map(k => {
+              const t = TOOLS[k];
+              if (!t) return '';
+              return `<a href="${t.href}" class="sb-item ${k === active ? 'active' : ''}">
+                <span class="sb-item-icon">${t.icon}</span>
+                <span class="sb-item-label">${t.label}</span>
+              </a>`;
+            }).join('')}
+          </div>
+        </div>`;
+    }).join('');
+
+    return `
+      <aside class="sidebar" role="navigation" aria-label="Main navigation">
+        <div class="sb-head">
+          <a href="landing.html" class="sb-logo">
+            <div class="sb-logo-dot"></div>
+            Farm Copilot
+          </a>
+          <div class="sb-profile">
+            <div class="sb-avatar">🌾</div>
+            <div class="sb-profile-info">
+              <div class="sb-profile-name">${escHtml(name)}</div>
+              <div class="sb-profile-sub">${escHtml(sub)}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sb-search-wrap">
+          <div class="sb-search-container">
+            <span class="sb-search-icon">🔍</span>
+            <input class="sb-search" type="search" placeholder="Search tools…" 
+                   oninput="sbSearch(this.value)" aria-label="Search tools">
+          </div>
+        </div>
+
+        <nav class="sb-nav" id="sb-nav-body">
+          ${groupsHTML}
+        </nav>
+
+        <div class="sb-foot">
+          <a href="pricing.html" class="sb-foot-item">
+            <span class="sb-foot-icon">⭐</span> Upgrade Plan
+          </a>
+          <a href="support.html" class="sb-foot-item">
+            <span class="sb-foot-icon">🆘</span> Help &amp; Support
+          </a>
+          <button class="sb-foot-item danger" onclick="sbLogout()">
+            <span class="sb-foot-icon">↩</span> Sign Out
+          </button>
+        </div>
+      </aside>`;
+  };
+
+  /* ═══════════════════════════════════════════════════════
+     4. SIDEBAR INTERACTIVITY
+  ═══════════════════════════════════════════════════════ */
+  window.sbToggleGroup = function (id) {
+    const el = document.querySelector(`.sb-group[data-group="${id}"]`);
+    if (el) el.classList.toggle('collapsed');
+  };
+
+  window.sbSearch = function (q) {
+    q = q.toLowerCase().trim();
+    document.querySelectorAll('.sb-item').forEach(item => {
+      const label = item.querySelector('.sb-item-label')?.textContent.toLowerCase() || '';
+      item.style.display = (!q || label.includes(q)) ? '' : 'none';
+    });
+    // Show/expand all groups while searching
+    document.querySelectorAll('.sb-group').forEach(g => {
+      g.classList.toggle('collapsed', false);
+    });
+    // Hide group if all its items hidden
+    if (q) {
+      document.querySelectorAll('.sb-group').forEach(g => {
+        const visible = [...g.querySelectorAll('.sb-item')].some(i => i.style.display !== 'none');
+        g.style.display = visible ? '' : 'none';
+      });
+    } else {
+      document.querySelectorAll('.sb-group').forEach(g => { g.style.display = ''; });
+    }
+  };
+
+  window.sbLogout = function () {
+    if (!confirm('Sign out of Farm Copilot?')) return;
+    localStorage.removeItem('authUser');
+    localStorage.removeItem('authSession');
+    window.location.href = 'auth.html';
+  };
+
+  /* ═══════════════════════════════════════════════════════
+     5. MOBILE BOTTOM NAV
+  ═══════════════════════════════════════════════════════ */
+  // Bottom bar: 5 fixed tabs
+  const BOTTOM_TABS = [
+    { key: 'dashboard', icon: '🏠', label: 'Home',    href: 'dashboard.html' },
+    { key: 'copilot',   icon: '✦',  label: 'Copilot', href: 'copilot.html'  },
+    { key: 'funding',   icon: '💰', label: 'Funding', href: 'funding.html'  },
+    { key: 'weather',   icon: '🌤', label: 'Weather', href: 'weather.html'  },
+    { key: '__more',    icon: '⊞',  label: 'More',    href: '#'             },
+  ];
+
+  // Groups shown in "More" drawer
+  const MORE_GROUPS = SIDEBAR_GROUPS.filter(g => g.id !== 'core');
+
+  function initMobileNav(active) {
+    if (document.getElementById('fc-mob-nav')) return;
+
+    // Build bottom bar
+    const nav = document.createElement('nav');
+    nav.id = 'fc-mob-nav';
+    nav.className = 'mob-nav';
+    nav.setAttribute('role', 'navigation');
+    nav.setAttribute('aria-label', 'Mobile navigation');
+
+    nav.innerHTML = BOTTOM_TABS.map(t => {
+      const isMore = t.key === '__more';
+      const isActive = t.key === active;
+      if (isMore) {
+        return `<button class="mob-nav-btn ${isActive ? 'active' : ''}" 
+                        onclick="mobMoreToggle(event)" 
+                        id="mob-more-btn"
+                        aria-label="More tools" aria-expanded="false">
+          <span class="mob-nav-icon">${t.icon}</span>
+          <span class="mob-nav-label">${t.label}</span>
+        </button>`;
+      }
+      return `<a href="${t.href}" class="mob-nav-btn ${isActive ? 'active' : ''}" aria-label="${t.label}">
+        <span class="mob-nav-icon">${t.icon}</span>
+        <span class="mob-nav-label">${t.label}</span>
       </a>`;
     }).join('');
-    return `<div class="cp-sidebar-section">
-      <span class="cp-sidebar-section-label">Community &amp; Tools</span>
-      ${items}
-    </div>
-    ${buildSidebarAuth()}`;
+
+    document.body.appendChild(nav);
+
+    // Build overlay
+    const overlay = document.createElement('div');
+    overlay.id = 'fc-more-overlay';
+    overlay.className = 'more-overlay';
+    overlay.onclick = mobMoreClose;
+    document.body.appendChild(overlay);
+
+    // Build "More" drawer
+    const drawer = document.createElement('div');
+    drawer.id = 'fc-more-drawer';
+    drawer.className = 'more-drawer';
+
+    const drawerContent = MORE_GROUPS.map(g => {
+      const tiles = g.keys.map(k => {
+        const t = TOOLS[k];
+        if (!t) return '';
+        return `<a href="${t.href}" class="more-tool-tile ${k === active ? 'active' : ''}">
+          <span class="more-tool-icon">${t.icon}</span>
+          <span class="more-tool-label">${t.label}</span>
+        </a>`;
+      }).join('');
+      return `
+        <div class="more-drawer-section">
+          <div class="more-drawer-section-label">${g.icon}&ensp;${g.label}</div>
+          <div class="more-tools-grid">${tiles}</div>
+        </div>`;
+    }).join('');
+
+    drawer.innerHTML = `
+      <div class="more-drawer-handle"></div>
+      ${drawerContent}
+      <div style="height:12px;"></div>`;
+
+    document.body.appendChild(drawer);
   }
 
-  function patchRenderSidebar () {
-    if (typeof window.renderSidebar !== 'function') return false;
-    if (window._cpPatched) return true;
-    const original = window.renderSidebar;
-    window.renderSidebar = function (key) {
-      const html    = original.call(this, key);
-      const section = buildCommunitySection(key || activeKey());
-      if (html.includes('</nav>'))   return html.replace(/<\/nav>(?=[^<]*$)/, section + '</nav>');
-      if (html.includes('</aside>')) return html.replace(/<\/aside>(?=[^<]*$)/, section + '</aside>');
-      return html + section;
-    };
-    window._cpPatched = true;
-    return true;
+  window.mobMoreToggle = function (e) {
+    if (e) e.stopPropagation();
+    const overlay = document.getElementById('fc-more-overlay');
+    const drawer  = document.getElementById('fc-more-drawer');
+    const btn     = document.getElementById('mob-more-btn');
+    if (!overlay || !drawer) return;
+    const isOpen = drawer.classList.contains('open');
+    overlay.classList.toggle('open', !isOpen);
+    drawer.classList.toggle('open', !isOpen);
+    if (btn) btn.setAttribute('aria-expanded', String(!isOpen));
+  };
+
+  window.mobMoreClose = function () {
+    const overlay = document.getElementById('fc-more-overlay');
+    const drawer  = document.getElementById('fc-more-drawer');
+    const btn     = document.getElementById('mob-more-btn');
+    if (overlay) overlay.classList.remove('open');
+    if (drawer)  drawer.classList.remove('open');
+    if (btn)     btn.setAttribute('aria-expanded', 'false');
+  };
+
+  /* Swipe-down on drawer to close */
+  let touchStartY = 0;
+  document.addEventListener('touchstart', e => {
+    touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+  document.addEventListener('touchend', e => {
+    const drawer = document.getElementById('fc-more-drawer');
+    if (!drawer || !drawer.classList.contains('open')) return;
+    const delta = e.changedTouches[0].clientY - touchStartY;
+    if (delta > 60) mobMoreClose();
+  }, { passive: true });
+
+  /* ═══════════════════════════════════════════════════════
+     6. AUTO-DETECT ACTIVE PAGE & INIT
+  ═══════════════════════════════════════════════════════ */
+  function detectActivePage() {
+    const path = window.location.pathname.split('/').pop().replace('.html', '');
+    return path || 'dashboard';
   }
 
-  function patchDOM () {
+  /* ═══════════════════════════════════════════════════════
+     7. UTIL
+  ═══════════════════════════════════════════════════════ */
+  function escHtml(s) {
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     8. BOOT
+  ═══════════════════════════════════════════════════════ */
+  injectStyles();
+
+  function boot() {
     const mount = document.getElementById('sidebar-mount');
-    if (!mount || mount.querySelector('.cp-sidebar-section')) return;
-    mount.insertAdjacentHTML('beforeend', buildCommunitySection(activeKey()));
+    if (!mount) return;
+    // If sidebar was already rendered by page script, just init mobile nav
+    const active = detectActivePage();
+    initMobileNav(active);
   }
 
-  /* ═══════════════════════════════════════════════════════════
-     5.  BOOT
-  ═══════════════════════════════════════════════════════════ */
-  injectNavStyles();
-  injectAuthStyles();
-  patchRenderSidebar();
-
-  document.addEventListener('DOMContentLoaded', function () {
-    injectNavStyles();
-    injectAuthStyles();
-    patchRenderSidebar();
-    patchDOM();
-    renderAuthWidget();
-  });
-
-  // MutationObserver: catches sidebar rendered after DOMContentLoaded
-  if (typeof MutationObserver !== 'undefined') {
-    const observer = new MutationObserver(function (mutations) {
-      mutations.forEach(function () {
-        const mount = document.getElementById('sidebar-mount');
-        if (mount && mount.children.length && !mount.querySelector('.cp-sidebar-section')) {
-          patchDOM();
-        }
-        // Re-run auth in case ln-nav was rendered late
-        if (document.querySelector('.ln-nav-links') && !document.querySelector('.cp-auth-pill')) {
-          patchLnNav();
-        }
-      });
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
   }
 
 })();

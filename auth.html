@@ -2,1018 +2,833 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sign In — Canadian Farm Copilot</title>
-  <link rel="stylesheet" href="css/style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Canadian Farm Copilot — Sign In</title>
   <link rel="manifest" href="manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;1,9..144,300;1,9..144,500&family=Outfit:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* ════════════════════════════ RESET & TOKENS ════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --forest:   #0D2318;
+  --forest-2: #142E20;
+  --forest-3: #1B3C2A;
+  --sage:     #3D7A5A;
+  --leaf:     #7EC99A;
+  --gold:     #C9943A;
+  --gold-lt:  #E8B84B;
+  --cream:    #FBF7EE;
+  --cream-dk: #EDE7D5;
+  --ink:      #0D2318;
+  --ink-2:    rgba(13,35,24,.58);
+  --ink-3:    rgba(13,35,24,.32);
+  --ink-4:    rgba(13,35,24,.12);
+  --red:      #C0392B;
+  --green:    #27AE60;
+  --r:        12px;
+}
+html { min-height: 100%; background: var(--forest); }
+body { font-family: 'Outfit', sans-serif; background: var(--forest);
+       color: var(--cream); min-height: 100vh; overflow-x: hidden;
+       -webkit-text-size-adjust: 100%; }
 
-    html, body {
-      background: #1B3528;
-      min-height: 100%;
-    }
+/* ════════════════════════════ LAYOUT ════════════════════════════ */
+.auth-root { min-height: 100vh; display: grid; grid-template-columns: 1fr 500px; }
 
-    body {
-      background: var(--forest);
-      color: var(--wheat);
-      font-family: 'Sora', sans-serif;
-      overflow-x: hidden;
-      -webkit-text-size-adjust: 100%;
-    }
+/* ════════════════════════════ LEFT BRAND PANEL ════════════════════════════ */
+.brand-panel {
+  position: relative; display: flex; flex-direction: column;
+  justify-content: space-between; padding: 44px 52px;
+  overflow: hidden; isolation: isolate;
+  background: var(--forest);
+}
+.brand-panel::before {
+  content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  background-size: 160px; opacity: .7;
+}
+.bg-glow-1 { position:absolute; z-index:0; width:650px; height:650px; border-radius:50%;
+  background:radial-gradient(circle, rgba(61,122,90,.26) 0%, transparent 70%);
+  bottom:-240px; left:-200px; animation: dA 16s ease-in-out infinite alternate; }
+.bg-glow-2 { position:absolute; z-index:0; width:420px; height:420px; border-radius:50%;
+  background:radial-gradient(circle, rgba(201,148,58,.13) 0%, transparent 70%);
+  top:-100px; right:-120px; animation: dB 20s ease-in-out infinite alternate; }
+@keyframes dA { from{transform:translate(0,0)} to{transform:translate(40px,-30px)} }
+@keyframes dB { from{transform:translate(0,0)} to{transform:translate(-28px,38px)} }
 
-    /* ── NAV ────────────────────────────────────────────────── */
-    .ln-nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-      padding: 14px 48px;
-      display: flex; align-items: center; justify-content: space-between;
-      background: rgba(27,53,40,.92);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(255,255,255,.07);
-    }
+.topo-svg { position:absolute; inset:0; z-index:0; opacity:.055; pointer-events:none; }
+.tl { fill:none; stroke:rgba(126,201,154,1); stroke-width:1.2; }
+.ap { stroke-dasharray:2000; stroke-dashoffset:2000; animation: drawL 9s ease forwards; }
+@keyframes drawL { to { stroke-dashoffset: 0; } }
 
-    .ln-nav-logo {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase;
-      color: var(--amber-lt);
-      display: flex; align-items: center; gap: 8px;
-      text-decoration: none; z-index: 201;
-    }
+.brand-inner { position:relative; z-index:1; display:flex; flex-direction:column; height:100%; justify-content:space-between; }
 
-    .ln-nav-logo-dot {
-      width: 7px; height: 7px;
-      background: var(--amber-lt);
-      border-radius: 50%;
-      animation: pulse 2.4s infinite;
-      flex-shrink: 0;
-    }
+/* Logo */
+.brand-logo { display:flex; align-items:center; gap:13px; text-decoration:none; margin-bottom:64px; }
+.brand-logo-mark {
+  width:42px; height:42px; border-radius:11px; flex-shrink:0;
+  background:linear-gradient(135deg, var(--sage) 0%, var(--forest-3) 100%);
+  border:1px solid rgba(126,201,154,.2);
+  display:flex; align-items:center; justify-content:center; font-size:20px;
+  box-shadow: 0 4px 18px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.08);
+}
+.brand-logo-info { display:flex; flex-direction:column; gap:2px; }
+.brand-logo-name { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:2.5px; text-transform:uppercase; color:var(--gold-lt); }
+.brand-logo-sub  { font-family:'IBM Plex Mono',monospace; font-size:8.5px; letter-spacing:1.5px; color:rgba(232,184,75,.38); }
 
-    .ln-nav-links { display: flex; align-items: center; gap: 24px; }
+/* Headline */
+.brand-eyebrow { font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:2.5px; text-transform:uppercase; color:var(--leaf); opacity:.72; margin-bottom:20px; display:flex; align-items:center; gap:10px; }
+.brand-eyebrow::before { content:''; display:inline-block; width:18px; height:1.5px; background:var(--leaf); opacity:.7; }
+.brand-headline { font-family:'Fraunces',serif; font-size:50px; font-weight:500; line-height:1.08; letter-spacing:-1.8px; color:var(--cream); margin-bottom:22px; }
+.brand-headline em { font-style:italic; font-weight:300; color:var(--gold-lt); }
+.brand-desc { font-size:14.5px; color:rgba(251,247,238,.48); line-height:1.78; max-width:380px; margin-bottom:44px; }
 
-    .ln-nav-link {
-      font-size: 13px; color: rgba(244,236,218,.6);
-      text-decoration: none; transition: color .14s; white-space: nowrap;
-    }
-    .ln-nav-link:hover  { color: var(--wheat); }
-    .ln-nav-link.active { color: var(--wheat); font-weight: 500; }
+/* Features */
+.brand-feats { display:flex; flex-direction:column; gap:12px; margin-bottom:44px; }
+.brand-feat { display:flex; align-items:center; gap:12px; font-size:13.5px; color:rgba(251,247,238,.62); }
+.feat-dot { width:6px; height:6px; border-radius:50%; background:var(--leaf); flex-shrink:0; opacity:.8; }
 
-    .ln-nav-cta {
-      padding: 9px 20px;
-      background: var(--amber); color: white;
-      border-radius: 8px; font-size: 13px; font-weight: 500;
-      text-decoration: none; transition: background .14s; white-space: nowrap;
-    }
-    .ln-nav-cta:hover { background: var(--amber-lt); }
+/* Stats */
+.brand-stats { display:flex; gap:0; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:14px; overflow:hidden; max-width:360px; }
+.bstat { flex:1; padding:16px 18px; border-right:1px solid rgba(255,255,255,.06); text-align:center; }
+.bstat:last-child { border-right:none; }
+.bstat-val { font-family:'Fraunces',serif; font-size:26px; font-weight:500; letter-spacing:-.5px; color:var(--cream); line-height:1; margin-bottom:4px; }
+.bstat-lbl { font-family:'IBM Plex Mono',monospace; font-size:8.5px; letter-spacing:1px; text-transform:uppercase; color:rgba(251,247,238,.28); }
 
-    /* Hamburger */
-    .nav-burger {
-      display: none;
-      flex-direction: column; justify-content: center;
-      gap: 5px; width: 44px; height: 44px;
-      background: none; border: none; cursor: pointer;
-      padding: 6px; border-radius: 8px; z-index: 201; flex-shrink: 0;
-    }
-    .nav-burger span {
-      display: block; width: 22px; height: 2px;
-      background: rgba(244,236,218,.8);
-      border-radius: 2px; transition: all .22s ease;
-    }
-    .nav-burger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-    .nav-burger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
-    .nav-burger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+/* Footer */
+.brand-foot { font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.5px; color:rgba(251,247,238,.16); margin-top:28px; }
 
-    /* Drawer */
-    .nav-drawer {
-      display: none; position: fixed;
-      top: 0; left: 0; right: 0;
-      background: rgba(20,40,28,.98);
-      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-      border-bottom: 1px solid rgba(255,255,255,.08);
-      padding: 76px 20px 24px; z-index: 199;
-      flex-direction: column; gap: 2px;
-    }
-    .nav-drawer.open { display: flex; animation: drawerIn .18s ease; }
+/* ════════════════════════════ RIGHT AUTH PANEL ════════════════════════════ */
+.auth-panel {
+  background: var(--cream); display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  padding:48px 44px; min-height:100vh; position:relative; overflow-y:auto;
+}
+.auth-panel::before {
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background: radial-gradient(ellipse at 100% 0%, rgba(201,148,58,.055) 0%, transparent 50%),
+              radial-gradient(ellipse at 0% 100%, rgba(61,122,90,.045) 0%, transparent 50%);
+}
+/* Rainbow top bar on mobile */
+.auth-panel::after { content:''; position:fixed; top:0; left:0; right:0; height:3px; z-index:100;
+  background:linear-gradient(90deg, var(--forest), var(--sage) 40%, var(--gold) 80%, var(--forest));
+  display:none; }
 
-    @keyframes drawerIn {
-      from { opacity: 0; transform: translateY(-6px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
+.auth-card { width:100%; max-width:396px; position:relative; z-index:1; }
 
-    .nav-drawer a {
-      display: block; padding: 14px 16px; font-size: 15px;
-      color: rgba(244,236,218,.75); text-decoration: none;
-      border-radius: 8px; transition: background .14s, color .14s;
-    }
-    .nav-drawer a:hover { background: rgba(255,255,255,.06); color: var(--wheat); }
-    .nav-drawer .nav-drawer-cta {
-      margin-top: 10px !important; background: var(--amber) !important;
-      color: white !important; text-align: center;
-      font-weight: 600 !important; border-radius: 10px !important;
-    }
-    .nav-drawer .nav-drawer-cta:hover { background: var(--amber-lt) !important; }
+/* ── View animation ── */
+.vfade { animation: vIn .22s cubic-bezier(.32,.72,0,1); }
+@keyframes vIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50%       { opacity: 0.35; }
-    }
+/* ── Back button ── */
+.auth-back { display:inline-flex; align-items:center; gap:6px; font-size:12.5px;
+  color:var(--ink-2); background:none; border:none; cursor:pointer; padding:0;
+  margin-bottom:28px; transition:color .14s; font-family:'Outfit',sans-serif; }
+.auth-back:hover { color:var(--ink); }
 
-    /* ── FOOTER ──────────────────────────────────────────────── */
-    .ln-footer {
-      padding: 40px 48px;
-      border-top: 1px solid rgba(255,255,255,.07);
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 20px; flex-wrap: wrap;
-    }
-    .ln-footer-logo {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
-      color: rgba(244,236,218,.3);
-    }
-    .ln-footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
-    .ln-footer-link {
-      font-size: 12.5px; color: rgba(244,236,218,.3);
-      text-decoration: none; transition: color .14s; padding: 4px 0;
-    }
-    .ln-footer-link:hover { color: rgba(244,236,218,.7); }
-    .ln-footer-copy {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 10px; color: rgba(244,236,218,.2); letter-spacing: .5px;
-    }
+/* ── Headings ── */
+.auth-eyebrow { font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:2px; text-transform:uppercase; color:var(--sage); margin-bottom:10px; }
+.auth-heading { font-family:'Fraunces',serif; font-size:30px; font-weight:500; letter-spacing:-.8px; color:var(--ink); margin-bottom:8px; line-height:1.15; }
+.auth-sub { font-size:14px; color:var(--ink-2); margin-bottom:30px; line-height:1.6; }
 
-    /* ── AUTH SPLIT LAYOUT ───────────────────────────────────── */
-    .auth-shell {
-      min-height: 100vh;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      padding-top: 52px; /* nav height */
-    }
+/* ── Alert ── */
+.auth-alert { display:none; padding:11px 14px; border-radius:10px;
+  font-size:13px; line-height:1.5; margin-bottom:18px;
+  align-items:flex-start; gap:9px; }
+.auth-alert.show { display:flex; animation:vIn .18s ease; }
+.auth-alert.error   { background:rgba(192,57,43,.08); border:1px solid rgba(192,57,43,.2); color:#8b1c10; }
+.auth-alert.success { background:rgba(39,174,96,.08); border:1px solid rgba(39,174,96,.25); color:#1a6b3c; }
+.auth-alert.info    { background:rgba(61,122,90,.07); border:1px solid rgba(61,122,90,.2);  color:var(--sage); }
+.auth-alert-icon { font-size:14px; margin-top:1px; flex-shrink:0; }
 
-    /* ── LEFT — hero panel ───────────────────────────────────── */
-    .auth-hero {
-      background: var(--forest);
-      display: flex; flex-direction: column;
-      justify-content: space-between;
-      padding: 56px 56px 48px;
-      position: relative; overflow: hidden;
-      background-image:
-        radial-gradient(ellipse at 0% 100%, rgba(74,122,90,.35) 0%, transparent 55%),
-        radial-gradient(ellipse at 100% 0%,  rgba(184,114,14,.15) 0%, transparent 50%),
-        repeating-linear-gradient(0deg,  transparent, transparent 39px, rgba(255,255,255,.013) 39px, rgba(255,255,255,.013) 40px),
-        repeating-linear-gradient(90deg, transparent, transparent 79px, rgba(255,255,255,.008) 79px, rgba(255,255,255,.008) 80px);
-    }
+/* ── OAuth buttons ── */
+.oauth-stack { display:flex; flex-direction:column; gap:10px; margin-bottom:22px; }
+.oauth-btn { display:flex; align-items:center; justify-content:center; gap:10px;
+  width:100%; padding:13px 18px;
+  background:#fff; border:1.5px solid var(--ink-4); border-radius:var(--r);
+  font-family:'Outfit',sans-serif; font-size:14.5px; font-weight:500; color:var(--ink);
+  cursor:pointer; transition:all .15s; min-height:50px; position:relative; }
+.oauth-btn:hover { background:var(--cream-dk); border-color:rgba(13,35,24,.22);
+  transform:translateY(-1px); box-shadow:0 4px 14px rgba(13,35,24,.08); }
+.oauth-btn:active { transform:none; }
+.oi { width:20px; height:20px; flex-shrink:0; }
+.oauth-soon { position:absolute; right:14px;
+  font-family:'IBM Plex Mono',monospace; font-size:8.5px; color:var(--ink-3); letter-spacing:.5px; }
 
-    .hero-logo {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
-      color: var(--amber-lt);
-      display: flex; align-items: center; gap: 9px;
-      text-decoration: none;
-    }
-    .hero-logo-dot {
-      width: 7px; height: 7px;
-      background: var(--amber-lt); border-radius: 50%;
-      animation: pulse 2.4s ease-in-out infinite;
-    }
+/* ── Or divider ── */
+.or-div { display:flex; align-items:center; gap:14px; margin-bottom:22px; }
+.or-div::before, .or-div::after { content:''; flex:1; height:1px; background:var(--ink-4); }
+.or-div span { font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--ink-3); white-space:nowrap; }
 
-    .hero-eyebrow {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase;
-      color: rgba(184,220,160,.65);
-      margin-bottom: 18px;
-    }
+/* ── Fields ── */
+.fg { display:flex; flex-direction:column; gap:6px; margin-bottom:15px; }
+.fg:last-of-type { margin-bottom:0; }
+.frow { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 
-    .hero-title {
-      font-family: 'DM Serif Display', serif;
-      font-size: 42px; color: var(--wheat);
-      line-height: 1.15; letter-spacing: -.8px;
-      margin-bottom: 20px;
-    }
-    .hero-title em { font-style: italic; color: var(--amber-lt); }
+.fl { font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:1.5px;
+  text-transform:uppercase; color:var(--ink-2); display:flex; justify-content:space-between; align-items:center; }
+.fl-action { font-size:11px; color:var(--sage); text-decoration:none; letter-spacing:0;
+  text-transform:none; font-family:'Outfit',sans-serif; font-weight:500; cursor:pointer; }
+.fl-action:hover { color:var(--forest-3); }
 
-    .hero-desc {
-      font-size: 14.5px; color: rgba(244,236,218,.65);
-      line-height: 1.7; margin-bottom: 36px; max-width: 380px;
-    }
+.fi { padding:13px 16px; background:#fff; border:1.5px solid var(--ink-4); border-radius:var(--r);
+  font-family:'Outfit',sans-serif; font-size:15px; color:var(--ink);
+  outline:none; transition:border-color .15s, box-shadow .15s; width:100%; -webkit-appearance:none; }
+.fi::placeholder { color:var(--ink-3); }
+.fi:focus { border-color:var(--sage); box-shadow:0 0 0 3px rgba(61,122,90,.1); }
+.fi.error { border-color:var(--red); box-shadow:0 0 0 3px rgba(192,57,43,.08); }
+.fi.valid { border-color:var(--green); }
 
-    .hero-features { display: flex; flex-direction: column; gap: 10px; }
+.fpw { position:relative; }
+.fpw .fi { padding-right:48px; }
+.pw-tog { position:absolute; right:14px; top:50%; transform:translateY(-50%);
+  background:none; border:none; color:var(--ink-3); cursor:pointer; font-size:16px; padding:4px; transition:color .14s; }
+.pw-tog:hover { color:var(--ink-2); }
 
-    .hero-feat {
-      display: flex; align-items: center; gap: 11px;
-      font-size: 13px; color: rgba(244,236,218,.7);
-    }
+.fsel { padding:13px 36px 13px 16px; background:#fff; border:1.5px solid var(--ink-4);
+  border-radius:var(--r); font-family:'Outfit',sans-serif; font-size:15px; color:var(--ink);
+  outline:none; width:100%; cursor:pointer; transition:border-color .15s, box-shadow .15s;
+  -webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%230D2318' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 14px center; }
+.fsel:focus { border-color:var(--sage); box-shadow:0 0 0 3px rgba(61,122,90,.1); }
+.fsel.error { border-color:var(--red); }
 
-    .hero-feat-icon {
-      width: 26px; height: 26px;
-      background: rgba(255,255,255,.07);
-      border: 1px solid rgba(255,255,255,.1);
-      border-radius: 6px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 13px; flex-shrink: 0;
-    }
+.ferr { font-size:12px; color:var(--red); display:none; margin-top:-2px; }
+.ferr.show { display:block; }
 
-    .hero-foot {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 10px; letter-spacing: .5px;
-      color: rgba(244,236,218,.2);
-      margin-top: 40px;
-    }
+/* ── Password strength ── */
+.pw-str { margin-top:8px; display:none; }
+.pw-str.on { display:block; }
+.pw-bars { display:flex; gap:4px; margin-bottom:5px; }
+.pw-bar { flex:1; height:3px; border-radius:3px; background:var(--ink-4); transition:background .3s; }
+.c-red    { background:#C0392B; } .c-orange { background:#E67E22; }
+.c-yellow { background:#F1C40F; } .c-green  { background:#27AE60; }
+.c-forest { background:var(--forest-3); }
+.pw-lbl { font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.5px; color:var(--ink-3); }
 
-    /* ── RIGHT — form panel ──────────────────────────────────── */
-    .auth-panel {
-      background: var(--wheat, #F4ECDA);
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      padding: 56px 48px;
-      position: relative;
-    }
+/* ── Remember me ── */
+.fchk { display:flex; align-items:center; gap:9px; cursor:pointer; user-select:none;
+  font-size:13.5px; color:var(--ink-2); }
+.fchk input[type=checkbox] { width:16px; height:16px; border-radius:4px; cursor:pointer; accent-color:var(--forest); flex-shrink:0; }
 
-    .auth-card {
-      width: 100%; max-width: 420px;
-    }
+/* ── Submit ── */
+.auth-btn { width:100%; padding:15px; background:var(--forest); color:var(--cream);
+  border:none; border-radius:var(--r); font-family:'Outfit',sans-serif;
+  font-size:15px; font-weight:600; cursor:pointer; transition:all .17s;
+  min-height:52px; margin-top:20px; position:relative; overflow:hidden; letter-spacing:-.1px; }
+.auth-btn:hover:not(:disabled) { background:var(--forest-3); transform:translateY(-2px); box-shadow:0 8px 24px rgba(13,35,24,.22); }
+.auth-btn:active { transform:none !important; }
+.auth-btn:disabled { opacity:.55; cursor:not-allowed; transform:none !important; }
+.auth-btn.ld { pointer-events:none; }
+.btn-txt { transition:opacity .15s; }
+.btn-spin { display:none; width:20px; height:20px; border:2px solid rgba(251,247,238,.25);
+  border-top-color:var(--cream); border-radius:50%; animation:spin .7s linear infinite;
+  position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); }
+.auth-btn.ld .btn-txt  { opacity:0; }
+.auth-btn.ld .btn-spin { display:block; }
+@keyframes spin { to { transform:translate(-50%,-50%) rotate(360deg); } }
 
-    /* Tab switcher */
-    .auth-tabs {
-      display: flex;
-      background: rgba(27,53,40,.08);
-      border-radius: 12px;
-      padding: 4px;
-      margin-bottom: 32px;
-    }
+/* ── Step dots ── */
+.step-dots { display:flex; align-items:center; gap:7px; margin-bottom:26px; }
+.sdot { width:8px; height:8px; border-radius:50%; background:var(--ink-4); transition:all .25s; flex-shrink:0; }
+.sdot.active { background:var(--sage); width:22px; border-radius:4px; }
+.sdot.done   { background:var(--green); }
+.sdot-lbl { font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:1px; text-transform:uppercase; color:var(--ink-3); margin-left:4px; }
 
-    .auth-tab {
-      flex: 1; padding: 10px;
-      text-align: center;
-      font-family: 'Sora', sans-serif;
-      font-size: 13.5px; font-weight: 600;
-      color: rgba(27,53,40,.45);
-      cursor: pointer;
-      border-radius: 9px;
-      transition: all .18s;
-      user-select: none;
-      border: none; background: none;
-    }
-    .auth-tab.active {
-      background: white;
-      color: #1B3528;
-      box-shadow: 0 2px 8px rgba(27,53,40,.12);
-    }
+/* ── Switch / terms ── */
+.auth-switch { text-align:center; margin-top:22px; font-size:13.5px; color:var(--ink-2); }
+.auth-switch a { color:var(--sage); font-weight:600; text-decoration:none; cursor:pointer; }
+.auth-switch a:hover { text-decoration:underline; }
+.auth-terms { margin-top:14px; font-size:11.5px; color:var(--ink-3); text-align:center; line-height:1.6; font-family:'IBM Plex Mono',monospace; }
+.auth-terms a { color:var(--ink-2); text-decoration:underline; }
 
-    /* Form heading */
-    .auth-heading {
-      font-family: 'DM Serif Display', serif;
-      font-size: 26px; color: #1B3528;
-      margin-bottom: 6px; letter-spacing: -.4px;
-    }
+/* ── Trust bar ── */
+.trust-bar { display:flex; align-items:center; justify-content:center; gap:16px; flex-wrap:wrap;
+  margin-top:28px; padding-top:22px; border-top:1px solid var(--ink-4); }
+.trust-item { display:flex; align-items:center; gap:5px; font-size:11.5px; color:var(--ink-3);
+  font-family:'IBM Plex Mono',monospace; letter-spacing:.3px; }
+.tck { color:var(--green); font-size:11px; }
 
-    .auth-sub {
-      font-size: 13.5px; color: rgba(27,53,40,.5);
-      margin-bottom: 28px; line-height: 1.5;
-    }
+/* ── Verify ── */
+.vi-icon { width:64px; height:64px; border-radius:18px;
+  background:linear-gradient(135deg, var(--forest-2), var(--forest-3));
+  border:1px solid rgba(126,201,154,.15); display:flex; align-items:center; justify-content:center;
+  font-size:28px; margin-bottom:22px; box-shadow:0 8px 28px rgba(13,35,24,.15); }
+.vi-chip { display:block; background:rgba(13,35,24,.06); border:1px solid var(--ink-4);
+  border-radius:8px; padding:9px 14px; font-family:'IBM Plex Mono',monospace;
+  font-size:13px; color:var(--ink); margin:10px 0 22px; word-break:break-all; text-align:center; }
 
-    /* Fields */
-    .auth-form { display: flex; flex-direction: column; gap: 16px; }
+/* ── Success ── */
+.su-icon { width:72px; height:72px; border-radius:20px;
+  background:linear-gradient(135deg, var(--forest-2), var(--sage));
+  display:flex; align-items:center; justify-content:center; font-size:32px;
+  margin:0 auto 24px; box-shadow:0 12px 36px rgba(13,35,24,.2);
+  animation:popIn .4s cubic-bezier(.175,.885,.32,1.275); }
+@keyframes popIn { from{transform:scale(.7);opacity:0} to{transform:scale(1);opacity:1} }
 
-    .field-group { display: flex; flex-direction: column; gap: 6px; }
+/* ── Demo banner ── */
+.demo-bn { display:none; background:rgba(201,148,58,.1); border:1px solid rgba(201,148,58,.25);
+  border-radius:10px; padding:10px 14px; font-size:12px; color:#7a5a1a; margin-bottom:18px;
+  line-height:1.55; font-family:'IBM Plex Mono',monospace; letter-spacing:.1px; }
+.demo-bn.on { display:block; }
 
-    .field-label {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
-      color: rgba(27,53,40,.5);
-    }
+/* ════════════════════════════ RESPONSIVE ════════════════════════════ */
+@media (max-width: 960px) {
+  .auth-root { grid-template-columns: 1fr; }
+  .brand-panel { display: none; }
+  .auth-panel { padding:40px 28px 56px; min-height:100vh; justify-content:flex-start; padding-top:52px; }
+  .auth-panel::after { display:block; }
+  .mobile-logo { display:flex !important; }
+}
+@media (max-width: 480px) {
+  .auth-panel { padding:32px 20px 48px; }
+  .auth-card { max-width:100%; }
+  .frow { grid-template-columns:1fr; gap:0; }
+  .frow .fg { margin-bottom:15px; }
+  .auth-heading { font-size:26px; }
+}
 
-    .field-input {
-      padding: 13px 16px;
-      background: white;
-      border: 1.5px solid rgba(27,53,40,.14);
-      border-radius: 10px;
-      font-family: 'Sora', sans-serif;
-      font-size: 14px; color: #1B3528;
-      outline: none;
-      transition: border-color .15s, box-shadow .15s;
-      width: 100%;
-      -webkit-appearance: none;
-    }
-    .field-input::placeholder { color: rgba(27,53,40,.3); }
-    .field-input:focus {
-      border-color: #1B3528;
-      box-shadow: 0 0 0 3px rgba(27,53,40,.08);
-    }
-    .field-input.error {
-      border-color: #c0392b;
-      box-shadow: 0 0 0 3px rgba(192,57,43,.1);
-    }
-
-    /* Password wrapper */
-    .field-pw { position: relative; }
-    .field-pw .field-input { padding-right: 44px; }
-    .pw-toggle {
-      position: absolute; right: 14px; top: 50%;
-      transform: translateY(-50%);
-      background: none; border: none;
-      color: rgba(27,53,40,.35); cursor: pointer;
-      font-size: 15px; padding: 4px;
-      transition: color .14s;
-    }
-    .pw-toggle:hover { color: rgba(27,53,40,.7); }
-
-    /* Name row */
-    .field-row {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
-    }
-
-    /* Province select */
-    .field-select {
-      padding: 13px 16px;
-      background: white;
-      border: 1.5px solid rgba(27,53,40,.14);
-      border-radius: 10px;
-      font-family: 'Sora', sans-serif;
-      font-size: 14px; color: #1B3528;
-      outline: none; width: 100%; cursor: pointer;
-      transition: border-color .15s, box-shadow .15s;
-      -webkit-appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%231B3528' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 14px center;
-      padding-right: 36px;
-    }
-    .field-select:focus {
-      border-color: #1B3528;
-      box-shadow: 0 0 0 3px rgba(27,53,40,.08);
-    }
-
-    /* Error text */
-    .field-error {
-      font-size: 11.5px; color: #c0392b;
-      display: none; margin-top: 2px;
-    }
-    .field-error.show { display: block; }
-
-    /* Forgot password */
-    .auth-forgot {
-      text-align: right; margin-top: -8px;
-    }
-    .auth-forgot a {
-      font-size: 12px; color: rgba(27,53,40,.45);
-      text-decoration: none; transition: color .14s;
-    }
-    .auth-forgot a:hover { color: #1B3528; }
-
-    /* Submit */
-    .auth-submit {
-      width: 100%; padding: 14px;
-      background: #1B3528; color: var(--wheat, #F4ECDA);
-      border: none; border-radius: 10px;
-      font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 600;
-      cursor: pointer; transition: all .15s;
-      min-height: 48px; margin-top: 4px;
-      position: relative; overflow: hidden;
-    }
-    .auth-submit:hover {
-      background: #254d37;
-      transform: translateY(-1px);
-      box-shadow: 0 6px 20px rgba(27,53,40,.22);
-    }
-    .auth-submit:active { transform: translateY(0); }
-    .auth-submit.loading { pointer-events: none; }
-    .auth-submit .btn-spinner {
-      display: none; width: 18px; height: 18px;
-      border: 2px solid rgba(244,236,218,.3);
-      border-top-color: var(--wheat, #F4ECDA);
-      border-radius: 50%;
-      animation: spin .7s linear infinite;
-      position: absolute; left: 50%; top: 50%;
-      transform: translate(-50%, -50%);
-    }
-    .auth-submit.loading .btn-text    { opacity: 0; }
-    .auth-submit.loading .btn-spinner { display: block; }
-
-    @keyframes spin {
-      to { transform: translate(-50%, -50%) rotate(360deg); }
-    }
-
-    /* Divider */
-    .auth-divider {
-      display: flex; align-items: center; gap: 12px;
-      margin: 20px 0;
-    }
-    .auth-divider::before,
-    .auth-divider::after {
-      content: ''; flex: 1;
-      height: 1px; background: rgba(27,53,40,.12);
-    }
-    .auth-divider span {
-      font-size: 11px; color: rgba(27,53,40,.35);
-      font-family: 'IBM Plex Mono', monospace;
-      letter-spacing: 1px; text-transform: uppercase;
-      white-space: nowrap;
-    }
-
-    /* OAuth buttons */
-    .oauth-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-    .oauth-btn {
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      padding: 11px 14px;
-      background: white;
-      border: 1.5px solid rgba(27,53,40,.12);
-      border-radius: 10px;
-      font-family: 'Sora', sans-serif; font-size: 13px;
-      color: #1B3528; cursor: pointer;
-      transition: all .15s; text-decoration: none;
-      min-height: 44px;
-    }
-    .oauth-btn:hover {
-      border-color: rgba(27,53,40,.28);
-      box-shadow: 0 2px 8px rgba(27,53,40,.1);
-    }
-    .oauth-icon { font-size: 16px; line-height: 1; }
-
-    /* Switch link */
-    .auth-switch {
-      text-align: center;
-      margin-top: 24px;
-      font-size: 13px; color: rgba(27,53,40,.5);
-    }
-    .auth-switch a {
-      color: #1B3528; font-weight: 600; text-decoration: none;
-      transition: opacity .14s;
-    }
-    .auth-switch a:hover { opacity: .7; }
-
-    /* Terms */
-    .auth-terms {
-      margin-top: 16px;
-      font-size: 11px; color: rgba(27,53,40,.35);
-      text-align: center; line-height: 1.6;
-      font-family: 'IBM Plex Mono', monospace;
-      letter-spacing: .2px;
-    }
-    .auth-terms a { color: rgba(27,53,40,.5); text-decoration: underline; }
-
-    /* Success state */
-    .auth-success {
-      display: none;
-      text-align: center; padding: 32px 20px;
-    }
-    .auth-success-icon {
-      font-size: 48px; margin-bottom: 16px;
-    }
-    .auth-success h3 {
-      font-family: 'DM Serif Display', serif;
-      font-size: 22px; color: #1B3528; margin-bottom: 8px;
-    }
-    .auth-success p {
-      font-size: 13.5px; color: rgba(27,53,40,.55);
-      line-height: 1.6; margin-bottom: 24px;
-    }
-    .auth-success-btn {
-      display: inline-block; padding: 13px 28px;
-      background: #1B3528; color: var(--wheat, #F4ECDA);
-      border-radius: 10px; font-weight: 600; font-size: 14px;
-      text-decoration: none; transition: background .15s;
-    }
-    .auth-success-btn:hover { background: #254d37; }
-
-    /* Alert banner */
-    .auth-alert {
-      display: none; align-items: flex-start; gap: 10px;
-      padding: 12px 14px;
-      border-radius: 8px;
-      font-size: 13px; line-height: 1.5;
-      margin-bottom: 4px;
-    }
-    .auth-alert.error   { background: rgba(192,57,43,.08); border: 1px solid rgba(192,57,43,.2); color: #a93226; }
-    .auth-alert.success { background: rgba(74,200,120,.1); border: 1px solid rgba(74,200,120,.25); color: #27ae60; }
-    .auth-alert.show    { display: flex; animation: fadeIn .18s ease; }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-4px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ── RESPONSIVE — tablet ≤ 900px ─────────────────────────── */
-    @media (max-width: 900px) {
-      .ln-nav       { padding: 12px 20px; }
-      .ln-nav-links { display: none; }
-      .nav-burger   { display: flex; }
-
-      .auth-shell {
-        grid-template-columns: 1fr;
-        padding-top: 52px;
-      }
-
-      .auth-hero   { display: none; }
-
-      .auth-panel  { padding: 40px 24px 48px; min-height: calc(100vh - 52px); }
-    }
-
-    /* ── RESPONSIVE — mobile ≤ 480px ─────────────────────────── */
-    @media (max-width: 480px) {
-      .auth-panel  { padding: 32px 16px 40px; }
-      .auth-card   { max-width: 100%; }
-
-      .field-row { grid-template-columns: 1fr; gap: 16px; }
-      .oauth-grid { grid-template-columns: 1fr; }
-
-      .auth-heading { font-size: 22px; }
-
-      .ln-footer { flex-direction: column; align-items: flex-start; padding: 24px 16px; gap: 12px; }
-      .ln-footer-links { gap: 12px; }
-      .ln-footer-link  { font-size: 12px; }
-    }
-  </style>
+/* ── Guest explore bar ── */
+.guest-bar { text-align:center; margin-top:18px; padding-top:16px;
+  border-top:1px dashed var(--ink-4); font-size:13px; color:var(--ink-3); }
+.guest-link { display:inline-flex; align-items:center; gap:4px;
+  color:var(--ink-2); font-weight:500; text-decoration:none; cursor:pointer;
+  transition:color .14s; margin-left:6px; font-size:13px; }
+.guest-link:hover { color:var(--sage); }
+</style>
 </head>
 <body>
+<div class="auth-root">
 
-  <!-- ── NAV ────────────────────────────────────────────────── -->
-  <nav class="ln-nav">
-    <a href="landing.html" class="ln-nav-logo">
-      <div class="ln-nav-logo-dot"></div>
-      Farm Copilot
-    </a>
-    <div class="ln-nav-links">
-      <a href="landing.html#features" class="ln-nav-link">Features</a>
-      <a href="landing.html#programs" class="ln-nav-link">Programs</a>
-      <a href="pricing.html"          class="ln-nav-link">Pricing</a>
-      <a href="dashboard.html"        class="ln-nav-link" id="nav-dashboard" style="display:none;">Dashboard</a>
-      <a href="auth.html"             class="ln-nav-link active">Sign In</a>
-      <a href="index.html"            class="ln-nav-cta">Start Free Setup →</a>
+  <!-- ══════════════ LEFT: BRAND PANEL ══════════════ -->
+  <div class="brand-panel">
+    <div class="bg-glow-1"></div>
+    <div class="bg-glow-2"></div>
+    <svg class="topo-svg" viewBox="0 0 600 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <path class="tl ap" style="animation-delay:.2s"  d="M-40,640 Q80,580 210,600 T450,560 T690,578"/>
+      <path class="tl ap" style="animation-delay:.5s"  d="M-40,580 Q100,518 250,540 T490,500 T730,520"/>
+      <path class="tl ap" style="animation-delay:.8s"  d="M-40,520 Q120,456 290,480 T530,440 T770,460"/>
+      <path class="tl ap" style="animation-delay:1.1s" d="M-40,460 Q140,393 330,420 T570,378 T810,400"/>
+      <path class="tl ap" style="animation-delay:1.4s" d="M-40,400 Q160,330 360,360 T600,318 T840,340"/>
+      <path class="tl ap" style="animation-delay:1.7s" d="M-40,340 Q180,268 390,300 T630,257 T870,280"/>
+      <path class="tl ap" style="animation-delay:2.0s" d="M-40,280 Q200,208 420,240 T660,198"/>
+      <path class="tl ap" style="animation-delay:2.3s" d="M-40,220 Q220,148 450,182 T690,142"/>
+      <path class="tl ap" style="animation-delay:2.6s" d="M-40,700 Q60,638 190,660 T420,622 T660,640"/>
+      <path class="tl ap" style="animation-delay:2.9s" d="M-40,760 Q40,698 170,720 T400,683 T640,702"/>
+    </svg>
+
+    <div class="brand-inner">
+      <div>
+        <a href="landing.html" class="brand-logo">
+          <div class="brand-logo-mark">🌾</div>
+          <div class="brand-logo-info">
+            <div class="brand-logo-name">Farm Copilot</div>
+            <div class="brand-logo-sub">Canada · v2.0 · 2026</div>
+          </div>
+        </a>
+
+        <div class="brand-eyebrow">Canadian Agriculture Intelligence</div>
+        <h1 class="brand-headline">Grow smarter<br>with <em>AI built<br>for Canada.</em></h1>
+        <p class="brand-desc">The complete farm intelligence platform — funding programs, live weather, AI-driven planning, and risk monitoring for Canadian producers.</p>
+
+        <div class="brand-feats">
+          <div class="brand-feat"><span class="feat-dot"></span>AI Copilot grounded in Canadian ag programs</div>
+          <div class="brand-feat"><span class="feat-dot"></span>Federal &amp; provincial funding navigator</div>
+          <div class="brand-feat"><span class="feat-dot"></span>Real-time weather + environmental risk alerts</div>
+          <div class="brand-feat"><span class="feat-dot"></span>ROI calculator, season planner &amp; 15 more tools</div>
+        </div>
+
+        <div class="brand-stats">
+          <div class="bstat"><div class="bstat-val">18</div><div class="bstat-lbl">AI Tools</div></div>
+          <div class="bstat"><div class="bstat-val">8+</div><div class="bstat-lbl">Programs</div></div>
+          <div class="bstat"><div class="bstat-val">Free</div><div class="bstat-lbl">Forever</div></div>
+        </div>
+      </div>
+
     </div>
-    <button class="nav-burger" id="nav-burger" aria-label="Open menu" aria-expanded="false">
-      <span></span><span></span><span></span>
-    </button>
-  </nav>
-
-  <!-- Mobile drawer -->
-  <div class="nav-drawer" id="nav-drawer" role="dialog" aria-label="Navigation">
-    <a href="landing.html#features">Features</a>
-    <a href="landing.html#programs">Programs</a>
-    <a href="pricing.html">Pricing</a>
-    <a href="dashboard.html" id="drawer-dashboard" style="display:none;">Dashboard</a>
-    <a href="auth.html" class="active">Sign In</a>
-    <a href="index.html" class="nav-drawer-cta">Start Free Setup →</a>
   </div>
 
-  <!-- ── MAIN ────────────────────────────────────────────────── -->
-  <div class="auth-shell">
+  <!-- ══════════════ RIGHT: AUTH PANEL ══════════════ -->
+  <div class="auth-panel">
+    <div class="auth-card">
 
-    <!-- Left — hero ──────────────────────────────────────────── -->
-    <div class="auth-hero">
-      <a href="landing.html" class="hero-logo">
-        <div class="hero-logo-dot"></div>
-        Farm Copilot
+      <!-- Mobile logo (only visible on small screens) -->
+      <a href="landing.html" class="brand-logo mobile-logo" style="display:none; margin-bottom:36px;">
+        <div class="brand-logo-mark">🌾</div>
+        <div class="brand-logo-info">
+          <div class="brand-logo-name">Farm Copilot</div>
+          <div class="brand-logo-sub">Canada · 2026</div>
+        </div>
       </a>
 
-      <div class="hero-main">
-        <div class="hero-eyebrow">Canadian Agriculture Intelligence</div>
-        <h1 class="hero-title">
-          Smarter decisions<br>for <em>every season.</em>
-        </h1>
-        <p class="hero-desc">
-          Access the full power of Farm Copilot — funding programs, AI-driven planning,
-          live weather, and ROI tools built for Canadian producers.
+      <!-- Demo banner -->
+      <div class="demo-bn" id="demo-bn">⚡ Demo mode — enter any email + password (6+ chars) to continue.</div>
+
+      <!-- Global alert -->
+      <div class="auth-alert" id="auth-alert" role="alert" aria-live="assertive">
+        <span class="auth-alert-icon" id="al-icon"></span>
+        <span id="al-text"></span>
+      </div>
+
+      <!-- ════ VIEW: SIGN IN ════ -->
+      <div id="v-signin" class="vfade">
+        <div class="auth-eyebrow">Welcome back</div>
+        <h2 class="auth-heading">Sign in to your account</h2>
+        <p class="auth-sub">Access your personalized farm dashboard.</p>
+
+        <div class="oauth-stack">
+          <button class="oauth-btn" onclick="handleOAuth('google')">
+            <svg class="oi" viewBox="0 0 20 20"><path d="M19.6 10.23c0-.68-.06-1.36-.17-2H10v3.77h5.37a4.6 4.6 0 01-2 3.02v2.5h3.23c1.89-1.74 2.98-4.3 2.98-7.3z" fill="#4285F4"/><path d="M10 20c2.7 0 4.96-.9 6.61-2.43l-3.23-2.5c-.9.6-2.05.96-3.38.96-2.6 0-4.8-1.76-5.59-4.12H1.07v2.58A9.99 9.99 0 0010 20z" fill="#34A853"/><path d="M4.41 11.91A6 6 0 014.09 10c0-.67.11-1.3.32-1.9V5.52H1.07A10.01 10.01 0 000 10c0 1.61.38 3.14 1.07 4.48l3.34-2.57z" fill="#FBBC05"/><path d="M10 3.96c1.47 0 2.78.5 3.82 1.5l2.86-2.86C14.96.99 12.7 0 10 0A9.99 9.99 0 001.07 5.52l3.34 2.58C5.2 5.72 7.4 3.96 10 3.96z" fill="#EA4335"/></svg>
+            Continue with Google
+          </button>
+          <button class="oauth-btn" onclick="handleOAuth('apple')">
+            <svg class="oi" viewBox="0 0 20 20" fill="currentColor"><path d="M16.31 15c-.34.79-.76 1.52-1.23 2.2-.64.92-1.17 1.56-1.59 1.92-.63.58-1.31.88-2.04.9-.52 0-1.15-.15-1.87-.45-.73-.3-1.4-.45-2-.45-.63 0-1.31.15-2.04.45-.74.3-1.33.46-1.79.47-.69.04-1.39-.28-2.09-.92-.45-.39-1-.1.06-1.99C.6 15.93.1 14.75.02 13.5c-.08-1.42.29-2.64 1.08-3.64.8-1.02 1.84-1.54 3.14-1.54.52 0 1.2.17 2.05.5.84.33 1.38.5 1.61.5.18 0 .77-.2 1.78-.59.96-.37 1.76-.52 2.42-.47 1.78.15 3.12.84 4 2.12-.62.38-1.08.81-1.38 1.32-.31.55-.46 1.15-.45 1.81.01.67.2 1.3.56 1.88.32.5.72.89 1.19 1.16-.16.44-.34.88-.55 1.3zM11.35 1.2c0 .52-.18 1.01-.56 1.47-.45.53-.99.83-1.58.79-.01-.06-.01-.13-.01-.18 0-.5.22-1.03.6-1.48.19-.22.43-.41.72-.56.3-.15.58-.24.84-.24.01.06.01.12 0 .2z"/></svg>
+            Continue with Apple
+            <span class="oauth-soon">Coming soon</span>
+          </button>
+        </div>
+
+        <div class="or-div"><span>or with email</span></div>
+
+        <div class="fg">
+          <label class="fl" for="si-email">Email address</label>
+          <input class="fi" type="email" id="si-email" placeholder="you@farm.ca" autocomplete="email"
+                 oninput="clrE('si-email','si-email-e')" onblur="lvEmail('si-email','si-email-e')"
+                 onkeydown="if(event.key==='Enter')G('si-pass').focus()">
+          <div class="ferr" id="si-email-e">Please enter a valid email address.</div>
+        </div>
+
+        <div class="fg">
+          <label class="fl" for="si-pass">
+            Password
+            <a class="fl-action" onclick="sv('forgot')" tabindex="0">Forgot password?</a>
+          </label>
+          <div class="fpw">
+            <input class="fi" type="password" id="si-pass" placeholder="••••••••" autocomplete="current-password"
+                   oninput="clrE('si-pass','si-pass-e')" onkeydown="if(event.key==='Enter') handleSignIn()">
+            <button class="pw-tog" type="button" onclick="togPw('si-pass',this)">👁</button>
+          </div>
+          <div class="ferr" id="si-pass-e">Password is required.</div>
+        </div>
+
+        <label class="fchk" style="margin-top:4px;">
+          <input type="checkbox" id="si-rem"> Remember me for 30 days
+        </label>
+
+        <button class="auth-btn" id="btn-si" onclick="handleSignIn()">
+          <span class="btn-txt">Sign In →</span><div class="btn-spin"></div>
+        </button>
+
+        <div class="auth-switch">
+          New to Farm Copilot? <a onclick="sv('signup-1')">Create a free account →</a>
+        </div>
+
+        <div class="trust-bar">
+          <div class="trust-item"><span class="tck">✓</span> Free forever</div>
+          <div class="trust-item"><span class="tck">✓</span> No credit card</div>
+          <div class="trust-item"><span class="tck">✓</span> Private &amp; secure</div>
+        </div>
+
+        <div class="guest-bar">
+          <span>Just browsing?</span>
+          <a class="guest-link" onclick="exploreAsGuest()">
+            Explore tools without an account
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M6 2l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- ════ VIEW: SIGNUP STEP 1 ════ -->
+      <div id="v-signup-1" class="vfade" style="display:none;">
+        <button class="auth-back" onclick="sv('signin')">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Back to sign in
+        </button>
+        <div class="step-dots">
+          <div class="sdot active" id="sd1-1"></div>
+          <div class="sdot"        id="sd1-2"></div>
+          <span class="sdot-lbl">Step 1 of 2</span>
+        </div>
+
+        <div class="auth-eyebrow">Create account</div>
+        <h2 class="auth-heading">Start with your email</h2>
+        <p class="auth-sub">Free forever. No credit card ever needed.</p>
+
+        <div class="oauth-stack">
+          <button class="oauth-btn" onclick="handleOAuth('google')">
+            <svg class="oi" viewBox="0 0 20 20"><path d="M19.6 10.23c0-.68-.06-1.36-.17-2H10v3.77h5.37a4.6 4.6 0 01-2 3.02v2.5h3.23c1.89-1.74 2.98-4.3 2.98-7.3z" fill="#4285F4"/><path d="M10 20c2.7 0 4.96-.9 6.61-2.43l-3.23-2.5c-.9.6-2.05.96-3.38.96-2.6 0-4.8-1.76-5.59-4.12H1.07v2.58A9.99 9.99 0 0010 20z" fill="#34A853"/><path d="M4.41 11.91A6 6 0 014.09 10c0-.67.11-1.3.32-1.9V5.52H1.07A10.01 10.01 0 000 10c0 1.61.38 3.14 1.07 4.48l3.34-2.57z" fill="#FBBC05"/><path d="M10 3.96c1.47 0 2.78.5 3.82 1.5l2.86-2.86C14.96.99 12.7 0 10 0A9.99 9.99 0 001.07 5.52l3.34 2.58C5.2 5.72 7.4 3.96 10 3.96z" fill="#EA4335"/></svg>
+            Sign up with Google
+          </button>
+        </div>
+
+        <div class="or-div"><span>or with email</span></div>
+
+        <div class="fg">
+          <label class="fl" for="su-email">Email address</label>
+          <input class="fi" type="email" id="su-email" placeholder="you@farm.ca" autocomplete="email"
+                 oninput="clrE('su-email','su-email-e')" onblur="lvEmail('su-email','su-email-e')"
+                 onkeydown="if(event.key==='Enter')G('su-pass').focus()">
+          <div class="ferr" id="su-email-e">Please enter a valid email address.</div>
+        </div>
+
+        <div class="fg">
+          <label class="fl" for="su-pass">Create a password</label>
+          <div class="fpw">
+            <input class="fi" type="password" id="su-pass" placeholder="Min. 8 characters" autocomplete="new-password"
+                   oninput="onPwInput(this.value)" onkeydown="if(event.key==='Enter') goStep2()">
+            <button class="pw-tog" type="button" onclick="togPw('su-pass',this)">👁</button>
+          </div>
+          <div class="pw-str" id="pw-str">
+            <div class="pw-bars">
+              <div class="pw-bar" id="pb1"></div><div class="pw-bar" id="pb2"></div>
+              <div class="pw-bar" id="pb3"></div><div class="pw-bar" id="pb4"></div>
+            </div>
+            <div class="pw-lbl" id="pw-lbl"></div>
+          </div>
+          <div class="ferr" id="su-pass-e">Password must be at least 8 characters.</div>
+        </div>
+
+        <button class="auth-btn" id="btn-s1" onclick="goStep2()">
+          <span class="btn-txt">Continue →</span><div class="btn-spin"></div>
+        </button>
+
+        <div class="auth-terms">By continuing you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.</div>
+        <div class="auth-switch">Already have an account? <a onclick="sv('signin')">Sign in →</a></div>
+      </div>
+
+      <!-- ════ VIEW: SIGNUP STEP 2 ════ -->
+      <div id="v-signup-2" class="vfade" style="display:none;">
+        <button class="auth-back" onclick="sv('signup-1')">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Back
+        </button>
+        <div class="step-dots">
+          <div class="sdot done"   id="sd2-1"></div>
+          <div class="sdot active" id="sd2-2"></div>
+          <span class="sdot-lbl">Step 2 of 2</span>
+        </div>
+
+        <div class="auth-eyebrow">Almost there</div>
+        <h2 class="auth-heading">Tell us about your farm</h2>
+        <p class="auth-sub">Personalizes your dashboard and funding recommendations.</p>
+
+        <div class="frow">
+          <div class="fg">
+            <label class="fl" for="su-first">First name</label>
+            <input class="fi" type="text" id="su-first" placeholder="Jane" autocomplete="given-name"
+                   oninput="clrE('su-first','su-first-e')">
+            <div class="ferr" id="su-first-e">Required.</div>
+          </div>
+          <div class="fg">
+            <label class="fl" for="su-last">Last name</label>
+            <input class="fi" type="text" id="su-last" placeholder="Smith" autocomplete="family-name"
+                   oninput="clrE('su-last','su-last-e')">
+            <div class="ferr" id="su-last-e">Required.</div>
+          </div>
+        </div>
+
+        <div class="fg">
+          <label class="fl" for="su-prov">Province / Territory</label>
+          <select class="fsel" id="su-prov" onchange="clrE('su-prov','su-prov-e')">
+            <option value="">Select your province…</option>
+            <option>Alberta</option><option>British Columbia</option><option>Manitoba</option>
+            <option>New Brunswick</option><option>Newfoundland &amp; Labrador</option>
+            <option>Northwest Territories</option><option>Nova Scotia</option><option>Nunavut</option>
+            <option>Ontario</option><option>Prince Edward Island</option>
+            <option>Quebec</option><option>Saskatchewan</option><option>Yukon</option>
+          </select>
+          <div class="ferr" id="su-prov-e">Please select your province.</div>
+        </div>
+
+        <button class="auth-btn" id="btn-su" onclick="handleSignUp()">
+          <span class="btn-txt">Create My Account →</span><div class="btn-spin"></div>
+        </button>
+
+        <div class="auth-terms">Your data is private and never sold. <a href="#">Privacy Policy →</a></div>
+      </div>
+
+      <!-- ════ VIEW: FORGOT PASSWORD ════ -->
+      <div id="v-forgot" class="vfade" style="display:none;">
+        <button class="auth-back" onclick="sv('signin')">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Back to sign in
+        </button>
+        <div class="auth-eyebrow">Reset password</div>
+        <h2 class="auth-heading">Forgot your password?</h2>
+        <p class="auth-sub">Enter your email and we'll send a reset link right away.</p>
+
+        <div class="fg">
+          <label class="fl" for="fp-email">Email address</label>
+          <input class="fi" type="email" id="fp-email" placeholder="you@farm.ca" autocomplete="email"
+                 onkeydown="if(event.key==='Enter') handleForgot()">
+          <div class="ferr" id="fp-email-e">Please enter a valid email.</div>
+        </div>
+
+        <button class="auth-btn" id="btn-fp" onclick="handleForgot()">
+          <span class="btn-txt">Send Reset Link →</span><div class="btn-spin"></div>
+        </button>
+      </div>
+
+      <!-- ════ VIEW: VERIFY EMAIL ════ -->
+      <div id="v-verify" class="vfade" style="display:none; text-align:center;">
+        <div class="vi-icon">📬</div>
+        <div class="auth-eyebrow" style="justify-content:center;">Almost done</div>
+        <h2 class="auth-heading">Check your inbox</h2>
+        <p style="font-size:14px;color:var(--ink-2);line-height:1.65;margin-bottom:6px;">We've sent a confirmation link to:</p>
+        <div class="vi-chip" id="vi-email">—</div>
+        <p style="font-size:13.5px;color:var(--ink-2);line-height:1.65;margin-bottom:26px;">Click the link to activate your account, then sign in.</p>
+        <button class="auth-btn" onclick="sv('signin')" style="margin-top:0;"><span class="btn-txt">Back to Sign In →</span><div class="btn-spin"></div></button>
+        <div class="auth-switch" style="margin-top:18px;">Didn't get it? <a onclick="resendVer()">Resend email</a></div>
+      </div>
+
+      <!-- ════ VIEW: SUCCESS ════ -->
+      <div id="v-success" class="vfade" style="display:none; text-align:center;">
+        <div class="su-icon">🌾</div>
+        <div class="auth-eyebrow" style="justify-content:center;">Welcome aboard</div>
+        <h2 class="auth-heading" style="margin-bottom:10px;">You're in!</h2>
+        <p style="font-size:14px;color:var(--ink-2);line-height:1.65;margin-bottom:30px;">
+          Welcome to Canadian Farm Copilot.<br>Let's personalize your experience.
         </p>
-        <div class="hero-features">
-          <div class="hero-feat">
-            <div class="hero-feat-icon">🌾</div>
-            AI Copilot grounded in Canadian ag programs
-          </div>
-          <div class="hero-feat">
-            <div class="hero-feat-icon">💰</div>
-            8 federal &amp; provincial funding programs
-          </div>
-          <div class="hero-feat">
-            <div class="hero-feat-icon">🌤</div>
-            Live weather + crop calendar by province
-          </div>
-          <div class="hero-feat">
-            <div class="hero-feat-icon">📊</div>
-            ROI calculator &amp; operations planner
-          </div>
-        </div>
+        <a href="index.html" class="auth-btn" style="display:block;text-decoration:none;text-align:center;line-height:1.4;">
+          Complete Farm Setup →
+        </a>
+        <div class="auth-switch" style="margin-top:18px;"><a href="dashboard.html">Skip to dashboard →</a></div>
       </div>
 
-      <div class="hero-foot">
-        Canadian Farm Copilot · v2.0 · 2026 · Powered by Claude
-      </div>
-    </div>
+    </div><!-- /.auth-card -->
+  </div><!-- /.auth-panel -->
+</div><!-- /.auth-root -->
 
-    <!-- Right — auth form ──────────────────────────────────────── -->
-    <div class="auth-panel">
-      <div class="auth-card">
+<script>
+/* ══ CONFIG ══ */
+const SUPABASE_URL      = 'YOUR_SUPABASE_URL';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const DEMO = !SUPABASE_URL || SUPABASE_URL.startsWith('YOUR_');
+let _sb = null, lastEmail = '';
 
-        <!-- Tab switcher -->
-        <div class="auth-tabs" role="tablist">
-          <button class="auth-tab active" id="tab-signin" role="tab" onclick="showTab('signin')">Sign In</button>
-          <button class="auth-tab"        id="tab-signup" role="tab" onclick="showTab('signup')">Create Account</button>
-        </div>
+/* ══ BOOT ══ */
+async function boot() {
+  G('demo-bn').classList.toggle('on', DEMO);
+  if (window.innerWidth < 960) {
+    document.querySelectorAll('.mobile-logo').forEach(el => el.style.display = 'flex');
+  }
+  // ?tab=signup param
+  if (new URLSearchParams(location.search).get('tab') === 'signup') sv('signup-1');
+  // Auto-focus
+  setTimeout(() => G('si-email')?.focus(), 300);
 
-        <!-- Alert banner -->
-        <div class="auth-alert" id="auth-alert" role="alert"></div>
+  if (!DEMO) {
+    try {
+      await ldScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js');
+      _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      const { data: { session } } = await _sb.auth.getSession();
+      if (session) { storeSess(session.user, false); go(); return; }
+      _sb.auth.onAuthStateChange((e, s) => { if (e === 'SIGNED_IN' && s) { storeSess(s.user, false); go(); } });
+    } catch (e) { console.warn('Supabase failed:', e); G('demo-bn').classList.add('on'); }
+  } else {
+    const s = getSess(); if (s?.email) go();
+  }
+}
 
-        <!-- ── SIGN IN ───────────────────────────────────────── -->
-        <div id="view-signin">
-          <div class="auth-heading">Welcome back</div>
-          <p class="auth-sub">Sign in to your Farm Copilot account.</p>
+function go() { window.location.replace(localStorage.getItem('farmProfile') ? 'dashboard.html' : 'index.html'); }
+function ldScript(src) {
+  return new Promise((res, rej) => {
+    if (document.querySelector(`script[src="${src}"]`)) { res(); return; }
+    const s = document.createElement('script'); s.src = src; s.async = true;
+    s.onload = res; s.onerror = () => rej(new Error('SDK load failed'));
+    document.head.appendChild(s);
+  });
+}
+boot().catch(console.error);
 
-          <div class="auth-form" id="form-signin">
-            <div class="field-group">
-              <label class="field-label" for="si-email">Email address</label>
-              <input class="field-input" type="email" id="si-email"
-                     placeholder="you@example.com" autocomplete="email">
-              <div class="field-error" id="si-email-err">Please enter a valid email address.</div>
-            </div>
+/* ══ SESSION ══ */
+function storeSess(user, rem) {
+  const d = { email: user.email, id: user.id || 'demo-' + Date.now(), signedIn: true,
+               expires: Date.now() + (rem ? 30 : 1) * 86400000 };
+  localStorage.setItem('authSession', JSON.stringify(d));
+  localStorage.setItem('authUser', JSON.stringify({ email: user.email, signedIn: true }));
+}
+function getSess() {
+  try {
+    const s = JSON.parse(localStorage.getItem('authSession') || 'null');
+    if (!s) return null;
+    if (s.expires && Date.now() > s.expires) { localStorage.removeItem('authSession'); return null; }
+    return s;
+  } catch { return null; }
+}
 
-            <div class="field-group">
-              <label class="field-label" for="si-pass">Password</label>
-              <div class="field-pw">
-                <input class="field-input" type="password" id="si-pass"
-                       placeholder="••••••••" autocomplete="current-password">
-                <button class="pw-toggle" type="button" onclick="togglePw('si-pass', this)" aria-label="Show password">👁</button>
-              </div>
-              <div class="field-error" id="si-pass-err">Password is required.</div>
-            </div>
-
-            <div class="auth-forgot">
-              <a href="#" onclick="showForgot(event)">Forgot password?</a>
-            </div>
-
-            <button class="auth-submit" id="btn-signin" onclick="handleSignIn()">
-              <span class="btn-text">Sign In →</span>
-              <div class="btn-spinner"></div>
-            </button>
-          </div>
-
-          <div class="auth-divider"><span>or continue with</span></div>
-
-          <div class="oauth-grid">
-            <button class="oauth-btn" onclick="handleOAuth('Google')">
-              <span class="oauth-icon">
-                <svg width="17" height="17" viewBox="0 0 18 18" fill="none">
-                  <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
-                  <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
-                  <path d="M3.964 10.706A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.038l3.007-2.332z" fill="#FBBC05"/>
-                  <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.962L3.964 7.294C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
-                </svg>
-              </span>
-              Google
-            </button>
-            <button class="oauth-btn" onclick="handleOAuth('Apple')">
-              <span class="oauth-icon">
-                <svg width="15" height="18" viewBox="0 0 15 18" fill="currentColor">
-                  <path d="M14.28 13.5c-.31.71-.68 1.37-1.1 1.98-.58.83-1.06 1.41-1.43 1.73-.57.52-1.18.79-1.83.8-.47 0-1.03-.13-1.68-.4-.65-.27-1.25-.4-1.79-.4-.57 0-1.18.13-1.84.4-.66.27-1.2.41-1.6.42-.62.03-1.25-.25-1.88-.83-.4-.35-.9-.95-1.5-1.8C.55 14.5.07 13.4.01 12.23c-.07-1.27.26-2.37.97-3.28.72-.92 1.66-1.38 2.83-1.38.47 0 1.08.15 1.84.45.75.3 1.24.45 1.45.45.16 0 .7-.18 1.6-.53.86-.33 1.58-.47 2.17-.42 1.6.13 2.81.76 3.6 1.91-.56.34-.97.73-1.24 1.19-.28.49-.41 1.03-.4 1.63.01.6.18 1.17.5 1.69.29.45.65.8 1.07 1.04-.14.4-.3.79-.5 1.16zM10.2 1.08c0 .47-.17.91-.5 1.33-.41.48-.89.75-1.42.71-.01-.06-.01-.11-.01-.16 0-.45.19-.93.54-1.33.17-.2.39-.37.65-.5.27-.14.52-.21.75-.21.01.05.01.1.01.16z"/>
-                </svg>
-              </span>
-              Apple
-            </button>
-          </div>
-
-          <div class="auth-switch">
-            Don't have an account? <a href="#" onclick="showTab('signup'); return false;">Create one free →</a>
-          </div>
-        </div>
-
-        <!-- ── SIGN UP ─────────────────────────────────────────── -->
-        <div id="view-signup" style="display:none;">
-          <div class="auth-heading">Create your account</div>
-          <p class="auth-sub">Free forever. No credit card needed.</p>
-
-          <div class="auth-form" id="form-signup">
-            <div class="field-row">
-              <div class="field-group">
-                <label class="field-label" for="su-first">First name</label>
-                <input class="field-input" type="text" id="su-first"
-                       placeholder="Jane" autocomplete="given-name">
-                <div class="field-error" id="su-first-err">First name is required.</div>
-              </div>
-              <div class="field-group">
-                <label class="field-label" for="su-last">Last name</label>
-                <input class="field-input" type="text" id="su-last"
-                       placeholder="Smith" autocomplete="family-name">
-                <div class="field-error" id="su-last-err">Last name is required.</div>
-              </div>
-            </div>
-
-            <div class="field-group">
-              <label class="field-label" for="su-email">Email address</label>
-              <input class="field-input" type="email" id="su-email"
-                     placeholder="you@example.com" autocomplete="email">
-              <div class="field-error" id="su-email-err">Please enter a valid email address.</div>
-            </div>
-
-            <div class="field-group">
-              <label class="field-label" for="su-province">Province</label>
-              <select class="field-select" id="su-province">
-                <option value="">Select your province…</option>
-                <option>Alberta</option>
-                <option>British Columbia</option>
-                <option>Manitoba</option>
-                <option>New Brunswick</option>
-                <option>Newfoundland &amp; Labrador</option>
-                <option>Nova Scotia</option>
-                <option>Ontario</option>
-                <option>Prince Edward Island</option>
-                <option>Quebec</option>
-                <option>Saskatchewan</option>
-              </select>
-              <div class="field-error" id="su-province-err">Please select your province.</div>
-            </div>
-
-            <div class="field-group">
-              <label class="field-label" for="su-pass">Password</label>
-              <div class="field-pw">
-                <input class="field-input" type="password" id="su-pass"
-                       placeholder="Min. 8 characters" autocomplete="new-password">
-                <button class="pw-toggle" type="button" onclick="togglePw('su-pass', this)" aria-label="Show password">👁</button>
-              </div>
-              <div class="field-error" id="su-pass-err">Password must be at least 8 characters.</div>
-            </div>
-
-            <button class="auth-submit" id="btn-signup" onclick="handleSignUp()">
-              <span class="btn-text">Create Free Account →</span>
-              <div class="btn-spinner"></div>
-            </button>
-          </div>
-
-          <div class="auth-terms">
-            By creating an account you agree to our
-            <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
-          </div>
-
-          <div class="auth-divider"><span>or sign up with</span></div>
-
-          <div class="oauth-grid">
-            <button class="oauth-btn" onclick="handleOAuth('Google')">
-              <span class="oauth-icon">
-                <svg width="17" height="17" viewBox="0 0 18 18" fill="none">
-                  <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
-                  <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
-                  <path d="M3.964 10.706A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.038l3.007-2.332z" fill="#FBBC05"/>
-                  <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.962L3.964 7.294C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
-                </svg>
-              </span>
-              Google
-            </button>
-            <button class="oauth-btn" onclick="handleOAuth('Apple')">
-              <span class="oauth-icon">
-                <svg width="15" height="18" viewBox="0 0 15 18" fill="currentColor">
-                  <path d="M14.28 13.5c-.31.71-.68 1.37-1.1 1.98-.58.83-1.06 1.41-1.43 1.73-.57.52-1.18.79-1.83.8-.47 0-1.03-.13-1.68-.4-.65-.27-1.25-.4-1.79-.4-.57 0-1.18.13-1.84.4-.66.27-1.2.41-1.6.42-.62.03-1.25-.25-1.88-.83-.4-.35-.9-.95-1.5-1.8C.55 14.5.07 13.4.01 12.23c-.07-1.27.26-2.37.97-3.28.72-.92 1.66-1.38 2.83-1.38.47 0 1.08.15 1.84.45.75.3 1.24.45 1.45.45.16 0 .7-.18 1.6-.53.86-.33 1.58-.47 2.17-.42 1.6.13 2.81.76 3.6 1.91-.56.34-.97.73-1.24 1.19-.28.49-.41 1.03-.4 1.63.01.6.18 1.17.5 1.69.29.45.65.8 1.07 1.04-.14.4-.3.79-.5 1.16zM10.2 1.08c0 .47-.17.91-.5 1.33-.41.48-.89.75-1.42.71-.01-.06-.01-.11-.01-.16 0-.45.19-.93.54-1.33.17-.2.39-.37.65-.5.27-.14.52-.21.75-.21.01.05.01.1.01.16z"/>
-                </svg>
-              </span>
-              Apple
-            </button>
-          </div>
-
-          <div class="auth-switch">
-            Already have an account? <a href="#" onclick="showTab('signin'); return false;">Sign in →</a>
-          </div>
-        </div>
-
-        <!-- ── FORGOT PASSWORD ──────────────────────────────────── -->
-        <div id="view-forgot" style="display:none;">
-          <div class="auth-heading">Reset password</div>
-          <p class="auth-sub">Enter your email and we'll send a reset link.</p>
-
-          <div class="auth-form">
-            <div class="field-group">
-              <label class="field-label" for="fp-email">Email address</label>
-              <input class="field-input" type="email" id="fp-email"
-                     placeholder="you@example.com" autocomplete="email">
-              <div class="field-error" id="fp-email-err">Please enter a valid email address.</div>
-            </div>
-
-            <button class="auth-submit" onclick="handleForgot()">
-              <span class="btn-text">Send Reset Link →</span>
-              <div class="btn-spinner"></div>
-            </button>
-          </div>
-
-          <div class="auth-switch">
-            <a href="#" onclick="showTab('signin'); return false;">← Back to sign in</a>
-          </div>
-        </div>
-
-        <!-- ── SUCCESS STATE ──────────────────────────────────────── -->
-        <div class="auth-success" id="view-success">
-          <div class="auth-success-icon">🌾</div>
-          <h3>You're in!</h3>
-          <p>Welcome to Canadian Farm Copilot.<br>Let's set up your farm profile.</p>
-          <a href="index.html" class="auth-success-btn">Go to Setup →</a>
-        </div>
-
-      </div><!-- /.auth-card -->
-    </div><!-- /.auth-panel -->
-  </div><!-- /.auth-shell -->
-
-  <!-- ── FOOTER ──────────────────────────────────────────────── -->
-  <footer class="ln-footer">
-    <div class="ln-footer-logo">Canadian Farm Copilot · v2.0 · 2026</div>
-    <div class="ln-footer-links">
-      <a href="landing.html"   class="ln-footer-link">Home</a>
-      <a href="index.html"     class="ln-footer-link">Setup</a>
-      <a href="pricing.html"   class="ln-footer-link">Pricing</a>
-      <a href="dashboard.html" class="ln-footer-link">Dashboard</a>
-      <a href="support.html"   class="ln-footer-link">Support</a>
-    </div>
-    <div class="ln-footer-copy">Covering 2025–2026 Canadian federal &amp; provincial programs · Open-Meteo weather · Powered by Claude</div>
-  </footer>
-
-  <script>
-    // ── Dashboard link ───────────────────────────────────────
-    if (localStorage.getItem('farmProfile')) {
-      ['nav-dashboard', 'drawer-dashboard'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = '';
-      });
+/* ══ HANDLERS ══ */
+async function handleSignIn() {
+  clrAlert();
+  const email = G('si-email').value.trim(), pass = G('si-pass').value;
+  const rem   = G('si-rem').checked;
+  if (!chk('si-email','si-email-e', isEm(email))) return;
+  if (!chk('si-pass', 'si-pass-e',  pass.length > 0)) return;
+  ld('btn-si', true);
+  try {
+    if (_sb) {
+      const { data, error } = await _sb.auth.signInWithPassword({ email, password: pass });
+      ld('btn-si', false);
+      if (error) { showAl(fErr(error.message), 'error'); return; }
+      storeSess(data.user, rem); go();
+    } else {
+      await wait(900); ld('btn-si', false);
+      if (pass.length < 6) { showAl('Incorrect email or password.', 'error'); return; }
+      storeSess({ email }, rem); go();
     }
+  } catch { ld('btn-si', false); showAl('Connection error. Please try again.', 'error'); }
+}
 
-    // ── Hamburger ────────────────────────────────────────────
-    const burger = document.getElementById('nav-burger');
-    const drawer = document.getElementById('nav-drawer');
+function goStep2() {
+  clrAlert();
+  if (!chk('su-email','su-email-e', isEm(G('su-email').value.trim()))) return;
+  if (!chk('su-pass', 'su-pass-e',  G('su-pass').value.length >= 8)) return;
+  sv('signup-2');
+  setTimeout(() => G('su-first')?.focus(), 200);
+}
 
-    function closeDrawer() {
-      drawer.classList.remove('open');
-      burger.classList.remove('open');
-      burger.setAttribute('aria-expanded', 'false');
-      document.body.style.overflow = '';
+async function handleSignUp() {
+  clrAlert();
+  const first = G('su-first').value.trim(), last = G('su-last').value.trim();
+  const prov  = G('su-prov').value;
+  const email = G('su-email').value.trim(), pass = G('su-pass').value;
+  const ok = [
+    chk('su-first','su-first-e', first.length > 0),
+    chk('su-last', 'su-last-e',  last.length > 0),
+    chk('su-prov', 'su-prov-e',  prov.length > 0),
+  ].every(Boolean);
+  if (!ok) return;
+  ld('btn-su', true); lastEmail = email;
+  try {
+    if (_sb) {
+      const { data, error } = await _sb.auth.signUp({ email, password: pass,
+        options: { data: { firstName: first, lastName: last, province: prov } } });
+      ld('btn-su', false);
+      if (error) { showAl(fErr(error.message), 'error'); return; }
+      if (data.user && !data.session) { G('vi-email').textContent = email; sv('verify'); return; }
+      if (data.session) { storeSess(data.user, false); go(); }
+    } else {
+      await wait(900); ld('btn-su', false);
+      storeSess({ email }, false);
+      const p = JSON.parse(localStorage.getItem('farmProfile') || '{}');
+      if (!p.province) { p.province = prov; localStorage.setItem('farmProfile', JSON.stringify(p)); }
+      sv('success');
     }
+  } catch { ld('btn-su', false); showAl('Connection error. Please try again.', 'error'); }
+}
 
-    burger.addEventListener('click', () => {
-      const isOpen = drawer.classList.toggle('open');
-      burger.classList.toggle('open', isOpen);
-      burger.setAttribute('aria-expanded', String(isOpen));
-      document.body.style.overflow = isOpen ? 'hidden' : '';
-    });
-
-    drawer.querySelectorAll('a').forEach(a => a.addEventListener('click', closeDrawer));
-
-    document.addEventListener('click', e => {
-      if (drawer.classList.contains('open') &&
-          !drawer.contains(e.target) &&
-          !burger.contains(e.target)) closeDrawer();
-    });
-
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') closeDrawer();
-    });
-
-    // ── Tab switcher ─────────────────────────────────────────
-    function showTab(tab) {
-      document.getElementById('view-signin').style.display  = tab === 'signin'  ? '' : 'none';
-      document.getElementById('view-signup').style.display  = tab === 'signup'  ? '' : 'none';
-      document.getElementById('view-forgot').style.display  = tab === 'forgot'  ? '' : 'none';
-      document.getElementById('view-success').style.display = 'none';
-
-      document.getElementById('tab-signin').classList.toggle('active', tab === 'signin');
-      document.getElementById('tab-signup').classList.toggle('active', tab === 'signup');
-
-      clearAlert();
+async function handleForgot() {
+  clrAlert();
+  const email = G('fp-email').value.trim();
+  if (!chk('fp-email','fp-email-e', isEm(email))) return;
+  ld('btn-fp', true);
+  try {
+    if (_sb) {
+      const { error } = await _sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + '/auth.html?mode=reset' });
+      ld('btn-fp', false);
+      error ? showAl(fErr(error.message), 'error') : showAl('Reset link sent! Check your inbox.', 'success');
+    } else {
+      await wait(800); ld('btn-fp', false);
+      showAl('Reset link sent! (Demo mode)', 'success');
     }
+  } catch { ld('btn-fp', false); showAl('Connection error.', 'error'); }
+}
 
-    function showForgot(e) {
-      e.preventDefault();
-      ['signin', 'signup', 'success'].forEach(v =>
-        document.getElementById('view-' + v).style.display = 'none');
-      document.getElementById('view-forgot').style.display = '';
-      clearAlert();
-    }
+async function handleOAuth(provider) {
+  if (!_sb) { showAl('Add Supabase keys to enable Google & Apple sign-in.', 'info'); return; }
+  try {
+    const { error } = await _sb.auth.signInWithOAuth({ provider, options: { redirectTo: location.origin + '/dashboard.html' } });
+    if (error) showAl(fErr(error.message), 'error');
+  } catch { showAl('OAuth error. Try again.', 'error'); }
+}
 
-    // ── Alert banner ─────────────────────────────────────────
-    function showAlert(msg, type = 'error') {
-      const el = document.getElementById('auth-alert');
-      el.textContent = msg;
-      el.className = `auth-alert ${type} show`;
-    }
+async function resendVer() {
+  if (!_sb || !lastEmail) return;
+  try { await _sb.auth.resend({ type: 'signup', email: lastEmail }); showAl('Verification email resent!', 'success'); }
+  catch { showAl('Could not resend. Try again.', 'error'); }
+}
 
-    function clearAlert() {
-      const el = document.getElementById('auth-alert');
-      el.className = 'auth-alert';
-      el.textContent = '';
-    }
+/* ══ VIEW MANAGEMENT ══ */
+const VIEWS = ['signin','signup-1','signup-2','forgot','verify','success'];
+function sv(name) {
+  clrAlert();
+  VIEWS.forEach(v => { const el = G('v-' + v); if (el) el.style.display = 'none'; });
+  const t = G('v-' + name);
+  if (!t) return;
+  t.style.display = '';
+  t.classList.remove('vfade'); void t.offsetWidth; t.classList.add('vfade');
+  setTimeout(() => { const f = t.querySelector('input:not([type=checkbox]),select'); if (f) f.focus(); }, 60);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
-    // ── Validation helpers ───────────────────────────────────
-    function validate(id, errId, test) {
-      const el = document.getElementById(id);
-      const err = document.getElementById(errId);
-      const ok = test(el.value.trim());
-      el.classList.toggle('error', !ok);
-      err.classList.toggle('show', !ok);
-      return ok;
-    }
+/* ══ VALIDATION ══ */
+function chk(iid, eid, cond) {
+  const i = G(iid), e = G(eid);
+  if (i) i.classList.toggle('error', !cond);
+  if (e) e.classList.toggle('show', !cond);
+  return !!cond;
+}
+function clrE(iid, eid) { G(iid)?.classList.remove('error','valid'); G(eid)?.classList.remove('show'); }
+function lvEmail(iid, eid) {
+  const v = G(iid)?.value.trim(); if (!v) return;
+  const ok = isEm(v);
+  G(iid)?.classList.toggle('valid', ok); G(iid)?.classList.toggle('error', !ok);
+  G(eid)?.classList.toggle('show', !ok);
+}
+function isEm(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
 
-    const isEmail = v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+/* ══ PASSWORD STRENGTH ══ */
+function onPwInput(v) {
+  clrE('su-pass','su-pass-e');
+  const w = G('pw-str');
+  if (!v.length) { w.classList.remove('on'); return; }
+  w.classList.add('on');
+  let s = 0;
+  if (v.length >= 8) s++; if (v.length >= 12) s++;
+  if (/[A-Z]/.test(v)) s++; if (/[0-9]/.test(v)) s++;
+  if (/[^A-Za-z0-9]/.test(v)) s++;
+  const clrs = [null,'c-red','c-orange','c-yellow','c-green','c-forest'];
+  const lbls = ['','Weak','Fair','Good','Strong','Very strong'];
+  for (let i = 1; i <= 4; i++) {
+    const b = G('pb' + i); b.className = 'pw-bar ' + (i <= s ? clrs[s] || 'c-green' : '');
+  }
+  G('pw-lbl').textContent = lbls[s] || '';
+}
 
-    // ── Show/hide password ───────────────────────────────────
-    function togglePw(inputId, btn) {
-      const inp = document.getElementById(inputId);
-      const show = inp.type === 'password';
-      inp.type = show ? 'text' : 'password';
-      btn.textContent = show ? '🙈' : '👁';
-    }
+/* ══ HELPERS ══ */
+function showAl(msg, type='error') {
+  const icons = { error:'⚠', success:'✓', info:'ℹ' };
+  G('al-icon').textContent = icons[type]; G('al-text').textContent = msg;
+  G('auth-alert').className = 'auth-alert ' + type + ' show';
+}
+function clrAlert() { G('auth-alert').className = 'auth-alert'; }
+function togPw(id, btn) {
+  const i = G(id); const s = i.type === 'password'; i.type = s ? 'text' : 'password'; btn.textContent = s ? '🙈' : '👁';
+}
+function ld(bid, on) { const b = G(bid); if (!b) return; b.classList.toggle('ld', on); b.disabled = on; }
+function G(id) { return document.getElementById(id); }
+function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+function fErr(m = '') {
+  if (/invalid.*credentials|wrong.*password/i.test(m)) return 'Incorrect email or password.';
+  if (/email.*not.*confirmed/i.test(m))                return 'Check your inbox — confirm your email first.';
+  if (/already.*registered|email.*exists/i.test(m))    return 'Account already exists. Try signing in.';
+  if (/rate.*limit|too many/i.test(m))                 return 'Too many attempts. Wait a few minutes.';
+  if (/weak.*password/i.test(m))                       return 'Choose a stronger password (8+ chars, mix of letters & numbers).';
+  return m || 'Something went wrong. Please try again.';
+}
 
-    // ── Loading state ────────────────────────────────────────
-    function setLoading(btnId, on) {
-      const btn = document.getElementById(btnId);
-      if (!btn) return;
-      btn.classList.toggle('loading', on);
-      btn.disabled = on;
-    }
-
-    // ── Sign In ──────────────────────────────────────────────
-    function handleSignIn() {
-      clearAlert();
-      const okEmail = validate('si-email', 'si-email-err', isEmail);
-      const okPass  = validate('si-pass',  'si-pass-err',  v => v.length > 0);
-      if (!okEmail || !okPass) return;
-
-      setLoading('btn-signin', true);
-
-      // Simulate auth (replace with real API call)
-      setTimeout(() => {
-        setLoading('btn-signin', false);
-        const email = document.getElementById('si-email').value.trim();
-        const pass  = document.getElementById('si-pass').value;
-
-        // Demo: accept any valid credentials
-        if (pass.length >= 6) {
-          localStorage.setItem('authUser', JSON.stringify({ email, signedIn: true }));
-          showSuccess();
-        } else {
-          showAlert('Incorrect email or password. Please try again.');
-        }
-      }, 1100);
-    }
-
-    // ── Sign Up ──────────────────────────────────────────────
-    function handleSignUp() {
-      clearAlert();
-      const okFirst    = validate('su-first',    'su-first-err',    v => v.length > 0);
-      const okLast     = validate('su-last',     'su-last-err',     v => v.length > 0);
-      const okEmail    = validate('su-email',    'su-email-err',    isEmail);
-      const okProvince = validate('su-province', 'su-province-err', v => v.length > 0);
-      const okPass     = validate('su-pass',     'su-pass-err',     v => v.length >= 8);
-
-      if (!okFirst || !okLast || !okEmail || !okProvince || !okPass) return;
-
-      setLoading('btn-signup', true);
-
-      // Simulate registration
-      setTimeout(() => {
-        setLoading('btn-signup', false);
-        const userData = {
-          email:    document.getElementById('su-email').value.trim(),
-          firstName: document.getElementById('su-first').value.trim(),
-          lastName:  document.getElementById('su-last').value.trim(),
-          province:  document.getElementById('su-province').value,
-          signedIn:  true,
-        };
-        localStorage.setItem('authUser', JSON.stringify(userData));
-        showSuccess();
-      }, 1200);
-    }
-
-    // ── Forgot password ──────────────────────────────────────
-    function handleForgot() {
-      clearAlert();
-      const ok = validate('fp-email', 'fp-email-err', isEmail);
-      if (!ok) return;
-
-      const btn = document.querySelector('#view-forgot .auth-submit');
-      btn.classList.add('loading'); btn.disabled = true;
-
-      setTimeout(() => {
-        btn.classList.remove('loading'); btn.disabled = false;
-        showAlert('Reset link sent! Check your inbox.', 'success');
-      }, 900);
-    }
-
-    // ── OAuth (demo) ─────────────────────────────────────────
-    function handleOAuth(provider) {
-      showAlert(`${provider} sign-in coming soon. Use email for now.`, 'success');
-    }
-
-    // ── Success state ────────────────────────────────────────
-    function showSuccess() {
-      ['signin', 'signup', 'forgot'].forEach(v => {
-        const el = document.getElementById('view-' + v);
-        if (el) el.style.display = 'none';
-      });
-      document.getElementById('view-success').style.display = 'block';
-    }
-
-    // ── Enter key submits ────────────────────────────────────
-    document.addEventListener('keydown', e => {
-      if (e.key !== 'Enter') return;
-      if (document.getElementById('view-signin').style.display !== 'none') handleSignIn();
-      else if (document.getElementById('view-signup').style.display !== 'none') handleSignUp();
-    });
-
-    // ── Check URL param ?tab=signup ──────────────────────────
-    const urlTab = new URLSearchParams(location.search).get('tab');
-    if (urlTab === 'signup') showTab('signup');
-  </script>
-  <script src="js/nav-patch.js"></script>
+/* ══ GUEST MODE ══ */
+function exploreAsGuest() {
+  // Mark as guest so pages know — no auth redirect
+  localStorage.setItem('guestMode', '1');
+  localStorage.removeItem('authSession');
+  localStorage.removeItem('authUser');
+  // Send to landing/dashboard in read-only preview
+  window.location.href = 'landing.html?guest=1';
+}
+</script>
 </body>
 </html>
