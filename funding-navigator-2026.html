@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>FarmCopilot - Funding Navigator 2026</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body { font-family: system-ui, sans-serif; }
+    .status-open { background-color: #10b981; }
+    .status-closing { background-color: #f59e0b; }
+    .status-closed { background-color: #ef4444; }
+    .fit-high { color: #10b981; }
+    .fit-medium { color: #f59e0b; }
+    .fit-low { color: #ef4444; }
+  </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 min-h-screen">
+  <div class="max-w-7xl mx-auto p-6">
+    <header class="flex justify-between items-center mb-8 gap-4 flex-wrap">
+      <div>
+        <h1 class="text-4xl font-bold text-green-700 dark:text-green-500">FarmCopilot</h1>
+        <p class="text-lg text-gray-600 dark:text-gray-400">Funding Navigator • 2026 Canadian Programs</p>
+      </div>
+      <div class="flex items-center gap-4">
+        <a href="funding.html" class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700">Back</a>
+        <button onclick="toggleTheme()" class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700">
+          <i class="fas fa-moon"></i>
+        </button>
+        <button onclick="resetApp()" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+          Restart Setup
+        </button>
+      </div>
+    </header>
+
+    <div id="step-indicator" class="flex justify-between mb-8 text-sm font-medium">
+      <div onclick="goToStep(1)" class="cursor-pointer flex-1 text-center py-3 border-b-4 border-green-600" id="step1">1. Province</div>
+      <div onclick="goToStep(2)" class="cursor-pointer flex-1 text-center py-3 border-b-4 border-gray-300" id="step2">2. Farm Type</div>
+      <div onclick="goToStep(3)" class="cursor-pointer flex-1 text-center py-3 border-b-4 border-gray-300" id="step3">3. Challenges</div>
+      <div onclick="goToStep(4)" class="cursor-pointer flex-1 text-center py-3 border-b-4 border-gray-300" id="step4">4. Size</div>
+    </div>
+
+    <div id="step-1" class="step-content">
+      <h2 class="text-2xl font-semibold mb-6">Where is your farm located?</h2>
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-4" id="province-options"></div>
+    </div>
+
+    <div id="step-2" class="step-content hidden">
+      <h2 class="text-2xl font-semibold mb-6">What type of farm do you operate?</h2>
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-4" id="farmtype-options"></div>
+    </div>
+
+    <div id="step-3" class="step-content hidden">
+      <h2 class="text-2xl font-semibold mb-6">Select your biggest challenges (up to 5)</h2>
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-3" id="challenge-options"></div>
+    </div>
+
+    <div id="step-4" class="step-content hidden">
+      <h2 class="text-2xl font-semibold mb-6">Approximate operation size</h2>
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-4" id="size-options"></div>
+    </div>
+
+    <div id="dashboard" class="hidden">
+      <div class="flex justify-between items-center mb-6 gap-3 flex-wrap">
+        <h2 class="text-3xl font-bold">Your Personalized Funding Matches</h2>
+        <div class="flex gap-3">
+          <button onclick="exportPDF()" class="px-5 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 flex items-center gap-2">
+            <i class="fas fa-download"></i> Export PDF
+          </button>
+          <button onclick="showAIAssistant()" class="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            AI Grant Assistant
+          </button>
+        </div>
+      </div>
+
+      <div id="matches-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+      <div class="mt-12 bg-white dark:bg-gray-900 p-8 rounded-2xl shadow">
+        <h3 class="text-xl font-semibold mb-4">Funding Readiness Score: <span id="readiness-score" class="text-4xl font-bold text-green-600">0</span>/100</h3>
+        <p class="text-gray-600 dark:text-gray-400">Complete your profile to improve matches. Strong applications win — use the AI assistant below to strengthen yours.</p>
+      </div>
+    </div>
+
+    <div id="ai-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+      <div class="bg-white dark:bg-gray-900 rounded-3xl max-w-2xl w-full mx-4 p-8 max-h-[90vh] overflow-auto">
+        <div class="flex justify-between mb-6">
+          <h3 class="text-2xl font-bold">AI Grant Assistant</h3>
+          <button onclick="hideAIAssistant()" class="text-3xl leading-none">&times;</button>
+        </div>
+        <textarea id="ai-input" class="w-full h-32 p-4 border rounded-xl dark:bg-gray-800" placeholder="Describe your project"></textarea>
+        <button onclick="runAIAssistant()" class="mt-4 w-full py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-2xl font-semibold text-lg">
+          Generate Draft & Checklist
+        </button>
+        <div id="ai-output" class="mt-8 prose dark:prose-invert max-w-none"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const provinces = ["Ontario", "Quebec", "British Columbia", "Alberta", "Saskatchewan", "Manitoba", "Nova Scotia", "New Brunswick", "Prince Edward Island", "Newfoundland and Labrador"];
+    const farmTypes = ["Grain & Oilseeds", "Dairy", "Beef & Livestock", "Hogs & Pork", "Poultry", "Produce / Vegetables", "Fruit & Orchards", "Mixed Farm", "Greenhouse / Controlled Environment", "Specialty Crops"];
+    const challengesList = ["Rising input costs", "Labour shortages", "Access to capital", "Market access / prices", "Climate variability", "Regulatory compliance", "Technology adoption", "Water access / irrigation"];
+    const sizes = [
+      {label: "Micro (<50 acres)", value: "micro"},
+      {label: "Small (50–250 acres)", value: "small"},
+      {label: "Medium (250–1,000 acres)", value: "medium"},
+      {label: "Large (1,000–5,000 acres)", value: "large"},
+      {label: "Enterprise (5,000+ acres)", value: "enterprise"}
+    ];
+
+    const programs = [
+      { id: 1, name: "AgriMarketing Program: Market Diversification for SMEs", status: "open", deadline: "September 30, 2030 (rolling)", fitCriteria: ["Market access / prices"], funding: "Up to $100,000 (70% cost-share)", description: "Helps small and medium agri-food businesses diversify into new domestic and export markets.", officialLink: "https://agriculture.canada.ca/en/programs/agrimarketing-market-diversification-small-medium-enterprises", provinces: "All" },
+      { id: 2, name: "On-Farm Climate Action Fund (OFCAF)", status: "open", deadline: "Varies by province", fitCriteria: ["Climate variability"], funding: "Up to 85% cost-share", description: "Supports adoption of climate-friendly practices on Canadian farms.", officialLink: "https://agriculture.canada.ca/en/programs/on-farm-climate-action-fund", provinces: "All" },
+      { id: 3, name: "Agricultural Clean Technology Program", status: "open", deadline: "Varies by stream", fitCriteria: ["Technology adoption", "Rising input costs"], funding: "50%+ cost-share", description: "Supports development and adoption of clean technologies in agriculture.", officialLink: "https://agriculture.canada.ca/en/programs/agricultural-clean-technology-program", provinces: "All" },
+      { id: 4, name: "AgriStability", status: "open", deadline: "April 30, 2026", fitCriteria: ["Access to capital", "Market access / prices", "Climate variability"], funding: "Margin-loss coverage", description: "Business risk management support when margins fall sharply.", officialLink: "https://agriculture.canada.ca/en/agricultural-programs-and-services/agristability", provinces: "All" },
+      { id: 5, name: "B.C. On-Farm Technology Adoption Program", status: "closing", deadline: "April 6, 2026", fitCriteria: ["Technology adoption", "Labour shortages"], funding: "Competitive cost-share", description: "Adopt labour-saving farm technologies in BC.", officialLink: "https://www.innovatebc.ca/", provinces: "British Columbia" },
+      { id: 6, name: "Ontario Market Diversification Initiative", status: "closed", deadline: "Closed March 17, 2026", fitCriteria: ["Market access / prices"], funding: "$20M pooled", description: "Ontario market diversification support stream.", officialLink: "https://ontario.ca", provinces: "Ontario" }
+    ];
+
+    let userProfile = { province: "", farmType: "", challenges: [], size: "" };
+
+    function renderOptions(id, items, onClickFn, icon = '') {
+      const c = document.getElementById(id);
+      c.innerHTML = items.map(v => `<button onclick="${onClickFn}('${typeof v === 'string' ? v : v.value}')" class="p-6 border-2 border-gray-200 dark:border-gray-700 hover:border-green-600 rounded-2xl text-left transition-all"><div class="font-semibold">${icon ? icon + ' ' : ''}${typeof v === 'string' ? v : v.label}</div></button>`).join('');
+    }
+    function renderChallenges() {
+      const c = document.getElementById('challenge-options');
+      c.innerHTML = challengesList.map(ch => `<button onclick="toggleChallenge(this, '${ch}')" class="px-5 py-4 border border-gray-300 dark:border-gray-600 hover:bg-green-50 dark:hover:bg-green-950 rounded-xl text-sm transition-all">${ch}</button>`).join('');
+    }
+
+    function renderDashboard() {
+      document.querySelectorAll('.step-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById('dashboard').classList.remove('hidden');
+      const box = document.getElementById('matches-container');
+      let score = 30 + (userProfile.challenges.length ? 20 : 0) + (userProfile.province ? 20 : 0) + (userProfile.farmType ? 15 : 0) + (userProfile.size ? 15 : 0);
+      document.getElementById('readiness-score').textContent = Math.min(95, score);
+
+      const filtered = programs.filter(p => (p.provinces === 'All' || p.provinces === userProfile.province) && p.fitCriteria.some(c => userProfile.challenges.includes(c)));
+      if (!filtered.length) {
+        box.innerHTML = '<div class="col-span-full text-center py-12 text-gray-500">No strong matches yet. Try selecting more challenges.</div>';
+        return;
+      }
+      box.innerHTML = filtered.map(prog => {
+        const fit = userProfile.challenges.filter(c => prog.fitCriteria.includes(c)).length >= 2 ? 'High Fit' : 'Medium Fit';
+        const fitClass = fit === 'High Fit' ? 'fit-high' : 'fit-medium';
+        const statusClass = prog.status === 'open' ? 'status-open text-white' : (prog.status === 'closing' ? 'status-closing text-white' : 'status-closed text-white');
+        return `<div class="bg-white dark:bg-gray-900 rounded-3xl shadow p-6 border border-gray-100 dark:border-gray-800">
+          <div class="flex justify-between items-start mb-4"><span class="px-3 py-1 text-xs font-medium rounded-full ${statusClass}">${prog.status.toUpperCase()}</span><div class="text-right"><div class="text-xs text-gray-500">Deadline</div><div class="text-sm font-medium">${prog.deadline}</div></div></div>
+          <h3 class="font-semibold text-lg leading-tight mb-3">${prog.name}</h3>
+          <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">${prog.description}</p>
+          <div class="flex items-center gap-2 mb-4"><span class="font-medium ${fitClass}">${fit}</span><span class="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded">${prog.funding}</span></div>
+          <a href="${prog.officialLink}" target="_blank" class="block w-full text-center py-3 border border-green-700 text-green-700 dark:border-green-500 dark:text-green-400 rounded-2xl hover:bg-green-50 dark:hover:bg-green-950 font-medium">View Official Details →</a>
+        </div>`;
+      }).join('');
+    }
+
+    function selectProvince(p) { userProfile.province = p; goToStep(2); }
+    function selectFarmType(ft) { userProfile.farmType = ft; goToStep(3); }
+    function toggleChallenge(btn, ch) {
+      if (userProfile.challenges.includes(ch)) { userProfile.challenges = userProfile.challenges.filter(c => c !== ch); btn.classList.remove('bg-green-100', 'border-green-600', 'dark:bg-green-900'); }
+      else if (userProfile.challenges.length < 5) { userProfile.challenges.push(ch); btn.classList.add('bg-green-100', 'border-green-600', 'dark:bg-green-900'); }
+    }
+    function selectSize(sz) { userProfile.size = sz; renderDashboard(); }
+    function goToStep(step) {
+      document.querySelectorAll('.step-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`step-${step}`).classList.remove('hidden');
+      for (let i = 1; i <= 4; i++) {
+        const el = document.getElementById(`step${i}`);
+        if (i < step) el.classList.add('border-green-600', 'text-green-600');
+        else if (i === step) el.classList.add('border-green-600');
+        else el.classList.remove('border-green-600', 'text-green-600');
+      }
+    }
+
+    function showAIAssistant() { document.getElementById('ai-modal').classList.remove('hidden'); document.getElementById('ai-output').innerHTML = ''; }
+    function hideAIAssistant() { document.getElementById('ai-modal').classList.add('hidden'); }
+    function runAIAssistant() {
+      const input = document.getElementById('ai-input').value.trim();
+      const outputDiv = document.getElementById('ai-output');
+      if (!input) return outputDiv.innerHTML = '<p class="text-red-500">Please describe your project.</p>';
+      outputDiv.innerHTML = '<div class="animate-pulse space-y-4"><div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div><div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6"></div></div>';
+      setTimeout(() => {
+        outputDiv.innerHTML = `<div class="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 p-6 rounded-2xl"><h4 class="font-semibold mb-3">Suggested Project Description</h4><p class="text-sm leading-relaxed">As a ${userProfile.farmType || 'mixed'} operation in ${userProfile.province || 'Canada'}, we are seeking support to improve productivity and resilience while reducing costs and climate risk.</p></div>`;
+      }, 900);
+    }
+    function exportPDF() { alert('PDF export simulated. Integrate jsPDF/html2pdf in production.'); }
+    function toggleTheme() { document.documentElement.classList.toggle('dark'); }
+    function resetApp() { if (confirm('Restart the entire setup?')) { userProfile = { province: '', farmType: '', challenges: [], size: '' }; document.getElementById('dashboard').classList.add('hidden'); goToStep(1); } }
+
+    function init() {
+      renderOptions('province-options', provinces, 'selectProvince', '📍');
+      renderOptions('farmtype-options', farmTypes, 'selectFarmType');
+      renderChallenges();
+      renderOptions('size-options', sizes, 'selectSize');
+      goToStep(1);
+    }
+    window.onload = init;
+  </script>
+</body>
+</html>
