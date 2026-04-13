@@ -627,7 +627,7 @@
     drawer.innerHTML = `
       <div class="more-drawer-handle"></div>
       ${drawerContent}
-<<<<<<< HEAD
+
       <div class="more-drawer-section" style="padding-top:4px;">
         <div class="more-drawer-section-label">👤&ensp;Account</div>
         <div class="more-tools-grid">
@@ -642,11 +642,10 @@
                </button>`
           }
         </div>
-=======
       <div class="more-drawer-section">
         <div class="more-drawer-section-label">👤&ensp;Account</div>
         <div id="mob-account-actions"></div>
->>>>>>> 7693e3789e82cac8538875578f1135dd4cd58497
+7693e3789e82cac8538875578f1135dd4cd58497
       </div>
       <div style="height:12px;"></div>`;
 
