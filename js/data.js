@@ -5,11 +5,23 @@
 /* ── Profile management ── */
 const Profile = {
   KEY: 'farmProfile',
+  sanitize(value) {
+    if (typeof value === 'string') {
+      const div = document.createElement('div');
+      div.textContent = value;
+      return div.innerHTML;
+    }
+    if (Array.isArray(value)) return value.map(v => this.sanitize(v));
+    if (value && typeof value === 'object') {
+      return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, this.sanitize(v)]));
+    }
+    return value;
+  },
   load() {
     try { return JSON.parse(localStorage.getItem(this.KEY)) || null; } catch { return null; }
   },
   save(profile) {
-    localStorage.setItem(this.KEY, JSON.stringify(profile));
+    localStorage.setItem(this.KEY, JSON.stringify(this.sanitize(profile)));
   },
   requireOrRedirect() {
     const p = this.load();
@@ -17,6 +29,30 @@ const Profile = {
     return p;
   }
 };
+
+/* ── User identity helpers (profile + auth fallbacks) ── */
+function getStoredJSON(key) {
+  try { return JSON.parse(localStorage.getItem(key)); } catch { return null; }
+}
+
+function getUserContext() {
+  const profile = getStoredJSON('farmProfile') || {};
+  const authSession = getStoredJSON('farmCopilotAuth') || {};
+  const authUser = getStoredJSON('authUser') || {};
+
+  const fullName = [
+    profile.firstName || authSession.firstName || '',
+    profile.lastName || authSession.lastName || '',
+  ].join(' ').trim();
+  const email = profile.email || authSession.email || authUser.email || '';
+  const emailPrefix = email ? email.split('@')[0] : '';
+  const rawFirstName = (profile.firstName || authSession.firstName || fullName.split(' ')[0] || emailPrefix || 'Farmer').trim();
+  const firstName = rawFirstName ? rawFirstName.charAt(0).toUpperCase() + rawFirstName.slice(1) : 'Farmer';
+  const regionContext = profile.province || profile.region || profile.location || 'your region';
+  const farmType = profile.farmType || '';
+
+  return { profile, firstName, fullName, email, regionContext, farmType };
+}
 
 /* ── Province & farm data ── */
 const PROVINCES = [

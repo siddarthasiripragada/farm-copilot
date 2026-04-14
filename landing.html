@@ -30,6 +30,7 @@ body { background: var(--forest); font-family: 'Sora', sans-serif; overflow-x: h
 .ln-nav-links { display:flex; align-items:center; gap:24px; }
 .ln-nav-link  { font-size:13px; color:rgba(244,236,218,.6); text-decoration:none; transition:color .14s; }
 .ln-nav-link:hover { color:var(--wheat); }
+.ln-nav-signin { border: 1px solid rgba(255,255,255,.16); padding: 8px 14px; border-radius: 8px; }
 .ln-nav-cta   { padding:9px 20px; background:var(--amber); color:white; border-radius:8px; font-size:13px; font-weight:500; text-decoration:none; transition:background .14s; }
 .ln-nav-cta:hover { background:var(--amber-lt); }
 
@@ -300,7 +301,8 @@ body { background: var(--forest); font-family: 'Sora', sans-serif; overflow-x: h
   .ln-hero-inner { grid-template-columns:1fr; }
   .ln-preview-card { display:none; }
   .ln-nav { padding:12px 20px; }
-  .ln-nav-links a:not(.ln-nav-cta) { display:none; }
+  .ln-nav-links a:not(.ln-nav-cta):not(.ln-nav-signin) { display:none; }
+  .ln-nav-signin { display:inline-flex; align-items:center; }
   .ln-hero { padding:90px 24px 60px; }
   .ln-title { font-size:38px; }
   .ln-section { padding:56px 24px; }
@@ -338,7 +340,8 @@ body { background: var(--forest); font-family: 'Sora', sans-serif; overflow-x: h
     <a href="#programs"  class="ln-nav-link">Programs</a>
     <a href="#pricing"   class="ln-nav-link">Pricing</a>
     <a href="dashboard.html" class="ln-nav-link" id="nav-dashboard" style="display:none;">Dashboard</a>
-    <a href="index.html" class="ln-nav-cta">Start Free Setup →</a>
+    <a href="login.html" class="ln-nav-link ln-nav-signin">Sign In</a>
+    <a href="signup.html" class="ln-nav-cta">Start Free Setup →</a>
   </div>
 </nav>
 
@@ -377,7 +380,7 @@ body { background: var(--forest); font-family: 'Sora', sans-serif; overflow-x: h
       </p>
 
       <div class="ln-cta-row">
-        <a href="index.html" class="ln-cta-primary">
+        <a href="signup.html" class="ln-cta-primary">
           Start Free Setup →
         </a>
         <a href="dashboard.html" class="ln-cta-ghost" onclick="activateDemoModeFromLanding(); return false;">
@@ -973,7 +976,7 @@ body { background: var(--forest); font-family: 'Sora', sans-serif; overflow-x: h
             <li>Basic ROI calculator</li>
             <li>Operations planner</li>
           </ul>
-          <a href="index.html" class="price-cta free">Start Free Setup</a>
+          <a href="signup.html" class="price-cta free">Start Free Setup</a>
         </div>
         <div class="price-card featured">
           <div class="price-badge">Most Popular</div>
