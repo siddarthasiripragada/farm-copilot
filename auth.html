@@ -1,0 +1,1648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="description" content="Canadian Farm Copilot — AI farm intelligence for Canadian producers">
+<!-- Security headers (also set at hosting level via vercel.json / _headers) -->
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta http-equiv="X-Frame-Options" content="DENY">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Canadian Farm Copilot — Account</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;1,9..144,300;1,9..144,500&family=Outfit:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ════════════════════════════════════════════════════
+   RESET + DESIGN TOKENS
+════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --forest:    #0D2318;
+  --forest-2:  #142E20;
+  --forest-3:  #1B3C2A;
+  --sage:      #3D7A5A;
+  --leaf:      #7EC99A;
+  --gold:      #C9943A;
+  --gold-lt:   #E8B84B;
+  --amber:     #D17C2A;
+  --cream:     #FBF7EE;
+  --cream-dk:  #EDE7D5;
+  --ink:       #0D2318;
+  --ink-2:     rgba(13,35,24,.58);
+  --ink-3:     rgba(13,35,24,.36);
+  --ink-4:     rgba(13,35,24,.12);
+  --red:       #C0392B;
+  --red-lt:    rgba(192,57,43,.1);
+  --green:     #27AE60;
+  --r:         12px;
+}
+
+html { min-height: 100%; background: var(--forest); }
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--forest);
+  color: var(--cream);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ════════════════════════════════════════════════════
+   LAYOUT
+════════════════════════════════════════════════════ */
+.auth-root {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 500px;
+}
+
+/* ════════════════════════════════════════════════════
+   LEFT — BRAND PANEL
+════════════════════════════════════════════════════ */
+.brand-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 44px 52px;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--forest);
+}
+.brand-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  background-size: 160px;
+  opacity: .7;
+}
+.bg-glow-1 {
+  position: absolute; z-index: 0;
+  width: 650px; height: 650px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(61,122,90,.26) 0%, transparent 70%);
+  bottom: -240px; left: -200px;
+  animation: dA 16s ease-in-out infinite alternate;
+}
+.bg-glow-2 {
+  position: absolute; z-index: 0;
+  width: 420px; height: 420px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(201,148,58,.13) 0%, transparent 70%);
+  top: -100px; right: -120px;
+  animation: dB 20s ease-in-out infinite alternate;
+}
+@keyframes dA { from { transform: translate(0,0); }   to { transform: translate(40px,-30px); } }
+@keyframes dB { from { transform: translate(0,0); }   to { transform: translate(-28px,38px); } }
+
+/* Animated topography lines */
+.topo-svg { position: absolute; inset: 0; z-index: 0; opacity: .055; pointer-events: none; }
+.tl { fill: none; stroke: rgba(126,201,154,1); stroke-width: 1.2; }
+.ap { stroke-dasharray: 2000; stroke-dashoffset: 2000; animation: drawL 9s ease forwards; }
+@keyframes drawL { to { stroke-dashoffset: 0; } }
+
+/* Seed animation in left panel — the signature element */
+.seed-container {
+  position: absolute;
+  bottom: 80px; right: 52px;
+  z-index: 1;
+  opacity: .18;
+  pointer-events: none;
+}
+.seed-stalk { animation: growStalk 3s cubic-bezier(.2,.8,.4,1) .5s both; transform-origin: bottom center; }
+@keyframes growStalk { from { transform: scaleY(0) translateY(10px); opacity:0; } to { transform: scaleY(1) translateY(0); opacity:1; } }
+.seed-leaf-l { animation: unfoldL 1.2s cubic-bezier(.2,.8,.4,1) 2.5s both; transform-origin: right center; }
+.seed-leaf-r { animation: unfoldR 1.2s cubic-bezier(.2,.8,.4,1) 2.8s both; transform-origin: left center; }
+@keyframes unfoldL { from { transform: rotate(60deg) scale(.2); opacity:0; } to { transform: rotate(0deg) scale(1); opacity:1; } }
+@keyframes unfoldR { from { transform: rotate(-60deg) scale(.2); opacity:0; } to { transform: rotate(0deg) scale(1); opacity:1; } }
+
+.brand-inner { position: relative; z-index: 1; display: flex; flex-direction: column; height: 100%; justify-content: space-between; }
+
+/* Logo */
+.brand-logo { display: flex; align-items: center; gap: 13px; text-decoration: none; margin-bottom: 64px; }
+.brand-logo-mark {
+  width: 42px; height: 42px; border-radius: 11px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--sage) 0%, var(--forest-3) 100%);
+  border: 1px solid rgba(126,201,154,.2);
+  display: flex; align-items: center; justify-content: center; font-size: 20px;
+  box-shadow: 0 4px 18px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.08);
+}
+.brand-logo-info { display: flex; flex-direction: column; gap: 2px; }
+.brand-logo-name { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--gold-lt); }
+.brand-logo-sub  { font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; letter-spacing: 1.5px; color: rgba(232,184,75,.38); }
+
+/* Headline */
+.brand-eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--leaf); opacity: .72; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+.brand-eyebrow::before { content: ''; display: inline-block; width: 18px; height: 1.5px; background: var(--leaf); opacity: .7; }
+.brand-headline { font-family: 'Fraunces', serif; font-size: 50px; font-weight: 500; line-height: 1.08; letter-spacing: -1.8px; color: var(--cream); margin-bottom: 22px; }
+.brand-headline em { font-style: italic; font-weight: 300; color: var(--gold-lt); }
+.brand-desc { font-size: 14.5px; color: rgba(251,247,238,.48); line-height: 1.78; max-width: 380px; margin-bottom: 44px; }
+
+/* Feature list */
+.brand-feats { display: flex; flex-direction: column; gap: 12px; margin-bottom: 44px; }
+.brand-feat { display: flex; align-items: center; gap: 12px; font-size: 13.5px; color: rgba(251,247,238,.62); }
+.feat-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--leaf); flex-shrink: 0; opacity: .8; }
+
+/* Stats */
+.brand-stats {
+  display: flex; gap: 0;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 14px;
+  overflow: hidden; max-width: 360px;
+}
+.bstat { flex: 1; padding: 16px 18px; border-right: 1px solid rgba(255,255,255,.06); text-align: center; }
+.bstat:last-child { border-right: none; }
+.bstat-val { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 500; letter-spacing: -.5px; color: var(--cream); line-height: 1; margin-bottom: 4px; }
+.bstat-lbl { font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; letter-spacing: 1px; text-transform: uppercase; color: rgba(251,247,238,.28); }
+
+.brand-foot { font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: .5px; color: rgba(251,247,238,.16); margin-top: 28px; }
+
+/* ════════════════════════════════════════════════════
+   RIGHT — AUTH PANEL
+════════════════════════════════════════════════════ */
+.auth-panel {
+  background: var(--cream);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 48px 44px; min-height: 100vh; position: relative; overflow-y: auto;
+}
+.auth-panel::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse at 100% 0%, rgba(201,148,58,.055) 0%, transparent 50%),
+    radial-gradient(ellipse at 0% 100%, rgba(61,122,90,.045) 0%, transparent 50%);
+}
+/* Top gradient bar on mobile */
+.auth-panel::after {
+  content: ''; position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 100;
+  background: linear-gradient(90deg, var(--forest), var(--sage) 40%, var(--gold) 80%, var(--forest));
+  display: none;
+}
+
+.auth-card { width: 100%; max-width: 400px; position: relative; z-index: 1; }
+
+/* ── View animation ── */
+.vfade { animation: vIn .24s cubic-bezier(.32,.72,0,1); }
+@keyframes vIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+/* Staggered field reveals (applied via JS by adding .field-stagger to each .fg) */
+.field-stagger {
+  animation: fieldIn .3s cubic-bezier(.32,.72,0,1) both;
+}
+.field-stagger:nth-child(1) { animation-delay: .04s; }
+.field-stagger:nth-child(2) { animation-delay: .09s; }
+.field-stagger:nth-child(3) { animation-delay: .14s; }
+.field-stagger:nth-child(4) { animation-delay: .19s; }
+.field-stagger:nth-child(5) { animation-delay: .24s; }
+@keyframes fieldIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+/* ── Back button ── */
+.auth-back { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--ink-2); background: none; border: none; cursor: pointer; padding: 0; margin-bottom: 28px; transition: color .14s; font-family: 'Outfit', sans-serif; }
+.auth-back:hover { color: var(--ink); }
+.auth-back:focus-visible { outline: 2px solid var(--sage); outline-offset: 3px; border-radius: 4px; }
+
+/* ── Headings ── */
+.auth-eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 2px; text-transform: uppercase; color: var(--sage); margin-bottom: 10px; }
+.auth-heading { font-family: 'Fraunces', serif; font-size: 30px; font-weight: 500; letter-spacing: -.8px; color: var(--ink); margin-bottom: 8px; line-height: 1.15; }
+.auth-sub { font-size: 14px; color: var(--ink-2); margin-bottom: 30px; line-height: 1.6; }
+
+/* ── Alert ── */
+.auth-alert { display: none; padding: 11px 14px; border-radius: 10px; font-size: 13px; line-height: 1.5; margin-bottom: 18px; align-items: flex-start; gap: 9px; }
+.auth-alert.show { display: flex; animation: vIn .18s ease; }
+.auth-alert.error   { background: rgba(192,57,43,.08);  border: 1px solid rgba(192,57,43,.22);  color: #7a1508; }
+.auth-alert.success { background: rgba(39,174,96,.08);  border: 1px solid rgba(39,174,96,.25);  color: #1a6b3c; }
+.auth-alert.info    { background: rgba(61,122,90,.07);  border: 1px solid rgba(61,122,90,.2);   color: var(--sage); }
+.auth-alert.warning { background: rgba(201,148,58,.09); border: 1px solid rgba(201,148,58,.28); color: #7a4d10; }
+.auth-alert-icon { font-size: 14px; margin-top: 1px; flex-shrink: 0; }
+
+/* ── Rate-limit banner ── */
+.rl-banner {
+  display: none;
+  background: rgba(192,57,43,.06);
+  border: 1px solid rgba(192,57,43,.2);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: #7a1508;
+}
+.rl-banner.on { display: block; animation: vIn .2s ease; }
+.rl-banner strong { font-weight: 600; display: block; margin-bottom: 3px; }
+
+/* ── OAuth buttons ── */
+.oauth-stack { display: flex; flex-direction: column; gap: 10px; margin-bottom: 22px; }
+.oauth-btn {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; padding: 13px 18px;
+  background: #fff; border: 1.5px solid var(--ink-4); border-radius: var(--r);
+  font-family: 'Outfit', sans-serif; font-size: 14.5px; font-weight: 500; color: var(--ink);
+  cursor: pointer; transition: all .15s; min-height: 50px; position: relative;
+}
+.oauth-btn:hover { background: var(--cream-dk); border-color: rgba(13,35,24,.22); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(13,35,24,.08); }
+.oauth-btn:active { transform: none; }
+.oauth-btn:focus-visible { outline: 2px solid var(--sage); outline-offset: 2px; }
+.oi { width: 20px; height: 20px; flex-shrink: 0; }
+.oauth-soon { position: absolute; right: 14px; font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; color: var(--ink-3); letter-spacing: .5px; }
+
+/* ── Divider ── */
+.or-div { display: flex; align-items: center; gap: 14px; margin-bottom: 22px; }
+.or-div::before, .or-div::after { content: ''; flex: 1; height: 1px; background: var(--ink-4); }
+.or-div span { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--ink-3); white-space: nowrap; }
+
+/* ── Fields ── */
+.fg { display: flex; flex-direction: column; gap: 6px; margin-bottom: 15px; }
+.fg:last-of-type { margin-bottom: 0; }
+.frow { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.fl {
+  font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--ink-2);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.fl-action {
+  font-size: 11px; color: var(--sage); text-decoration: none; letter-spacing: 0;
+  text-transform: none; font-family: 'Outfit', sans-serif; font-weight: 500; cursor: pointer;
+}
+.fl-action:hover { color: var(--forest-3); }
+
+.fi {
+  padding: 13px 16px;
+  background: #fff; border: 1.5px solid var(--ink-4); border-radius: var(--r);
+  font-family: 'Outfit', sans-serif; font-size: 15px; color: var(--ink);
+  outline: none; transition: border-color .15s, box-shadow .15s, transform .1s;
+  width: 100%; -webkit-appearance: none;
+}
+.fi::placeholder { color: var(--ink-3); }
+.fi:focus { border-color: var(--sage); box-shadow: 0 0 0 3.5px rgba(61,122,90,.12); transform: translateY(-1px); }
+.fi.error  { border-color: var(--red);   box-shadow: 0 0 0 3px rgba(192,57,43,.08); }
+.fi.valid  { border-color: var(--green); }
+.fi:disabled { opacity: .5; cursor: not-allowed; }
+
+.fpw { position: relative; }
+.fpw .fi { padding-right: 48px; }
+.pw-tog { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--ink-3); cursor: pointer; font-size: 16px; padding: 4px; transition: color .14s; line-height: 1; }
+.pw-tog:hover { color: var(--ink-2); }
+
+.fsel {
+  padding: 13px 36px 13px 16px; background: #fff; border: 1.5px solid var(--ink-4);
+  border-radius: var(--r); font-family: 'Outfit', sans-serif; font-size: 15px; color: var(--ink);
+  outline: none; width: 100%; cursor: pointer; transition: border-color .15s, box-shadow .15s;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%230D2318' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center;
+}
+.fsel:focus { border-color: var(--sage); box-shadow: 0 0 0 3.5px rgba(61,122,90,.12); }
+.fsel.error { border-color: var(--red); }
+
+.ferr { font-size: 12px; color: var(--red); display: none; margin-top: -2px; }
+.ferr.show { display: block; animation: vIn .15s ease; }
+
+/* ── Password strength ── */
+.pw-str { margin-top: 8px; display: none; }
+.pw-str.on { display: block; }
+.pw-bars { display: flex; gap: 4px; margin-bottom: 5px; }
+.pw-bar { flex: 1; height: 3px; border-radius: 3px; background: var(--ink-4); transition: background .3s; }
+.c-red    { background: #C0392B; } .c-orange { background: #E67E22; }
+.c-yellow { background: #F1C40F; } .c-green  { background: #27AE60; }
+.c-forest { background: var(--forest-3); }
+.pw-lbl { font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: .5px; color: var(--ink-3); }
+
+/* ── Checkbox ── */
+.fchk { display: flex; align-items: center; gap: 9px; cursor: pointer; user-select: none; font-size: 13.5px; color: var(--ink-2); }
+.fchk input[type=checkbox] { width: 16px; height: 16px; border-radius: 4px; cursor: pointer; accent-color: var(--forest); flex-shrink: 0; }
+
+/* ── Primary button ── */
+.auth-btn {
+  width: 100%; padding: 15px;
+  background: var(--forest); color: var(--cream);
+  border: none; border-radius: var(--r);
+  font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 600;
+  cursor: pointer; transition: all .17s;
+  min-height: 52px; margin-top: 20px;
+  position: relative; overflow: hidden; letter-spacing: -.1px;
+}
+.auth-btn:hover:not(:disabled) { background: var(--forest-3); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(13,35,24,.22); }
+.auth-btn:active:not(:disabled) { transform: translateY(0); }
+.auth-btn:disabled  { opacity: .55; cursor: not-allowed; transform: none !important; }
+.auth-btn.ld        { pointer-events: none; }
+.auth-btn:focus-visible { outline: 2px solid var(--sage); outline-offset: 3px; }
+.btn-txt  { transition: opacity .15s; }
+.btn-spin { display: none; width: 20px; height: 20px; border: 2px solid rgba(251,247,238,.25); border-top-color: var(--cream); border-radius: 50%; animation: spin .7s linear infinite; position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); }
+.auth-btn.ld .btn-txt  { opacity: 0; }
+.auth-btn.ld .btn-spin { display: block; }
+@keyframes spin { to { transform: translate(-50%,-50%) rotate(360deg); } }
+
+/* Danger variant (sign-out confirm) */
+.auth-btn.danger {
+  background: #8B1C10;
+  color: #fff;
+}
+.auth-btn.danger:hover:not(:disabled) { background: #6e1509; }
+
+/* Secondary ghost button */
+.auth-btn-ghost {
+  width: 100%; padding: 13px;
+  background: transparent; color: var(--ink-2);
+  border: 1.5px solid var(--ink-4); border-radius: var(--r);
+  font-family: 'Outfit', sans-serif; font-size: 14.5px; font-weight: 500;
+  cursor: pointer; transition: all .15s; margin-top: 10px;
+  position: relative; overflow: hidden;
+}
+.auth-btn-ghost:hover { background: var(--cream-dk); border-color: rgba(13,35,24,.22); color: var(--ink); }
+.auth-btn-ghost:focus-visible { outline: 2px solid var(--sage); outline-offset: 3px; }
+
+/* ── Step dots ── */
+.step-dots { display: flex; align-items: center; gap: 7px; margin-bottom: 26px; }
+.sdot { width: 8px; height: 8px; border-radius: 50%; background: var(--ink-4); transition: all .25s; flex-shrink: 0; }
+.sdot.active { background: var(--sage); width: 22px; border-radius: 4px; }
+.sdot.done   { background: var(--green); }
+.sdot-lbl { font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 1px; text-transform: uppercase; color: var(--ink-3); margin-left: 4px; }
+
+/* ── Switch / terms ── */
+.auth-switch { text-align: center; margin-top: 22px; font-size: 13.5px; color: var(--ink-2); }
+.auth-switch a { color: var(--sage); font-weight: 600; text-decoration: none; cursor: pointer; }
+.auth-switch a:hover { text-decoration: underline; }
+.auth-terms { margin-top: 14px; font-size: 11.5px; color: var(--ink-3); text-align: center; line-height: 1.6; font-family: 'IBM Plex Mono', monospace; }
+.auth-terms a { color: var(--ink-2); text-decoration: underline; }
+
+/* ── Trust bar ── */
+.trust-bar {
+  display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap;
+  margin-top: 28px; padding-top: 22px; border-top: 1px solid var(--ink-4);
+}
+.trust-item { display: flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--ink-3); font-family: 'IBM Plex Mono', monospace; letter-spacing: .3px; }
+.tck { color: var(--green); font-size: 11px; }
+
+/* ── Verify screen ── */
+.vi-icon { width: 64px; height: 64px; border-radius: 18px; background: linear-gradient(135deg, var(--forest-2), var(--forest-3)); border: 1px solid rgba(126,201,154,.15); display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 22px; box-shadow: 0 8px 28px rgba(13,35,24,.15); }
+.vi-chip { display: block; background: rgba(13,35,24,.06); border: 1px solid var(--ink-4); border-radius: 8px; padding: 9px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--ink); margin: 10px 0 22px; word-break: break-all; text-align: center; }
+
+/* ── Success screen ── */
+.su-icon { width: 72px; height: 72px; border-radius: 20px; background: linear-gradient(135deg, var(--forest-2), var(--sage)); display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 24px; box-shadow: 0 12px 36px rgba(13,35,24,.2); animation: popIn .4s cubic-bezier(.175,.885,.32,1.275); }
+@keyframes popIn { from { transform: scale(.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+/* ── SIGN-OUT screen ── */
+.so-wrap { text-align: center; }
+.so-avatar {
+  width: 80px; height: 80px; border-radius: 22px; margin: 0 auto 24px;
+  background: linear-gradient(135deg, var(--forest-2), var(--forest-3));
+  border: 1px solid rgba(126,201,154,.18);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px;
+  box-shadow: 0 12px 36px rgba(13,35,24,.18), 0 0 0 6px rgba(61,122,90,.07);
+  animation: popIn .35s cubic-bezier(.175,.885,.32,1.275);
+}
+.so-user-chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(13,35,24,.06); border: 1px solid var(--ink-4);
+  border-radius: 50px; padding: 7px 14px;
+  font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--ink);
+  margin: 6px auto 22px; word-break: break-all;
+}
+.so-chip-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); flex-shrink: 0; box-shadow: 0 0 0 3px rgba(39,174,96,.2); }
+.so-message { font-size: 14px; color: var(--ink-2); line-height: 1.65; margin-bottom: 28px; }
+
+/* ── FAREWELL screen ── */
+.farewell-wrap { text-align: center; }
+.farewell-wheat {
+  font-size: 56px; display: block; margin: 0 auto 24px;
+  animation: waveWheat 2.2s ease-in-out infinite alternate;
+  transform-origin: center bottom;
+}
+@keyframes waveWheat {
+  from { transform: rotate(-8deg); }
+  to   { transform: rotate(8deg); }
+}
+/* Countdown bar */
+.farewell-bar-wrap { margin: 20px 0 16px; }
+.farewell-bar-track { height: 3px; background: var(--ink-4); border-radius: 4px; overflow: hidden; }
+.farewell-bar-fill  {
+  height: 100%; background: var(--sage); border-radius: 4px;
+  width: 100%;
+  animation: shrinkBar 3s linear forwards;
+}
+@keyframes shrinkBar { from { width: 100%; } to { width: 0%; } }
+.farewell-countdown { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 1px; color: var(--ink-3); margin-top: 6px; text-transform: uppercase; }
+
+/* ── Demo mode banner ── */
+.demo-bn {
+  display: none;
+  background: rgba(201,148,58,.09); border: 1px solid rgba(201,148,58,.28);
+  border-radius: 10px; padding: 10px 14px;
+  font-size: 12px; color: #6b470e; margin-bottom: 18px;
+  line-height: 1.55; font-family: 'IBM Plex Mono', monospace;
+}
+.demo-bn.on { display: block; }
+
+/* ── Session banner (already signed in) ── */
+.session-bn {
+  display: none;
+  background: rgba(61,122,90,.07); border: 1px solid rgba(61,122,90,.22);
+  border-radius: 10px; padding: 12px 14px; margin-bottom: 16px;
+}
+.session-bn.on { display: block; animation: vIn .2s ease; }
+.session-bn-title { font-size: 13px; color: var(--ink); margin-bottom: 8px; }
+.session-bn-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.session-bn-btn { border: 1.5px solid var(--ink-4); background: #fff; border-radius: 8px; padding: 8px 12px; font-size: 12.5px; color: var(--ink); cursor: pointer; text-decoration: none; font-family: 'Outfit', sans-serif; transition: background .14s; }
+.session-bn-btn:hover { background: var(--cream-dk); }
+.session-bn-btn.primary { background: var(--forest); color: var(--cream); border-color: var(--forest); }
+.session-bn-btn.primary:hover { background: var(--forest-3); }
+
+/* ── Guest bar ── */
+.guest-bar { text-align: center; margin-top: 18px; padding-top: 16px; border-top: 1px dashed var(--ink-4); font-size: 13px; color: var(--ink-3); }
+.guest-link { display: inline-flex; align-items: center; gap: 4px; color: var(--ink-2); font-weight: 500; text-decoration: none; cursor: pointer; transition: color .14s; margin-left: 6px; font-size: 13px; }
+.guest-link:hover { color: var(--sage); }
+
+/* ════════════════════════════════════════════════════
+   RESPONSIVE
+════════════════════════════════════════════════════ */
+@media (max-width: 960px) {
+  .auth-root { grid-template-columns: 1fr; }
+  .brand-panel { display: none; }
+  .auth-panel { padding: 40px 28px 56px; min-height: 100vh; min-height: 100dvh; justify-content: flex-start; padding-top: 52px; padding-bottom: calc(56px + env(safe-area-inset-bottom)); }
+  .auth-panel::after { display: block; }
+  .mobile-logo { display: flex !important; }
+}
+@media (max-width: 480px) {
+  .auth-panel { padding: 32px 20px 48px; }
+  .auth-card  { max-width: 100%; }
+  .frow { grid-template-columns: 1fr; gap: 0; }
+  .frow .fg { margin-bottom: 15px; }
+  .auth-heading { font-size: 26px; }
+}
+
+/* Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="auth-root">
+
+  <!-- ══════════════════════════════════════════════
+       LEFT — BRAND PANEL
+  ══════════════════════════════════════════════ -->
+  <div class="brand-panel">
+    <div class="bg-glow-1"></div>
+    <div class="bg-glow-2"></div>
+
+    <!-- Animated topography lines -->
+    <svg class="topo-svg" viewBox="0 0 600 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <path class="tl ap" style="animation-delay:.2s"  d="M-40,640 Q80,580 210,600 T450,560 T690,578"/>
+      <path class="tl ap" style="animation-delay:.5s"  d="M-40,580 Q100,518 250,540 T490,500 T730,520"/>
+      <path class="tl ap" style="animation-delay:.8s"  d="M-40,520 Q120,456 290,480 T530,440 T770,460"/>
+      <path class="tl ap" style="animation-delay:1.1s" d="M-40,460 Q140,393 330,420 T570,378 T810,400"/>
+      <path class="tl ap" style="animation-delay:1.4s" d="M-40,400 Q160,330 360,360 T600,318 T840,340"/>
+      <path class="tl ap" style="animation-delay:1.7s" d="M-40,340 Q180,268 390,300 T630,257 T870,280"/>
+      <path class="tl ap" style="animation-delay:2.0s" d="M-40,280 Q200,208 420,240 T660,198"/>
+      <path class="tl ap" style="animation-delay:2.3s" d="M-40,220 Q220,148 450,182 T690,142"/>
+      <path class="tl ap" style="animation-delay:2.6s" d="M-40,700 Q60,638 190,660 T420,622 T660,640"/>
+      <path class="tl ap" style="animation-delay:2.9s" d="M-40,760 Q40,698 170,720 T400,683 T640,702"/>
+    </svg>
+
+    <!-- Signature: animated seed / plant SVG -->
+    <div class="seed-container">
+      <svg class="seed-stalk" width="80" height="140" viewBox="0 0 80 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Stalk -->
+        <path d="M40 140 Q38 100 40 60 Q42 30 40 10" stroke="rgba(126,201,154,.9)" stroke-width="2" stroke-linecap="round"/>
+        <!-- Leaf left -->
+        <path class="seed-leaf-l" d="M40 80 Q20 70 12 55 Q28 60 40 80Z" fill="rgba(126,201,154,.7)"/>
+        <!-- Leaf right -->
+        <path class="seed-leaf-r" d="M40 60 Q60 50 68 35 Q52 40 40 60Z" fill="rgba(126,201,154,.7)"/>
+        <!-- Wheat head -->
+        <ellipse cx="40" cy="10" rx="7" ry="13" fill="rgba(232,184,75,.8)"/>
+        <ellipse cx="30" cy="20" rx="5" ry="10" fill="rgba(232,184,75,.6)" transform="rotate(-20 30 20)"/>
+        <ellipse cx="50" cy="20" rx="5" ry="10" fill="rgba(232,184,75,.6)" transform="rotate(20 50 20)"/>
+      </svg>
+    </div>
+
+    <div class="brand-inner">
+      <div>
+        <a href="landing.html" class="brand-logo">
+          <div class="brand-logo-mark">🌾</div>
+          <div class="brand-logo-info">
+            <div class="brand-logo-name">Farm Copilot</div>
+            <div class="brand-logo-sub">Canada · v2.0 · 2026</div>
+          </div>
+        </a>
+
+        <div class="brand-eyebrow">Canadian Agriculture Intelligence</div>
+        <h1 class="brand-headline">Grow smarter<br>with <em>AI built<br>for Canada.</em></h1>
+        <p class="brand-desc">The complete farm intelligence platform — funding programs, live weather, AI-driven planning, and risk monitoring for Canadian producers.</p>
+
+        <div class="brand-feats">
+          <div class="brand-feat"><span class="feat-dot"></span>AI Copilot grounded in Canadian ag programs</div>
+          <div class="brand-feat"><span class="feat-dot"></span>Federal &amp; provincial funding navigator</div>
+          <div class="brand-feat"><span class="feat-dot"></span>Real-time weather + environmental risk alerts</div>
+          <div class="brand-feat"><span class="feat-dot"></span>ROI calculator, season planner &amp; 15 more tools</div>
+        </div>
+
+        <div class="brand-stats">
+          <div class="bstat"><div class="bstat-val">18</div><div class="bstat-lbl">AI Tools</div></div>
+          <div class="bstat"><div class="bstat-val">8+</div><div class="bstat-lbl">Programs</div></div>
+          <div class="bstat"><div class="bstat-val">Free</div><div class="bstat-lbl">Forever</div></div>
+        </div>
+      </div>
+      <div class="brand-foot">farmcopilot.ca · Built in Canada 🍁</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       RIGHT — AUTH PANEL
+  ══════════════════════════════════════════════ -->
+  <div class="auth-panel">
+    <div class="auth-card">
+
+      <!-- Mobile logo -->
+      <a href="landing.html" class="brand-logo mobile-logo" style="display:none; margin-bottom:36px;" aria-label="Farm Copilot home">
+        <div class="brand-logo-mark">🌾</div>
+        <div class="brand-logo-info">
+          <div class="brand-logo-name">Farm Copilot</div>
+          <div class="brand-logo-sub">Canada · 2026</div>
+        </div>
+      </a>
+
+      <!-- Demo mode notice -->
+      <div class="demo-bn" id="demo-bn" role="status">
+        🧪 <strong>Demo mode</strong> — enter any email + password (8+ chars) to explore. No real data is stored.
+      </div>
+
+      <!-- Already signed in -->
+      <div class="session-bn" id="session-bn">
+        <div class="session-bn-title" id="session-bn-title"></div>
+        <div class="session-bn-actions">
+          <a href="dashboard.html" class="session-bn-btn primary">Continue to dashboard</a>
+          <button type="button" class="session-bn-btn" onclick="switchAccount()">Use different account</button>
+        </div>
+      </div>
+
+      <!-- Rate limit banner -->
+      <div class="rl-banner" id="rl-banner" role="alert">
+        <strong>🔒 Too many attempts</strong>
+        <span id="rl-msg">Please wait before trying again.</span>
+      </div>
+
+      <!-- Global alert -->
+      <div class="auth-alert" id="auth-alert" role="alert" aria-live="assertive">
+        <span class="auth-alert-icon" id="al-icon"></span>
+        <span id="al-text"></span>
+      </div>
+
+      <!-- ════════ VIEW: SIGN IN ════════ -->
+      <div id="v-signin" class="vfade">
+        <div class="auth-eyebrow">Welcome back</div>
+        <h2 class="auth-heading">Sign in to your account</h2>
+        <p class="auth-sub">Access your personalized farm dashboard.</p>
+
+        <div class="oauth-stack">
+          <button class="oauth-btn" onclick="handleOAuth('google')" type="button" aria-label="Continue with Google">
+            <svg class="oi" viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M19.6 10.23c0-.68-.06-1.36-.17-2H10v3.77h5.37a4.6 4.6 0 01-2 3.02v2.5h3.23c1.89-1.74 2.98-4.3 2.98-7.3z" fill="#4285F4"/>
+              <path d="M10 20c2.7 0 4.96-.9 6.61-2.43l-3.23-2.5c-.9.6-2.05.96-3.38.96-2.6 0-4.8-1.76-5.59-4.12H1.07v2.58A9.99 9.99 0 0010 20z" fill="#34A853"/>
+              <path d="M4.41 11.91A6 6 0 014.09 10c0-.67.11-1.3.32-1.9V5.52H1.07A10.01 10.01 0 000 10c0 1.61.38 3.14 1.07 4.48l3.34-2.57z" fill="#FBBC05"/>
+              <path d="M10 3.96c1.47 0 2.78.5 3.82 1.5l2.86-2.86C14.96.99 12.7 0 10 0A9.99 9.99 0 001.07 5.52l3.34 2.58C5.2 5.72 7.4 3.96 10 3.96z" fill="#EA4335"/>
+            </svg>
+            Continue with Google
+          </button>
+
+          <button class="oauth-btn" onclick="handleOAuth('apple')" type="button" aria-label="Continue with Apple (coming soon)">
+            <svg class="oi" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path d="M16.31 15c-.34.79-.76 1.52-1.23 2.2-.64.92-1.17 1.56-1.59 1.92-.63.58-1.31.88-2.04.9-.52 0-1.15-.15-1.87-.45-.73-.3-1.4-.45-2-.45-.63 0-1.31.15-2.04.45-.74.3-1.33.46-1.79.47-.69.04-1.39-.28-2.09-.92-.45-.39-1-.1.06-1.99C.6 15.93.1 14.75.02 13.5c-.08-1.42.29-2.64 1.08-3.64.8-1.02 1.84-1.54 3.14-1.54.52 0 1.2.17 2.05.5.84.33 1.38.5 1.61.5.18 0 .77-.2 1.78-.59.96-.37 1.76-.52 2.42-.47 1.78.15 3.12.84 4 2.12-.62.38-1.08.81-1.38 1.32-.31.55-.46 1.15-.45 1.81.01.67.2 1.3.56 1.88.32.5.72.89 1.19 1.16-.16.44-.34.88-.55 1.3zM11.35 1.2c0 .52-.18 1.01-.56 1.47-.45.53-.99.83-1.58.79-.01-.06-.01-.13-.01-.18 0-.5.22-1.03.6-1.48.19-.22.43-.41.72-.56.3-.15.58-.24.84-.24.01.06.01.12 0 .2z"/>
+            </svg>
+            Continue with Apple
+            <span class="oauth-soon">Coming soon</span>
+          </button>
+        </div>
+
+        <div class="or-div"><span>or with email</span></div>
+
+        <div class="fg" id="si-fg-email">
+          <label class="fl" for="si-email">Email address</label>
+          <input class="fi" type="email" id="si-email" placeholder="you@farm.ca"
+                 autocomplete="email" inputmode="email"
+                 aria-describedby="si-email-e">
+          <div class="ferr" id="si-email-e" role="alert">Please enter a valid email address.</div>
+        </div>
+
+        <div class="fg" id="si-fg-pass">
+          <label class="fl" for="si-pass">
+            Password
+            <a class="fl-action" onclick="sv('forgot')" tabindex="0" role="button">Forgot password?</a>
+          </label>
+          <div class="fpw">
+            <input class="fi" type="password" id="si-pass" placeholder="••••••••"
+                   autocomplete="current-password" aria-describedby="si-pass-e">
+            <button class="pw-tog" type="button" onclick="togPw('si-pass',this)" aria-label="Toggle password visibility">👁</button>
+          </div>
+          <div class="ferr" id="si-pass-e" role="alert">Password is required.</div>
+        </div>
+
+        <label class="fchk" style="margin-top:4px;">
+          <input type="checkbox" id="si-rem"> Remember me for 30 days
+        </label>
+
+        <button class="auth-btn" id="btn-si" type="button" onclick="handleSignIn()">
+          <span class="btn-txt">Sign In →</span><div class="btn-spin" aria-hidden="true"></div>
+        </button>
+
+        <div class="auth-switch">
+          New to Farm Copilot? <a onclick="sv('signup-1')">Create a free account →</a>
+        </div>
+
+        <div class="trust-bar" role="list">
+          <div class="trust-item" role="listitem"><span class="tck" aria-hidden="true">✓</span> Free forever</div>
+          <div class="trust-item" role="listitem"><span class="tck" aria-hidden="true">✓</span> No credit card</div>
+          <div class="trust-item" role="listitem"><span class="tck" aria-hidden="true">✓</span> Private &amp; secure</div>
+        </div>
+
+        <div class="guest-bar">
+          <span>Just browsing?</span>
+          <a class="guest-link" onclick="exploreAsGuest()" role="button" tabindex="0">
+            Explore without an account
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2 6h8M6 2l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- ════════ VIEW: SIGNUP STEP 1 ════════ -->
+      <div id="v-signup-1" class="vfade" style="display:none;">
+        <button class="auth-back" onclick="sv('signin')" type="button">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Back to sign in
+        </button>
+
+        <div class="step-dots" aria-label="Step 1 of 2">
+          <div class="sdot active"></div>
+          <div class="sdot"></div>
+          <span class="sdot-lbl">Step 1 of 2</span>
+        </div>
+
+        <div class="auth-eyebrow">Create account</div>
+        <h2 class="auth-heading">Start with your email</h2>
+        <p class="auth-sub">Free forever. No credit card ever needed.</p>
+
+        <div class="oauth-stack">
+          <button class="oauth-btn" onclick="handleOAuth('google')" type="button" aria-label="Sign up with Google">
+            <svg class="oi" viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M19.6 10.23c0-.68-.06-1.36-.17-2H10v3.77h5.37a4.6 4.6 0 01-2 3.02v2.5h3.23c1.89-1.74 2.98-4.3 2.98-7.3z" fill="#4285F4"/>
+              <path d="M10 20c2.7 0 4.96-.9 6.61-2.43l-3.23-2.5c-.9.6-2.05.96-3.38.96-2.6 0-4.8-1.76-5.59-4.12H1.07v2.58A9.99 9.99 0 0010 20z" fill="#34A853"/>
+              <path d="M4.41 11.91A6 6 0 014.09 10c0-.67.11-1.3.32-1.9V5.52H1.07A10.01 10.01 0 000 10c0 1.61.38 3.14 1.07 4.48l3.34-2.57z" fill="#FBBC05"/>
+              <path d="M10 3.96c1.47 0 2.78.5 3.82 1.5l2.86-2.86C14.96.99 12.7 0 10 0A9.99 9.99 0 001.07 5.52l3.34 2.58C5.2 5.72 7.4 3.96 10 3.96z" fill="#EA4335"/>
+            </svg>
+            Sign up with Google
+          </button>
+        </div>
+
+        <div class="or-div"><span>or with email</span></div>
+
+        <div class="fg">
+          <label class="fl" for="su-email">Email address</label>
+          <input class="fi" type="email" id="su-email" placeholder="you@farm.ca"
+                 autocomplete="email" inputmode="email"
+                 aria-describedby="su-email-e">
+          <div class="ferr" id="su-email-e" role="alert">Please enter a valid email address.</div>
+        </div>
+
+        <div class="fg">
+          <label class="fl" for="su-pass">Create a password</label>
+          <div class="fpw">
+            <input class="fi" type="password" id="su-pass" placeholder="Min. 8 characters"
+                   autocomplete="new-password" aria-describedby="su-pass-e pw-lbl">
+            <button class="pw-tog" type="button" onclick="togPw('su-pass',this)" aria-label="Toggle password visibility">👁</button>
+          </div>
+          <div class="pw-str" id="pw-str" aria-live="polite">
+            <div class="pw-bars" aria-hidden="true">
+              <div class="pw-bar" id="pb1"></div>
+              <div class="pw-bar" id="pb2"></div>
+              <div class="pw-bar" id="pb3"></div>
+              <div class="pw-bar" id="pb4"></div>
+            </div>
+            <div class="pw-lbl" id="pw-lbl"></div>
+          </div>
+          <div class="ferr" id="su-pass-e" role="alert">Password must be at least 8 characters.</div>
+        </div>
+
+        <button class="auth-btn" id="btn-s1" type="button" onclick="goStep2()">
+          <span class="btn-txt">Continue →</span><div class="btn-spin" aria-hidden="true"></div>
+        </button>
+        <div class="auth-terms">By continuing you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.</div>
+        <div class="auth-switch">Already have an account? <a onclick="sv('signin')">Sign in →</a></div>
+      </div>
+
+      <!-- ════════ VIEW: SIGNUP STEP 2 ════════ -->
+      <div id="v-signup-2" class="vfade" style="display:none;">
+        <button class="auth-back" id="signup2-back" onclick="sv('signup-1')" type="button">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Back
+        </button>
+
+        <div class="step-dots" aria-label="Step 2 of 2">
+          <div class="sdot done"></div>
+          <div class="sdot active"></div>
+          <span class="sdot-lbl">Step 2 of 2</span>
+        </div>
+
+        <div class="auth-eyebrow">Almost there</div>
+        <h2 class="auth-heading" id="signup2-heading">Tell us about your farm</h2>
+        <p class="auth-sub" id="signup2-sub">Personalizes your dashboard and funding recommendations.</p>
+
+        <div class="auth-alert info" id="oauth-hint" style="display:none; margin-top:-8px; margin-bottom:14px;">
+          <span class="auth-alert-icon">✓</span>
+          <span id="oauth-hint-text">Google account connected</span>
+        </div>
+
+        <div class="frow">
+          <div class="fg">
+            <label class="fl" for="su-first">First name</label>
+            <input class="fi" type="text" id="su-first" placeholder="Jane"
+                   autocomplete="given-name" aria-describedby="su-first-e">
+            <div class="ferr" id="su-first-e" role="alert">Required.</div>
+          </div>
+          <div class="fg">
+            <label class="fl" for="su-last">Last name</label>
+            <input class="fi" type="text" id="su-last" placeholder="Smith"
+                   autocomplete="family-name" aria-describedby="su-last-e">
+            <div class="ferr" id="su-last-e" role="alert">Required.</div>
+          </div>
+        </div>
+
+        <div class="fg">
+          <label class="fl" for="su-prov">Province / Territory</label>
+          <select class="fsel" id="su-prov" aria-describedby="su-prov-e">
+            <option value="">Select your province…</option>
+            <option>Alberta</option>
+            <option>British Columbia</option>
+            <option>Manitoba</option>
+            <option>New Brunswick</option>
+            <option>Newfoundland &amp; Labrador</option>
+            <option>Northwest Territories</option>
+            <option>Nova Scotia</option>
+            <option>Nunavut</option>
+            <option>Ontario</option>
+            <option>Prince Edward Island</option>
+            <option>Quebec</option>
+            <option>Saskatchewan</option>
+            <option>Yukon</option>
+          </select>
+          <div class="ferr" id="su-prov-e" role="alert">Please select your province.</div>
+        </div>
+
+        <!-- New: Farm type field for better personalization -->
+        <div class="fg">
+          <label class="fl" for="su-type">Farm type</label>
+          <select class="fsel" id="su-type">
+            <option value="">Select farm type…</option>
+            <option value="grain">Grain &amp; Oilseeds</option>
+            <option value="livestock">Livestock &amp; Poultry</option>
+            <option value="mixed">Mixed Farming</option>
+            <option value="horticulture">Horticulture &amp; Vegetables</option>
+            <option value="dairy">Dairy</option>
+            <option value="specialty">Specialty Crops</option>
+            <option value="organic">Organic</option>
+            <option value="other">Other / Exploring</option>
+          </select>
+        </div>
+
+        <button class="auth-btn" id="btn-su" type="button" onclick="handleSignUp()">
+          <span class="btn-txt">Create My Account →</span><div class="btn-spin" aria-hidden="true"></div>
+        </button>
+        <div class="auth-terms">Your data is private and never sold. <a href="#">Privacy Policy →</a></div>
+      </div>
+
+      <!-- ════════ VIEW: FORGOT PASSWORD ════════ -->
+      <div id="v-forgot" class="vfade" style="display:none;">
+        <button class="auth-back" onclick="sv('signin')" type="button">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Back to sign in
+        </button>
+        <div class="auth-eyebrow">Reset password</div>
+        <h2 class="auth-heading">Forgot your password?</h2>
+        <p class="auth-sub">Enter your email and we'll send a reset link right away.</p>
+        <div class="fg">
+          <label class="fl" for="fp-email">Email address</label>
+          <input class="fi" type="email" id="fp-email" placeholder="you@farm.ca"
+                 autocomplete="email" inputmode="email" aria-describedby="fp-email-e">
+          <div class="ferr" id="fp-email-e" role="alert">Please enter a valid email.</div>
+        </div>
+        <button class="auth-btn" id="btn-fp" type="button" onclick="handleForgot()">
+          <span class="btn-txt">Send Reset Link →</span><div class="btn-spin" aria-hidden="true"></div>
+        </button>
+      </div>
+
+      <!-- ════════ VIEW: VERIFY EMAIL ════════ -->
+      <div id="v-verify" class="vfade" style="display:none; text-align:center;">
+        <div class="vi-icon" aria-hidden="true">📬</div>
+        <div class="auth-eyebrow" style="justify-content:center;">Almost done</div>
+        <h2 class="auth-heading">Check your inbox</h2>
+        <p style="font-size:14px; color:var(--ink-2); line-height:1.65; margin-bottom:6px;">We've sent a confirmation link to:</p>
+        <div class="vi-chip" id="vi-email">—</div>
+        <p style="font-size:13.5px; color:var(--ink-2); line-height:1.65; margin-bottom:26px;">Click the link to activate your account, then sign in.</p>
+        <button class="auth-btn" type="button" onclick="sv('signin')" style="margin-top:0;">
+          <span class="btn-txt">Back to Sign In →</span><div class="btn-spin" aria-hidden="true"></div>
+        </button>
+        <div class="auth-switch" style="margin-top:18px;">Didn't get it? <a onclick="resendVer()">Resend email</a></div>
+      </div>
+
+      <!-- ════════ VIEW: SUCCESS ════════ -->
+      <div id="v-success" class="vfade" style="display:none; text-align:center;">
+        <div class="su-icon" aria-hidden="true">🌾</div>
+        <div class="auth-eyebrow" style="justify-content:center;">Welcome aboard</div>
+        <h2 class="auth-heading" style="margin-bottom:10px;">You're in!</h2>
+        <p style="font-size:14px; color:var(--ink-2); line-height:1.65; margin-bottom:30px;">Welcome to Canadian Farm Copilot.<br>Let's set up your dashboard.</p>
+        <a href="index.html" class="auth-btn" style="display:block; text-decoration:none; text-align:center; line-height:1.4; margin-top:0;">
+          Complete Farm Setup →
+        </a>
+        <div class="auth-switch" style="margin-top:18px;"><a href="dashboard.html">Skip to dashboard →</a></div>
+      </div>
+
+      <!-- ════════ VIEW: SIGN OUT CONFIRMATION ════════ -->
+      <div id="v-signout" class="vfade" style="display:none;">
+        <div class="so-wrap">
+          <div class="so-avatar" aria-hidden="true">🌾</div>
+          <div class="auth-eyebrow" style="display:block; text-align:center;">Sign out</div>
+          <h2 class="auth-heading" style="text-align:center; margin-bottom:8px;">Leaving for the season?</h2>
+          <p class="auth-sub" style="text-align:center;">Signed in as:</p>
+          <div class="so-user-chip">
+            <span class="so-chip-dot" aria-hidden="true"></span>
+            <span id="so-email">your account</span>
+          </div>
+          <p class="so-message">Your farm data and settings will be saved. Come back any time to pick up where you left off.</p>
+
+          <button class="auth-btn danger" id="btn-so" type="button" onclick="doSignOut()">
+            <span class="btn-txt">Yes, Sign Me Out</span><div class="btn-spin" aria-hidden="true"></div>
+          </button>
+          <button class="auth-btn-ghost" type="button" onclick="goToDashboard()">
+            ← Stay signed in
+          </button>
+        </div>
+      </div>
+
+      <!-- ════════ VIEW: FAREWELL ════════ -->
+      <div id="v-farewell" class="vfade" style="display:none;">
+        <div class="farewell-wrap">
+          <span class="farewell-wheat" aria-hidden="true">🌾</span>
+          <div class="auth-eyebrow" style="display:block; text-align:center;">Signed out</div>
+          <h2 class="auth-heading" style="text-align:center; margin-bottom:10px;">See you next season!</h2>
+          <p style="font-size:14px; color:var(--ink-2); text-align:center; line-height:1.65; margin-bottom:24px;">You've been signed out successfully. Your farm data is safe.</p>
+
+          <div class="farewell-bar-wrap">
+            <div class="farewell-bar-track"><div class="farewell-bar-fill" id="farewell-bar"></div></div>
+            <div class="farewell-countdown" id="farewell-countdown" aria-live="polite">Returning to home in 3s…</div>
+          </div>
+
+          <a href="landing.html" class="auth-btn" style="display:block; text-decoration:none; text-align:center; margin-top:20px; line-height:1.4;">
+            Back to Home
+          </a>
+        </div>
+      </div>
+
+    </div><!-- /.auth-card -->
+  </div><!-- /.auth-panel -->
+
+</div><!-- /.auth-root -->
+
+<script>
+/* ════════════════════════════════════════════════════
+   CONFIG
+   NOTE: For production, set SUPABASE_URL and SUPABASE_ANON_KEY
+   via your Vercel environment variables and replace these
+   placeholders at build time with a script or edge function.
+   The anon key is safe to expose (Supabase is designed for this),
+   but NEVER commit a service_role key to source code.
+════════════════════════════════════════════════════ */
+const SUPABASE_URL      = 'YOUR_SUPABASE_URL';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const DEMO = !SUPABASE_URL || SUPABASE_URL.startsWith('YOUR_');
+
+let _sb = null;
+let lastEmail = '';
+let oauthDraft = null;
+
+/* ════════════════════════════════════════════════════
+   SECURITY — RATE LIMITING (client-side)
+   5 failed attempts → 15-min lockout per email.
+   Stored in localStorage so refresh doesn't bypass it.
+════════════════════════════════════════════════════ */
+const RL = { max: 5, windowMs: 15 * 60 * 1000 };
+
+function rlKey(email) {
+  return 'fc_rl_' + email.toLowerCase().slice(0, 48).replace(/[^a-z0-9@._-]/g, '_');
+}
+
+function isRateLimited(email) {
+  try {
+    const d = JSON.parse(localStorage.getItem(rlKey(email)) || 'null');
+    if (!d || Date.now() > d.until) return false;
+    return d.count >= RL.max;
+  } catch { return false; }
+}
+
+function getRLMinutesLeft(email) {
+  try {
+    const d = JSON.parse(localStorage.getItem(rlKey(email)) || 'null');
+    if (!d || Date.now() > d.until) return 0;
+    return Math.ceil((d.until - Date.now()) / 60000);
+  } catch { return 0; }
+}
+
+function recordFailedAttempt(email) {
+  const key = rlKey(email);
+  try {
+    const raw = localStorage.getItem(key);
+    const d = raw ? JSON.parse(raw) : { count: 0, until: 0 };
+    d.count = (d.count || 0) + 1;
+    d.until = Date.now() + RL.windowMs;
+    localStorage.setItem(key, JSON.stringify(d));
+    return Math.max(0, RL.max - d.count);
+  } catch { return RL.max; }
+}
+
+function clearRateLimit(email) {
+  try { localStorage.removeItem(rlKey(email)); } catch {}
+}
+
+function showRLBanner(email) {
+  const mins = getRLMinutesLeft(email);
+  const banner = G('rl-banner');
+  const msg    = G('rl-msg');
+  if (!banner || !msg) return;
+  msg.textContent = `Account temporarily locked. Please wait ${mins} minute${mins !== 1 ? 's' : ''} before trying again.`;
+  banner.classList.add('on');
+}
+
+function hideRLBanner() {
+  G('rl-banner')?.classList.remove('on');
+}
+
+/* ════════════════════════════════════════════════════
+   SECURITY — INPUT SANITIZATION
+   Strip HTML special chars before storing in localStorage.
+   Limits field lengths to prevent bloated storage.
+════════════════════════════════════════════════════ */
+function san(str, maxLen = 200) {
+  return String(str || '')
+    .slice(0, maxLen)
+    .replace(/[<>"'`]/g, c => ({ '<': '', '>': '', '"': '', "'": '', '`': '' }[c] || ''));
+}
+
+/* ════════════════════════════════════════════════════
+   BOOT
+════════════════════════════════════════════════════ */
+async function boot() {
+  const params = new URLSearchParams(location.search);
+  const action      = params.get('action');     // 'signout'
+  const forceAuth   = params.get('forceAuth') === '1';
+  const requestedTab = params.get('tab');
+
+  // Handle sign-out action
+  if (action === 'signout') {
+    const sess = getSess();
+    if (sess?.email) {
+      const el = G('so-email');
+      if (el) el.textContent = sess.email;
+    }
+    sv('signout');
+    return;
+  }
+
+  if (forceAuth) clearSession();
+
+  G('demo-bn').classList.toggle('on', DEMO);
+
+  // Show mobile logo
+  if (window.innerWidth < 960) {
+    document.querySelectorAll('.mobile-logo').forEach(el => el.style.display = 'flex');
+  }
+
+  // Tab param
+  if (requestedTab === 'signup') sv('signup-1');
+
+  // Auto-focus
+  setTimeout(() => G('si-email')?.focus(), 300);
+
+  if (!DEMO) {
+    try {
+      await ldScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js');
+      _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      const { data: { session } } = await _sb.auth.getSession();
+      if (session && !forceAuth) {
+        storeSess(session.user, false);
+        showSessionBanner(session.user.email || '');
+      }
+      _sb.auth.onAuthStateChange((ev, s) => {
+        if (ev === 'SIGNED_IN' && s) { storeSess(s.user, false); go(); }
+      });
+    } catch (e) {
+      console.warn('Supabase init failed:', e);
+      G('demo-bn').classList.add('on');
+    }
+  } else {
+    const s = getSess();
+    if (s?.email && !forceAuth) showSessionBanner(s.email);
+  }
+}
+
+function go() {
+  window.location.replace(
+    localStorage.getItem('farmProfile') ? 'dashboard.html' : 'index.html'
+  );
+}
+
+function goToDashboard() {
+  window.location.href = 'dashboard.html';
+}
+
+function ldScript(src) {
+  return new Promise((res, rej) => {
+    if (document.querySelector(`script[src="${src}"]`)) { res(); return; }
+    const s = document.createElement('script');
+    s.src = src; s.async = true;
+    s.onload = res;
+    s.onerror = () => rej(new Error('SDK load failed'));
+    document.head.appendChild(s);
+  });
+}
+
+boot().catch(console.error);
+
+/* ════════════════════════════════════════════════════
+   SESSION MANAGEMENT
+════════════════════════════════════════════════════ */
+function storeSess(user, rem) {
+  const d = {
+    email: san(user.email || '', 254),
+    id: san(user.id || ('demo-' + Date.now()), 64),
+    firstName: san(user.firstName || '', 80),
+    signedIn: true,
+    expires: Date.now() + (rem ? 30 : 1) * 86400000,
+    // A simple integrity marker — not cryptographic, but deters trivial edits
+    _v: Date.now().toString(36)
+  };
+  try {
+    localStorage.setItem('authSession', JSON.stringify(d));
+    localStorage.setItem('authUser', JSON.stringify({ email: d.email, signedIn: true }));
+  } catch (e) {
+    console.warn('Session storage failed:', e);
+  }
+}
+
+function getSess() {
+  try {
+    const s = JSON.parse(localStorage.getItem('authSession') || 'null');
+    if (!s || !s.signedIn) return null;
+    if (s.expires && Date.now() > s.expires) {
+      clearSession();
+      return null;
+    }
+    return s;
+  } catch { return null; }
+}
+
+function clearSession() {
+  const keys = ['authSession', 'authUser', 'guestMode'];
+  keys.forEach(k => { try { localStorage.removeItem(k); } catch {} });
+}
+
+/* ════════════════════════════════════════════════════
+   SIGN-IN HANDLER
+════════════════════════════════════════════════════ */
+async function handleSignIn() {
+  clrAlert();
+  hideRLBanner();
+  const email = G('si-email').value.trim();
+  const pass  = G('si-pass').value;
+  const rem   = G('si-rem').checked;
+
+  if (!chk('si-email', 'si-email-e', isEm(email))) return;
+  if (!chk('si-pass',  'si-pass-e',  pass.length > 0)) return;
+
+  // Rate-limit check
+  if (isRateLimited(email)) {
+    showRLBanner(email);
+    return;
+  }
+
+  ld('btn-si', true);
+
+  try {
+    if (_sb) {
+      const { data, error } = await _sb.auth.signInWithPassword({ email, password: pass });
+      ld('btn-si', false);
+      if (error) {
+        recordFailedAttempt(email);
+        if (isRateLimited(email)) showRLBanner(email);
+        showAl(fErr(error.message), 'error');
+        return;
+      }
+      clearRateLimit(email);
+      storeSess(data.user, rem);
+      go();
+    } else {
+      // DEMO mode — require 8+ chars for consistency with signup policy
+      await wait(900);
+      ld('btn-si', false);
+      if (pass.length < 8) {
+        recordFailedAttempt(email);
+        if (isRateLimited(email)) { showRLBanner(email); return; }
+        showAl('Incorrect email or password.', 'error');
+        return;
+      }
+      // Demo: accept any valid email + 8+ char password
+      clearRateLimit(email);
+      storeSess({ email }, rem);
+      go();
+    }
+  } catch {
+    ld('btn-si', false);
+    showAl('Connection error. Please try again.', 'error');
+  }
+}
+
+/* ════════════════════════════════════════════════════
+   SIGNUP — STEP 1 → STEP 2
+════════════════════════════════════════════════════ */
+function goStep2() {
+  clrAlert();
+  if (!chk('su-email', 'su-email-e', isEm(G('su-email').value.trim()))) return;
+  if (!chk('su-pass',  'su-pass-e',  G('su-pass').value.length >= 8))   return;
+
+  // Block re-signup if already signed in
+  if (getSess()?.signedIn) {
+    showAl('You're already signed in. Head to your dashboard or use a different account.', 'info');
+    return;
+  }
+
+  // Demo: check duplicate email
+  if (DEMO) {
+    const email = G('su-email').value.trim().toLowerCase();
+    if (getRegisteredEmails().includes(email)) {
+      showAl('An account already exists for this email. Please sign in instead.', 'error');
+      G('si-email').value = G('su-email').value.trim();
+      setTimeout(() => sv('signin'), 1800);
+      return;
+    }
+  }
+
+  oauthDraft = null;
+  setSignupStep2Mode(false);
+  sv('signup-2');
+  setTimeout(() => G('su-first')?.focus(), 200);
+}
+
+/* ════════════════════════════════════════════════════
+   SIGNUP — STEP 2: CREATE ACCOUNT
+════════════════════════════════════════════════════ */
+async function handleSignUp() {
+  clrAlert();
+  const first = san(G('su-first').value.trim(), 80);
+  const last  = san(G('su-last').value.trim(),  80);
+  const prov  = G('su-prov').value;
+  const type  = G('su-type').value;
+  const email = san((oauthDraft?.email || G('su-email').value.trim()).trim(), 254);
+  const pass  = G('su-pass').value;
+
+  const ok = [
+    chk('su-first', 'su-first-e', first.length > 0),
+    chk('su-last',  'su-last-e',  last.length  > 0),
+    chk('su-prov',  'su-prov-e',  prov.length  > 0),
+  ].every(Boolean);
+
+  if (!ok) return;
+
+  ld('btn-su', true);
+  lastEmail = email;
+
+  try {
+    if (_sb) {
+      const { data, error } = await _sb.auth.signUp({
+        email,
+        password: pass || (crypto.randomUUID().replace(/-/g,'').slice(0,10) + 'Aa1!'),
+        options: { data: { firstName: first, lastName: last, province: prov, farmType: type } }
+      });
+      ld('btn-su', false);
+      if (error) { showAl(fErr(error.message), 'error'); return; }
+
+      // Supabase v2: existing confirmed user → empty identities array
+      if (data.user?.identities?.length === 0) {
+        showAl('An account already exists for this email. Please sign in instead.', 'error');
+        G('si-email').value = email;
+        setTimeout(() => sv('signin'), 1800);
+        return;
+      }
+      if (data.user && !data.session) { G('vi-email').textContent = email; sv('verify'); return; }
+      if (data.session) { storeSess(data.user, false); go(); }
+    } else {
+      // Demo: duplicate check
+      const registered = getRegisteredEmails();
+      if (registered.includes(email.toLowerCase())) {
+        ld('btn-su', false);
+        showAl('An account already exists for this email. Please sign in instead.', 'error');
+        G('si-email').value = email;
+        setTimeout(() => sv('signin'), 1800);
+        return;
+      }
+
+      await wait(900);
+      ld('btn-su', false);
+      addRegisteredEmail(email);
+      storeSess({ email, firstName: first }, false);
+
+      // Save profile
+      const profile = JSON.parse(localStorage.getItem('farmProfile') || '{}');
+      profile.firstName = first;
+      profile.lastName  = last;
+      profile.email     = email;
+      profile.province  = prov || profile.province;
+      profile.farmType  = type || profile.farmType;
+      try { localStorage.setItem('farmProfile', JSON.stringify(profile)); } catch {}
+
+      oauthDraft = null;
+      setSignupStep2Mode(false);
+      sv('success');
+    }
+  } catch {
+    ld('btn-su', false);
+    showAl('Connection error. Please try again.', 'error');
+  }
+}
+
+/* ════════════════════════════════════════════════════
+   FORGOT PASSWORD
+════════════════════════════════════════════════════ */
+async function handleForgot() {
+  clrAlert();
+  const email = G('fp-email').value.trim();
+  if (!chk('fp-email', 'fp-email-e', isEm(email))) return;
+
+  ld('btn-fp', true);
+  try {
+    if (_sb) {
+      const { error } = await _sb.auth.resetPasswordForEmail(email, {
+        redirectTo: location.origin + '/auth.html?mode=reset'
+      });
+      ld('btn-fp', false);
+      error
+        ? showAl(fErr(error.message), 'error')
+        : showAl('Reset link sent! Check your inbox (and spam folder).', 'success');
+    } else {
+      await wait(800);
+      ld('btn-fp', false);
+      showAl('Reset link sent! (Demo mode — no real email sent)', 'success');
+    }
+  } catch {
+    ld('btn-fp', false);
+    showAl('Connection error. Please try again.', 'error');
+  }
+}
+
+/* ════════════════════════════════════════════════════
+   OAUTH
+════════════════════════════════════════════════════ */
+async function handleOAuth(provider) {
+  if (!_sb) {
+    if (provider !== 'google') {
+      showAl('Apple sign-up is coming soon. Use Google or email sign-up.', 'info');
+      return;
+    }
+    // Demo: simulate OAuth with a placeholder email
+    const seed = Math.floor(Math.random() * 90000) + 10000;
+    oauthDraft = { provider: 'google', email: `farmer${seed}@gmail.com` };
+    setSignupStep2Mode(true, oauthDraft.email);
+    showAl('Google account connected. Complete your farm profile to finish.', 'success');
+    sv('signup-2');
+    setTimeout(() => G('su-first')?.focus(), 180);
+    return;
+  }
+
+  try {
+    const { error } = await _sb.auth.signInWithOAuth({
+      provider,
+      options: { redirectTo: location.origin + '/dashboard.html' }
+    });
+    if (error) showAl(fErr(error.message), 'error');
+  } catch {
+    showAl('OAuth error. Please try again.', 'error');
+  }
+}
+
+/* ════════════════════════════════════════════════════
+   SIGN OUT — CORE
+════════════════════════════════════════════════════ */
+async function doSignOut() {
+  ld('btn-so', true);
+
+  // Sign out from Supabase
+  if (_sb) {
+    try { await _sb.auth.signOut(); } catch (e) { console.warn('Supabase signout:', e); }
+  }
+
+  // Clear all FC-owned localStorage keys
+  [
+    'authSession', 'authUser', 'guestMode', 'farmProfile',
+    'demoRegisteredEmails'
+  ].forEach(k => { try { localStorage.removeItem(k); } catch {} });
+
+  ld('btn-so', false);
+  sv('farewell');
+  startFarewellCountdown();
+}
+
+function startFarewellCountdown() {
+  let secs = 3;
+  const countEl = G('farewell-countdown');
+  const iv = setInterval(() => {
+    secs--;
+    if (countEl) countEl.textContent = `Returning to home in ${secs}s…`;
+    if (secs <= 0) {
+      clearInterval(iv);
+      window.location.href = 'landing.html';
+    }
+  }, 1000);
+}
+
+/* ════════════════════════════════════════════════════
+   GLOBAL SIGN-OUT (callable from any page)
+   Usage in nav: <button onclick="farmSignOut()">Sign Out</button>
+════════════════════════════════════════════════════ */
+window.farmSignOut = function() {
+  window.location.href = 'auth.html?action=signout';
+};
+
+/* ════════════════════════════════════════════════════
+   GLOBAL SESSION GETTER (callable from any page)
+════════════════════════════════════════════════════ */
+window.farmGetSession = getSess;
+
+/* ════════════════════════════════════════════════════
+   RESEND VERIFICATION
+════════════════════════════════════════════════════ */
+async function resendVer() {
+  if (!_sb || !lastEmail) return;
+  try {
+    await _sb.auth.resend({ type: 'signup', email: lastEmail });
+    showAl('Verification email resent!', 'success');
+  } catch {
+    showAl('Could not resend. Please try again.', 'error');
+  }
+}
+
+/* ════════════════════════════════════════════════════
+   DEMO HELPERS
+════════════════════════════════════════════════════ */
+function getRegisteredEmails() {
+  try { return JSON.parse(localStorage.getItem('demoRegisteredEmails') || '[]'); } catch { return []; }
+}
+
+function addRegisteredEmail(email) {
+  const list = getRegisteredEmails();
+  const lc = email.toLowerCase();
+  if (!list.includes(lc)) {
+    list.push(lc);
+    try { localStorage.setItem('demoRegisteredEmails', JSON.stringify(list)); } catch {}
+  }
+}
+
+/* ════════════════════════════════════════════════════
+   VIEW MANAGEMENT
+════════════════════════════════════════════════════ */
+const VIEWS = ['signin','signup-1','signup-2','forgot','verify','success','signout','farewell'];
+
+function sv(name) {
+  clrAlert();
+  hideRLBanner();
+
+  VIEWS.forEach(v => {
+    const el = G('v-' + v);
+    if (el) el.style.display = 'none';
+  });
+
+  const t = G('v-' + name);
+  if (!t) return;
+  t.style.display = '';
+  t.classList.remove('vfade');
+  void t.offsetWidth;
+  t.classList.add('vfade');
+
+  // Stagger animate child .fg elements
+  const fgs = t.querySelectorAll('.fg, .frow, .oauth-stack');
+  fgs.forEach((el, i) => {
+    el.classList.remove('field-stagger');
+    void el.offsetWidth;
+    el.classList.add('field-stagger');
+    el.style.animationDelay = (i * 0.055) + 's';
+  });
+
+  // Focus first input
+  setTimeout(() => {
+    const f = t.querySelector('input:not([type=checkbox]), select');
+    if (f) f.focus();
+  }, 80);
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ════════════════════════════════════════════════════
+   SESSION BANNER & SWITCH
+════════════════════════════════════════════════════ */
+function showSessionBanner(email) {
+  const wrap  = G('session-bn');
+  const title = G('session-bn-title');
+  if (!wrap || !title) return;
+  title.textContent = `Already signed in as ${email}.`;
+  wrap.classList.add('on');
+}
+
+function switchAccount() {
+  clearSession();
+  G('session-bn')?.classList.remove('on');
+  showAl('Session cleared. Sign in with another account.', 'success');
+  sv('signin');
+}
+
+/* ════════════════════════════════════════════════════
+   SIGNUP STEP 2 MODE (email vs OAuth)
+════════════════════════════════════════════════════ */
+function setSignupStep2Mode(isOAuth, email = '') {
+  const heading  = G('signup2-heading');
+  const subtitle = G('signup2-sub');
+  const hint     = G('oauth-hint');
+  const hintText = G('oauth-hint-text');
+  const back     = G('signup2-back');
+  if (!heading) return;
+
+  heading.textContent  = isOAuth ? 'Finish your Google sign-up' : 'Tell us about your farm';
+  subtitle.textContent = isOAuth
+    ? 'Almost done — add your farm profile to unlock your personalized dashboard.'
+    : 'Personalizes your dashboard and funding recommendations.';
+  hint.style.display   = isOAuth ? 'flex' : 'none';
+  hintText.textContent = isOAuth ? `Google account connected: ${email}` : 'Google account connected';
+  back.textContent     = isOAuth ? 'Back to sign up' : '← Back';
+}
+
+/* ════════════════════════════════════════════════════
+   GUEST MODE
+════════════════════════════════════════════════════ */
+function exploreAsGuest() {
+  try { localStorage.setItem('guestMode', '1'); } catch {}
+  clearSession();
+  window.location.href = 'landing.html?guest=1';
+}
+
+/* ════════════════════════════════════════════════════
+   VALIDATION
+════════════════════════════════════════════════════ */
+function chk(iid, eid, cond) {
+  G(iid)?.classList.toggle('error', !cond);
+  G(eid)?.classList.toggle('show',  !cond);
+  return !!cond;
+}
+
+function clrE(iid, eid) {
+  G(iid)?.classList.remove('error', 'valid');
+  G(eid)?.classList.remove('show');
+}
+
+function lvEmail(iid, eid) {
+  const v = G(iid)?.value.trim();
+  if (!v) return;
+  const ok = isEm(v);
+  G(iid)?.classList.toggle('valid', ok);
+  G(iid)?.classList.toggle('error', !ok);
+  G(eid)?.classList.toggle('show',  !ok);
+}
+
+function isEm(v) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
+}
+
+/* ════════════════════════════════════════════════════
+   PASSWORD STRENGTH
+════════════════════════════════════════════════════ */
+function onPwInput(v) {
+  clrE('su-pass', 'su-pass-e');
+  const w = G('pw-str');
+  if (!v.length) { w?.classList.remove('on'); return; }
+  w?.classList.add('on');
+
+  let s = 0;
+  if (v.length >= 8)  s++;
+  if (v.length >= 12) s++;
+  if (/[A-Z]/.test(v))           s++;
+  if (/[0-9]/.test(v))           s++;
+  if (/[^A-Za-z0-9]/.test(v))    s++;
+
+  const clrs = [null, 'c-red', 'c-orange', 'c-yellow', 'c-green', 'c-forest'];
+  const lbls = ['', 'Weak', 'Fair', 'Good', 'Strong', 'Very strong'];
+  for (let i = 1; i <= 4; i++) {
+    const b = G('pb' + i);
+    if (b) b.className = 'pw-bar ' + (i <= s ? (clrs[s] || 'c-green') : '');
+  }
+  const lbl = G('pw-lbl');
+  if (lbl) lbl.textContent = lbls[s] || '';
+}
+
+/* ════════════════════════════════════════════════════
+   HELPERS
+════════════════════════════════════════════════════ */
+function showAl(msg, type = 'error') {
+  const icons = { error: '⚠', success: '✓', info: 'ℹ', warning: '⚡' };
+  const icon = G('al-icon');
+  const text = G('al-text');
+  if (icon) icon.textContent = icons[type] || '⚠';
+  if (text) text.textContent = msg;                          // textContent — XSS safe
+  G('auth-alert').className = 'auth-alert ' + type + ' show';
+}
+
+function clrAlert() {
+  const el = G('auth-alert');
+  if (el) el.className = 'auth-alert';
+}
+
+function togPw(id, btn) {
+  const inp = G(id);
+  if (!inp) return;
+  const isPass = inp.type === 'password';
+  inp.type = isPass ? 'text' : 'password';
+  btn.textContent = isPass ? '🙈' : '👁';
+  btn.setAttribute('aria-label', isPass ? 'Hide password' : 'Show password');
+}
+
+function ld(bid, on) {
+  const b = G(bid);
+  if (!b) return;
+  b.classList.toggle('ld', on);
+  b.disabled = on;
+}
+
+function G(id) { return document.getElementById(id); }
+
+function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function fErr(m = '') {
+  if (/invalid.*credentials|wrong.*password/i.test(m)) return 'Incorrect email or password.';
+  if (/email.*not.*confirmed/i.test(m))               return 'Check your inbox — confirm your email first.';
+  if (/already.*registered|email.*exists/i.test(m))   return 'Account already exists. Try signing in.';
+  if (/rate.*limit|too.?many/i.test(m))               return 'Too many attempts. Please wait a few minutes.';
+  if (/weak.*password/i.test(m))                       return 'Choose a stronger password (8+ chars, letters, numbers & symbols).';
+  return m || 'Something went wrong. Please try again.';
+}
+
+/* ════════════════════════════════════════════════════
+   KEYBOARD NAVIGATION
+   All major actions reachable via Enter key
+════════════════════════════════════════════════════ */
+document.addEventListener('keydown', function(e) {
+  if (e.key !== 'Enter') return;
+  const active = document.activeElement;
+
+  // Sign in
+  if (active?.id === 'si-email') { G('si-pass')?.focus(); e.preventDefault(); return; }
+  if (active?.id === 'si-pass')  { handleSignIn(); e.preventDefault(); return; }
+
+  // Sign up step 1
+  if (active?.id === 'su-email') { G('su-pass')?.focus(); e.preventDefault(); return; }
+  if (active?.id === 'su-pass')  { goStep2(); e.preventDefault(); return; }
+
+  // Sign up step 2
+  if (active?.id === 'su-first') { G('su-last')?.focus(); e.preventDefault(); return; }
+  if (active?.id === 'su-last')  { G('su-prov')?.focus(); e.preventDefault(); return; }
+
+  // Forgot password
+  if (active?.id === 'fp-email') { handleForgot(); e.preventDefault(); return; }
+});
+
+/* ════════════════════════════════════════════════════
+   FIELD EVENT BINDINGS
+   Using addEventListener (not inline handlers on form fields)
+   to keep HTML clean and support proper event delegation.
+════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  // Email blur validation
+  ['si-email', 'su-email', 'fp-email'].forEach(id => {
+    G(id)?.addEventListener('blur', () => lvEmail(id, id.replace('email','email-e')));
+    G(id)?.addEventListener('input', () => clrE(id, id.replace('email','email-e')));
+  });
+
+  // Password input (strength meter)
+  G('su-pass')?.addEventListener('input', e => onPwInput(e.target.value));
+  G('su-pass')?.addEventListener('input', () => clrE('su-pass', 'su-pass-e'));
+
+  // Sign-in password clear on input
+  G('si-pass')?.addEventListener('input', () => clrE('si-pass', 'si-pass-e'));
+
+  // Step 2 clear-on-input
+  ['su-first','su-last'].forEach(id => {
+    G(id)?.addEventListener('input', () => clrE(id, id + '-e'));
+  });
+  G('su-prov')?.addEventListener('change', () => clrE('su-prov', 'su-prov-e'));
+});
+</script>
+
+</body>
+</html>
