@@ -33,6 +33,19 @@
           </div>
           <div style="display:flex;gap:8px;align-items:center;">
             <a href="index.html" class="btn btn-ghost btn-sm" style="display:inline-flex;align-items:center;gap:5px;text-decoration:none;">🏠 Home</a>
+            <select id="model-select" class="btn btn-ghost btn-sm"
+              style="cursor:pointer;font-size:12px;padding:5px 8px;"
+              onchange="switchModel(this.value)" title="Switch AI model">
+              <optgroup label="Local (Ollama)">
+                <option value="ollama:llama3.2" selected>🦙 llama3.2 (local)</option>
+                <option value="ollama:llama3.2:1b">🦙 llama3.2:1b (fast)</option>
+                <option value="ollama:qwen2.5-coder:3b">⚙️ qwen2.5-coder:3b</option>
+                <option value="ollama:phi3:mini">🔷 phi3:mini (local)</option>
+              </optgroup>
+              <optgroup label="Cloud (Anthropic)">
+                <option value="anthropic:claude-sonnet-4-20250514">✦ Claude Sonnet</option>
+              </optgroup>
+            </select>
             <button class="btn btn-ghost btn-sm" onclick="clearChat()">Clear chat</button>
           </div>
         </div>
@@ -64,8 +77,8 @@
             ></textarea>
             <button class="chat-send" id="send-btn" onclick="sendMessage()" disabled>↑</button>
           </div>
-          <div class="chat-input-hint">
-            Enter to send · Shift+Enter for new line · Powered by Claude
+          <div class="chat-input-hint" id="model-hint">
+            Enter to send · Shift+Enter for new line · Model: llama3.2 (local Ollama)
           </div>
         </div>
       </div>
@@ -80,7 +93,17 @@
 
     document.getElementById('sidebar-mount').innerHTML = renderSidebar('copilot');
     document.getElementById('copilot-sub').textContent =
-      `Farm type: ${profile.farmType} · ${profile.province} · Ask anything`;
+      `Farm type: ${profile.farmType} · ${profile.province} · Model: llama3.2 (local)`;
+
+    // ─── AI PROVIDER CONFIG ──────────────────────────────────────────
+    // DEV_MODE true  = Ollama local (localhost:11434) — free/private for development.
+    // DEV_MODE false = Anthropic cloud — requires ANTHROPIC_KEY and should be proxied in production.
+    // WARNING: do not commit real API keys into browser JavaScript.
+    let DEV_MODE       = true;
+    let OLLAMA_MODEL    = 'llama3.2';
+    const ANTHROPIC_KEY   = '';
+    const ANTHROPIC_MODEL = 'claude-sonnet-4-20250514';
+    // ─────────────────────────────────────────────────────────────────
 
     // Suggestions
     const sugWrap = document.getElementById('suggestions');
@@ -99,6 +122,7 @@
     const chatArea = document.getElementById('chat-area');
     const chatInput = document.getElementById('chat-input');
     const sendBtn = document.getElementById('send-btn');
+    const modelHint = document.getElementById('model-hint');
 
     chatInput.addEventListener('input', () => {
       sendBtn.disabled = !chatInput.value.trim() || isLoading;
@@ -113,6 +137,67 @@
         if (!sendBtn.disabled) sendMessage();
       }
     });
+
+    function updateModelLabel() {
+      const modelLabel = DEV_MODE ? `${OLLAMA_MODEL} (local Ollama)` : 'Claude Sonnet';
+      document.getElementById('copilot-sub').textContent =
+        `Farm type: ${profile.farmType} · ${profile.province} · Model: ${modelLabel}`;
+      modelHint.textContent = `Enter to send · Shift+Enter for new line · Model: ${modelLabel}`;
+    }
+
+    function switchModel(val) {
+      const [provider, ...modelParts] = val.split(':');
+
+      if (provider === 'ollama') {
+        DEV_MODE = true;
+        OLLAMA_MODEL = modelParts.join(':');
+      } else {
+        DEV_MODE = false;
+      }
+
+      updateModelLabel();
+      console.log('[FarmCopilot] Model switched:', DEV_MODE ? OLLAMA_MODEL : ANTHROPIC_MODEL);
+    }
+
+    function buildApiRequest(systemPrompt) {
+      if (DEV_MODE) {
+        return {
+          apiUrl: 'http://localhost:11434/v1/chat/completions',
+          apiHeaders: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ollama'
+          },
+          apiBody: JSON.stringify({
+            model: OLLAMA_MODEL,
+            messages: [
+              { role: 'system', content: systemPrompt },
+              ...messages
+            ],
+            stream: false,
+            temperature: 0.7
+          }),
+          parseReply: data => data.choices?.[0]?.message?.content ||
+            'Ollama returned no response. Confirm Ollama is running on localhost:11434.'
+        };
+      }
+
+      return {
+        apiUrl: 'https://api.anthropic.com/v1/messages',
+        apiHeaders: {
+          'Content-Type': 'application/json',
+          'x-api-key': ANTHROPIC_KEY,
+          'anthropic-version': '2023-06-01'
+        },
+        apiBody: JSON.stringify({
+          model: ANTHROPIC_MODEL,
+          max_tokens: 1000,
+          system: systemPrompt,
+          messages: messages
+        }),
+        parseReply: data => data.content?.map(b => b.text || '').join('') ||
+          'Sorry, I could not get a response. Please try again.'
+      };
+    }
 
     async function sendMessage(overrideText) {
       const text = overrideText || chatInput.value.trim();
@@ -160,28 +245,33 @@ Communication style:
 - If uncertain about current program specifics, acknowledge it and recommend canada.ca or the relevant provincial agriculture ministry
 - Speak to a Canadian farmer directly, not about them`;
 
-        const response = await fetch('https://api.anthropic.com/v1/messages', {
+        const { apiUrl, apiHeaders, apiBody, parseReply } = buildApiRequest(systemPrompt);
+
+        const response = await fetch(apiUrl, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            model: 'claude-sonnet-4-20250514',
-            max_tokens: 1000,
-            system: systemPrompt,
-            messages: messages
-          })
+          headers: apiHeaders,
+          body: apiBody
         });
+
+        if (!response.ok) {
+          const errText = await response.text();
+          console.error('[FarmCopilot] API error:', response.status, errText);
+          throw new Error(`API ${response.status}: ${errText.slice(0, 160)}`);
+        }
 
         const data = await response.json();
         removeTyping(typingId);
 
-        const reply = data.content?.map(b => b.text || '').join('') ||
-          'Sorry, I could not get a response. Please try again.';
+        const reply = parseReply(data);
         messages.push({ role: 'assistant', content: reply });
         appendMessage('ai', reply);
 
       } catch (err) {
         removeTyping(typingId);
-        const errMsg = 'Sorry — there was a connection error. Please try again in a moment.';
+        console.error('[FarmCopilot] Chat error:', err);
+        const errMsg = DEV_MODE
+          ? 'Local Ollama connection failed. Make sure Ollama is running, the selected model is installed, and OLLAMA_ORIGINS allows browser requests.'
+          : 'Cloud AI connection failed. Check the API key, Anthropic headers, and network access.';
         messages.push({ role: 'assistant', content: errMsg });
         appendMessage('ai', errMsg);
       }
